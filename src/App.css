@@ -1,0 +1,351 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --winxp-blue: #245edb;
+  --winxp-blue-light: #3a70e3;
+  --winxp-blue-dark: #0f3a99;
+  --winxp-green: #36a546;
+  --winxp-red: #ff2f2f;
+  --winxp-taskbar: #0c5fcb;
+  --winxp-start: #4cc218;
+}
+
+body, html {
+  height: 100%;
+  width: 100%;
+  font-family: 'Tahoma', sans-serif;
+  overflow-x: hidden;
+}
+
+.winxp-desktop {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  background-image: url('https://i.imgur.com/Zk6TR5k.jpg');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  overflow: hidden;
+}
+
+.desktop-icons {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.desktop-icon {
+  width: 130px;
+  text-align: center;
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.desktop-icon:hover {
+  background-color: rgba(49, 106, 197, 0.2);
+  border: 1px solid rgba(49, 106, 197, 0.5);
+  transform: scale(1.05);
+}
+
+.icon {
+  font-size: 50px;
+  margin-bottom: 5px;
+}
+
+.icon-text {
+  font-size: 12px;
+  color: white;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+.windows-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 40px;
+}
+
+.window {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 800px;
+  height: 600px;
+  background-color: #f0f0f0;
+  border: 1px solid #0055ea;
+  border-radius: 7px 7px 0 0;
+  box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  color: #000;
+  z-index: 10;
+}
+
+.window.active {
+  z-index: 100;
+}
+
+.window-titlebar {
+  height: 30px;
+  background: linear-gradient(to right, #0058e7, #3a95ff);
+  border-radius: 7px 7px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.window-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.window-controls button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.minimize-btn {
+  background-color: var(--winxp-blue);
+}
+
+.close-btn {
+  background-color: var(--winxp-red);
+}
+
+.window-content {
+  flex: 1;
+  overflow: auto;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, #2573ea, #1559af);
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  z-index: 1000;
+}
+
+.win-start-button {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 10px;
+  margin-left: 2px;
+  background: linear-gradient(to bottom, #3c9642, #308c33);
+  border-radius: 3px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.start-button::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url('https://i.imgur.com/7GFAkKK.png');
+  background-size: contain;
+  margin-right: 5px;
+}
+
+.taskbar-items {
+  flex: 1;
+  display: flex;
+  margin: 0 5px;
+  gap: 3px;
+  overflow-x: auto;
+}
+
+.taskbar-item {
+  height: 34px;
+  min-width: 150px;
+  max-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  background: linear-gradient(to bottom, #3a95ff, #1e6dc8);
+  border-radius: 3px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskbar-item.active {
+  background: linear-gradient(to bottom, #58a4ff, #3680da);
+}
+
+.item-icon {
+  font-size: 18px;
+}
+
+.system-tray {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  color: white;
+}
+
+.time {
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
+.home-page {
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #f5f5f5;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+  position: relative;
+}
+
+.home-header h1 {
+  font-size: 2.5rem;
+  color: #245edb;
+  margin-bottom: 0.5rem;
+}
+
+.home-header p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.home-header .time {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #245edb;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.game-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.game-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.game-title {
+  font-size: 1.5rem;
+  color: #245edb;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.game-description {
+  color: #666;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.game-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f0f0f0;
+}
+
+.game-header {
+  background-color: #245edb;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.game-header .back-button {
+  background-color: white;
+  color: #245edb;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.game-header .back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.game-content {
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+}

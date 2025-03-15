@@ -1,0 +1,991 @@
+.wiki-connect {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    background: #FFFFFF;
+    font-family: 'Tahoma', sans-serif;
+    border: 3px solid #0054E3;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.wiki-connect .window-header {
+    background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 3px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    user-select: none;
+}
+
+.wiki-connect .window-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    padding-left: 4px;
+}
+
+.wiki-connect .window-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.wiki-connect .window-button {
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(180deg, #4B97FD 0%, #3281E8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    border-radius: 0;
+}
+
+.wiki-connect .window-button.minimize {
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.wiki-connect .window-button.maximize {
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.wiki-connect .window-button.close::after {
+    content: "×";
+    font-size: 16px;
+}
+
+.wiki-connect .window-button:hover {
+    background: linear-gradient(180deg, #5ca4ff 0%, #3d8fff 100%);
+}
+
+.wiki-connect .window-button.close:hover {
+    background: #E81123;
+}
+
+.wiki-connect .game-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: #FFFFFF;
+    min-height: 0;
+}
+
+.wiki-connect .game-header {
+    display: none;
+}
+
+.wiki-connect .controls {
+    display: flex;
+    gap: 10px;
+}
+
+.wiki-connect .controls button {
+    background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
+    border: 2px solid;
+    border-color: #fff #848484 #848484 #fff;
+    color: #000;
+    border-radius: 0;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.wiki-connect .controls button:hover {
+    background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
+}
+
+.wiki-connect .game-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.wiki-connect .info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wiki-connect .info-label {
+    font-size: 12px;
+    color: #666;
+}
+
+.wiki-connect .info-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0366D6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.wiki-connect .game-content {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.wiki-connect .word-cards {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.wiki-connect .word-card {
+    flex: 1;
+    padding: 15px;
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #919B9C;
+}
+
+.wiki-connect .start-card {
+    background: #DFE9FB;
+    border-color: #91A8C9;
+}
+
+.wiki-connect .target-card {
+    background: #E9DFFA;
+    border-color: #A891C9;
+}
+
+.wiki-connect .card-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.wiki-connect .word-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.wiki-connect .definitions {
+    font-size: 14px;
+    color: #555;
+}
+
+.wiki-connect .definition {
+    margin-bottom: 5px;
+    line-height: 1.3;
+}
+
+.wiki-connect .word-chain-container {
+    background: #FFFFFF;
+    border: 1px solid #a2a9b1;
+    border-radius: 0;
+    padding: 15px;
+    margin: 10px 0;
+    flex-shrink: 0;
+}
+
+.wiki-connect .word-chain-section {
+    margin-bottom: 15px;
+}
+
+.wiki-connect .word-chain-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 1px solid #DDD;
+    padding-bottom: 5px;
+}
+
+.wiki-connect .word-chain {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 5px;
+    max-height: none;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wiki-connect .chain-word {
+    background: #FFFFFF;
+    border: 1px solid #919B9C;
+    border-radius: 0;
+    padding: 8px 15px;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.wiki-connect .chain-arrow {
+    margin: 0 15px;
+    color: #666;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.wiki-connect .input-section {
+    flex-shrink: 0;
+    margin: 10px 0;
+}
+
+.wiki-connect .input-section label {
+    font-size: 14px;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.wiki-connect .input-field {
+    width: 100%;
+    position: relative;
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+.wiki-connect .input-field input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #919B9C;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.wiki-connect .input-field input:focus {
+    border-color: #0366D6;
+}
+
+.wiki-connect .button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.wiki-connect .submit-button {
+    height: 32px;
+    width: 50%;
+    padding: 0 15px;
+    background: linear-gradient(180deg, #3690E6 0%, #2D7DD2 45%, #2270C5 50%, #2D7DD2 100%);
+    border: 2px solid;
+    border-color: #3690E6 #1860B5 #1860B5 #3690E6;
+    border-radius: 0;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.wiki-connect .del-button {
+    width: 50%;
+    height: 32px;
+    margin-right: 10px;
+    padding: 0 10px;
+    background: linear-gradient(180deg, #E85C33 0%, #D94E27 45%, #C94218 50%, #D94E27 100%);
+    border: 2px solid;
+    border-color: #E85C33 #B73915 #B73915 #E85C33;
+    border-radius: 0;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wiki-connect .submit-button:hover {
+    background: linear-gradient(180deg, #4BA1F7 0%, #3E8EE3 45%, #3080D6 50%, #3E8EE3 100%);
+}
+
+.wiki-connect .del-button:hover {
+    background: linear-gradient(180deg, #F96D44 0%, #EA5F38 45%, #DA5129 50%, #EA5F38 100%);
+}
+
+.wiki-connect .submit-button:active {
+    background: linear-gradient(180deg, #2D7DD2 0%, #2270C5 45%, #1860B5 50%, #2270C5 100%);
+    border-color: #1860B5 #3690E6 #3690E6 #1860B5;
+}
+
+.wiki-connect .del-button:active {
+    background: linear-gradient(180deg, #D94E27 0%, #C94218 45%, #B73915 50%, #C94218 100%);
+    border-color: #B73915 #E85C33 #E85C33 #B73915;
+}
+
+.wiki-connect .submit-button:disabled,
+.wiki-connect .del-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.wiki-connect .error-message {
+    color: #C00;
+    margin: 10px 0;
+    padding: 8px;
+    background: #FFEAEE;
+    border: 1px solid #FFADB9;
+    border-radius: 0;
+    font-size: 14px;
+}
+
+.wiki-connect .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 18px;
+    color: #555;
+    text-align: center;
+    padding: 20px;
+}
+
+.wiki-connect .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 84, 227, 0.2);
+    border-radius: 50%;
+    border-top-color: #0054E3;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 20px;
+}
+
+.wiki-connect .loading p {
+    margin: 5px 0;
+}
+
+.wiki-connect .loading-hint {
+    font-size: 14px;
+    color: #777;
+    max-width: 300px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.wiki-connect .game-complete {
+    background: #F0F8FF;
+    border: 1px solid #919B9C;
+    border-radius: 0;
+    padding: 20px;
+    text-align: center;
+    margin: 20px auto;
+    max-width: 700px;
+}
+
+.wiki-connect .game-complete h2 {
+    color: #0054E3;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.wiki-connect .word-chain-display {
+    background: #FFF;
+    padding: 15px;
+    border-radius: 0;
+    border: 1px solid #DDD;
+    margin-bottom: 20px;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.wiki-connect .complete-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.wiki-connect .complete-buttons button {
+    padding: 8px 20px;
+    background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
+    border: 2px solid;
+    border-color: #fff #848484 #848484 #fff;
+    border-radius: 0;
+    cursor: pointer;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 14px;
+}
+
+.wiki-connect .complete-buttons button:first-child {
+    background: linear-gradient(180deg, #3690E6 0%, #2D7DD2 45%, #2270C5 50%, #2D7DD2 100%);
+    color: white;
+    border-color: #3690E6 #1860B5 #1860B5 #3690E6;
+}
+
+.wiki-connect .complete-buttons button:hover {
+    filter: brightness(1.05);
+}
+
+.wiki-connect .rules-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.wiki-connect .rules-content {
+    background: #ECE9D8;
+    padding: 20px;
+    border: 2px solid #919B9C;
+    border-radius: 0;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.wiki-connect .rules-content h2 {
+    color: #0054E3;
+    margin-top: 0;
+    border-bottom: 1px solid #919B9C;
+    padding-bottom: 10px;
+}
+
+.wiki-connect .rules-content ol {
+    margin-left: 20px;
+}
+
+.wiki-connect .rules-content button {
+    margin-top: 15px;
+    background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
+    border: 2px solid;
+    border-color: #fff #848484 #848484 #fff;
+    border-radius: 0;
+    color: #000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.wiki-connect .rules-content button:hover {
+    background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
+}
+
+.wiki-connect .menu-bar {
+    display: flex;
+    background: #FFFFFF;
+    border-bottom: 1px solid #a2a9b1;
+    height: 24px;
+    padding: 0 5px;
+    font-size: 14px;
+    position: relative;
+    z-index: 20;
+}
+
+.wiki-connect .menu-item {
+    color: #000;
+    position: relative;
+    padding: 2px 10px;
+    cursor: pointer;
+}
+
+.wiki-connect .menu-item:hover {
+    background-color: #316AC5;
+    color: white;
+}
+
+.wiki-connect .menu-item:hover .menu-dropdown {
+    display: block;
+}
+
+.wiki-connect .menu-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #ECE9D8;
+    border: 1px solid #919B9C;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    min-width: 150px;
+    z-index: 30;
+}
+
+.wiki-connect .menu-option {
+    padding: 6px 20px;
+    font-size: 13px;
+    color: #000;
+}
+
+.wiki-connect .menu-option:hover {
+    background-color: #316AC5;
+    color: white;
+}
+
+.wiki-connect .suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    color: #000;
+    border: 1px solid #919B9C;
+    border-top: none;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.wiki-connect .suggestion {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #E1E4E8;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wiki-connect .suggestion:last-child {
+    border-bottom: none;
+}
+
+.wiki-connect .suggestion:hover {
+    background-color: #F8F9FA;
+}
+
+.wiki-connect .suggestion.selected {
+    background-color: #E8F0FE;
+}
+
+.wiki-connect .suggestion-icon {
+    color: #666;
+    font-size: 14px;
+}
+
+.wiki-connect .suggestion-text {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .wiki-connect .game-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .wiki-connect .game-info {
+        justify-content: space-between;
+    }
+    
+    .wiki-connect .info-value {
+        max-width: 100px;
+    }
+    
+    .wiki-connect .word-cards {
+        flex-direction: column;
+    }
+    
+    .wiki-connect .button-container {
+        flex-direction: row !important;
+    }
+}
+
+.wiki-connect .wiki-header {
+    padding: 20px 0 15px;
+    border-bottom: 1px solid #a2a9b1;
+    background-color: #FFFFFF;
+}
+
+.wiki-connect .wiki-header-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.wiki-connect .wiki-title {
+    font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
+    font-size: 29px;
+    margin: 0;
+    padding: 0;
+    color: #000;
+    font-weight: normal;
+}
+
+.wiki-connect .wiki-stats {
+    font-size: 14px;
+    color: #54595d;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.wiki-connect .stats-item {
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.wiki-connect .stats-value {
+    font-weight: bold;
+    color: #202122;
+}
+
+.wiki-connect .stats-divider {
+    color: #a2a9b1;
+    margin: 0 5px;
+}
+
+.wiki-connect .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.wiki-connect .person-image {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+}
+
+.wiki-connect .person-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border: 1px solid #c8ccd1;
+    padding: 3px;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.wiki-connect .word-info {
+    flex: 1;
+}
+
+.wiki-connect .current-person-container {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #a2a9b1;
+}
+
+.wiki-connect .current-person-image {
+    margin: 10px auto;
+    max-width: 200px;
+}
+
+.wiki-connect .current-person-image img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #c8ccd1;
+    padding: 3px;
+    background: white;
+}
+
+.wiki-connect .connection-path {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;
+    font-size: 24px;
+    color: #72777d;
+}
+
+.wiki-connect .person-connection-path {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    gap: 10px;
+}
+
+.wiki-connect .person-card {
+    flex: 1;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #919B9C;
+    display: flex;
+    flex-direction: column;
+    height: 350px;
+    max-width: 30%;
+    box-sizing: border-box;
+}
+
+.wiki-connect .start-card {
+    background: #DFE9FB;
+    border-color: #91A8C9;
+}
+
+.wiki-connect .current-card {
+    background: #F6F6F0;
+    border-color: #919B9C;
+}
+
+.wiki-connect .target-card {
+    background: #E9DFFA;
+    border-color: #A891C9;
+}
+
+.wiki-connect .connection-arrow {
+    font-size: 24px;
+    color: #666;
+    font-weight: bold;
+}
+
+.wiki-connect .card-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.wiki-connect .person-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+    font-family: 'Linux Libertine', 'Georgia', 'Times', serif;
+}
+
+.wiki-connect .person-description {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+    max-height: 80px;
+    overflow-y: auto;
+}
+
+.wiki-connect .person-image:empty::before {
+    content: "Loading image...";
+    color: #72777d;
+    font-style: italic;
+}
+
+.wiki-connect .person-info {
+    width: 100%;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .wiki-connect .person-connection-path {
+        flex-direction: column;
+    }
+    
+    .wiki-connect .person-card {
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    .wiki-connect .connection-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+}
+
+.wiki-connect .current-card .person-title:empty::after,
+.wiki-connect .current-card .person-title:contains("?") {
+    content: "?";
+    font-size: 24px;
+    color: #666;
+}
+
+.question-mark-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F6F6F0;
+}
+
+.question-mark {
+    font-size: 120px;
+    font-weight: bold;
+    color: #666;
+}
+
+.wiki-connect .word-chain::-webkit-scrollbar {
+    height: 8px;
+}
+
+.wiki-connect .word-chain::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.wiki-connect .word-chain::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.wiki-connect .word-chain::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+.wiki-connect .default-image {
+    width: 100%;
+    height: 100%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.wiki-connect .default-image span {
+    font-size: 80px;
+    font-weight: bold;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.wiki-connect .person-title a {
+    color: #0645ad;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.wiki-connect .person-title a:hover {
+    text-decoration: underline;
+    color: #3366bb;
+}
+
+.wiki-connect .person-title a:visited {
+    color: #0b0080;
+}
+
+.wiki-connect .person-title a:active {
+    color: #faa700;
+}
+
+.wiki-connect .person-title a:visited {
+    color: #0b0080;
+}
+
+.wiki-connect .person-title a:active {
+    color: #faa700;
+}
+
+.wiki-connect .custom-game-content {
+    background: #ECE9D8;
+    padding: 20px;
+    border: 2px solid #919B9C;
+    border-radius: 0;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.wiki-connect .custom-game-content h2 {
+    color: #0054E3;
+    margin-top: 0;
+    border-bottom: 1px solid #919B9C;
+    padding-bottom: 10px;
+}
+
+.wiki-connect .custom-game-inputs {
+    margin-top: 20px;
+}
+
+.wiki-connect .custom-input-group {
+    margin-bottom: 15px;
+}
+
+.wiki-connect .custom-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.wiki-connect .custom-input-group input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #919B9C;
+    box-sizing: border-box;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 14px;
+}
+
+.wiki-connect .custom-error {
+    color: #C00;
+    margin: 10px 0;
+    padding: 8px;
+    background: #FFEAEE;
+    border: 1px solid #FFADB9;
+    border-radius: 0;
+    font-size: 14px;
+}
+
+.wiki-connect .custom-game-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.wiki-connect .custom-game-buttons button {
+    padding: 8px 15px;
+    background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
+    border: 2px solid;
+    border-color: #fff #848484 #848484 #fff;
+    color: #000;
+    border-radius: 0;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.wiki-connect .custom-game-buttons button:last-child {
+    background: linear-gradient(180deg, #3690E6 0%, #2D7DD2 45%, #2270C5 50%, #2D7DD2 100%);
+    color: white;
+    border-color: #3690E6 #1860B5 #1860B5 #3690E6;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.wiki-connect .custom-game-buttons button:hover {
+    filter: brightness(1.05);
+}
+
+.wiki-connect .custom-game-buttons button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+} 

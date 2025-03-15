@@ -1,0 +1,57 @@
+.game-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://i.imgur.com/Zk6TR5k.jpg');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  user-select: none;
+}
+
+.game-wrapper::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--xp-taskbar), var(--xp-blue-dark));
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}
+
+.back-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  color: white;
+  cursor: pointer;
+  z-index: 1000;
+  background: linear-gradient(to bottom, var(--xp-start-gradient-top), var(--xp-start-gradient-bottom));
+  border-radius: 0 3px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-top: 1px solid var(--xp-blue-dark);
+  border-right: 1px solid var(--xp-blue-dark);
+}
+
+.back-button:hover {
+  background: linear-gradient(to bottom, #4d9aff, #2c6edb);
+}
+
+.back-icon {
+  margin-right: 5px;
+  font-size: 14px;
+}
+
+.back-text {
+  font-size: 12px;
+  font-weight: bold;
+} 

@@ -1,0 +1,172 @@
+.window {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid var(--xp-window-border);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 300px;
+  min-height: 200px;
+}
+
+.window-header {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  cursor: move;
+  user-select: none;
+}
+
+.window-header.active {
+  background: linear-gradient(to right, var(--xp-window-title), #2c71e0);
+  color: white;
+}
+
+.window-header.inactive {
+  background: linear-gradient(to right, var(--xp-window-title-inactive), #a5b7e5);
+  color: #f0f0f0;
+}
+
+.window-title {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.window-icon {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+.window-controls {
+  display: flex;
+  align-items: center;
+}
+
+.window-button {
+  width: 22px;
+  height: 22px;
+  margin-left: 2px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  color: white;
+}
+
+.window-button:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.window-button.minimize {
+  font-size: 12px;
+}
+
+.window-button.close {
+  background-color: #c75050;
+}
+
+.window-button.close:hover {
+  background-color: #e04343;
+}
+
+.window-content {
+  flex: 1;
+  overflow: auto;
+  background-color: #f0f0f0;
+  position: relative;
+}
+
+.resize-handle {
+  position: absolute;
+  background-color: transparent;
+}
+
+.resize-handle.n {
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  cursor: n-resize;
+}
+
+.resize-handle.e {
+  top: 8px;
+  right: 0;
+  bottom: 8px;
+  width: 4px;
+  cursor: e-resize;
+}
+
+.resize-handle.s {
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  cursor: s-resize;
+}
+
+.resize-handle.w {
+  top: 8px;
+  left: 0;
+  bottom: 8px;
+  width: 4px;
+  cursor: w-resize;
+}
+
+.resize-handle.ne {
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  cursor: ne-resize;
+}
+
+.resize-handle.se {
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  cursor: se-resize;
+}
+
+.resize-handle.sw {
+  bottom: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  cursor: sw-resize;
+}
+
+.resize-handle.nw {
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  cursor: nw-resize;
+}
+
+.window.active {
+  z-index: 10;
+}
+
+.window.inactive {
+  z-index: 5;
+}
+
+.window {
+  transition: width 0.1s, height 0.1s;
+} 
