@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Desktop.css';
 import Window from './Window';
 import AboutWindow from './AboutWindow';
+import InternetExplorer from './InternetExplorer';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
@@ -18,6 +19,7 @@ const Desktop = ({ games }) => {
   const [activeWindowId, setActiveWindowId] = useState(null);
   const [minimizedWindows, setMinimizedWindows] = useState([]);
   const [showAbout, setShowAbout] = useState(false);
+  const [showInternetExplorer, setShowInternetExplorer] = useState(false);
   
   const gameComponents = {
     'minesweeper': Minesweeper,
@@ -138,6 +140,11 @@ const Desktop = ({ games }) => {
     setShowAbout(!showAbout);
     setStartMenuOpen(false);
   };
+  
+  const toggleInternetExplorer = () => {
+    setShowInternetExplorer(!showInternetExplorer);
+    setStartMenuOpen(false);
+  };
 
   return (
     <div className="winxp-desktop" onClick={handleDesktopClick}>
@@ -154,6 +161,14 @@ const Desktop = ({ games }) => {
           </div>
         ))}
         
+        <div 
+          className="desktop-icon"
+          onClick={toggleInternetExplorer}
+          onDoubleClick={toggleInternetExplorer}
+        >
+          <div className="icon">🌐</div>
+          <div className="icon-text">Internet Explorer</div>
+        </div>
       </div>
       
       {openWindows.map(window => {
@@ -197,6 +212,21 @@ const Desktop = ({ games }) => {
         </Window>
       )}
       
+      {showInternetExplorer && (
+        <Window
+          title="Internet Explorer"
+          icon="🌐"
+          isActive={true}
+          initialPosition={{ x: 150, y: 150 }}
+          initialSize={{ width: 800, height: 600 }}
+          isMaximized={false}
+          zIndex={1001}
+          onClose={() => setShowInternetExplorer(false)}
+        >
+          <InternetExplorer />
+        </Window>
+      )}
+      
       <div className="taskbar">
         <div 
           className={`win-start-button ${startMenuOpen ? 'active' : ''}`}
@@ -207,7 +237,10 @@ const Desktop = ({ games }) => {
         </div>
         
         <div className="quick-launch">
-          <div className="quick-launch-item">
+          <div 
+            className="quick-launch-item"
+            onClick={toggleInternetExplorer}
+          >
             <div className="quick-icon">🌐</div>
           </div>
           <div className="quick-launch-item">
@@ -232,6 +265,16 @@ const Desktop = ({ games }) => {
               </div>
             );
           })}
+          
+          {showInternetExplorer && (
+            <div 
+              className={`taskbar-item ${activeWindowId === 'ie' ? 'active' : ''}`}
+              onClick={() => setShowInternetExplorer(true)}
+            >
+              <div className="taskbar-icon">🌐</div>
+              <div className="taskbar-text">Internet Explorer</div>
+            </div>
+          )}
         </div>
         
         <div className="system-tray">
@@ -255,7 +298,10 @@ const Desktop = ({ games }) => {
           <div className="start-content">
             <div className="start-left">
               <div className="pinned-programs">
-                <div className="program-item internet-explorer">
+                <div 
+                  className="program-item"
+                  onClick={toggleInternetExplorer}
+                >
                   <div className="program-icon">🌐</div>
                   <div className="program-name">Internet Explorer</div>
                 </div>

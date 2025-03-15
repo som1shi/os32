@@ -52,7 +52,7 @@ const QuantumChess = () => {
                 </div>
                         <div className="rules-footer">
                     <p>Based on quantum mechanical principles of superposition and wave function collapse.</p>
-                </div>
+                        </div>
                 <button onClick={() => setShowRules(false)}>Got it!</button>
                 </div>
             </div>
