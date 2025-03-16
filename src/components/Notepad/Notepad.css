@@ -44,16 +44,23 @@
   border: 1px solid #919B9C;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
   min-width: 150px;
+  border-radius: 0px;
   z-index: 30;
 }
 
-.menu-option {
+.menu-dropdown button {
+  width: 100%;
+  text-align: left;
   padding: 6px 20px;
+  border: none;
+  background: none;
   font-size: 13px;
+  cursor: pointer;
+  border-radius: 0px;
   color: #000;
 }
 
-.menu-option:hover {
+.menu-dropdown button:hover {
   background-color: #316AC5;
   color: white;
 }
@@ -70,6 +77,7 @@
   border: 1px solid #919B9C;
   margin: 2px;
   overflow: auto;
+  position: relative;
 }
 
 .editor {
@@ -88,12 +96,22 @@
   cursor: text;
 }
 
-.editor b {
-  font-weight: bold;
+.editor::selection {
+  background: #316AC5;
+  color: white;
 }
 
-.editor i {
-  font-style: italic;
+.editor::-moz-selection {
+  background: #316AC5;
+  color: white;
+}
+
+.editor:focus {
+  outline: none;
+}
+
+.editor b {
+  font-weight: bold;
 }
 
 .editor u {
@@ -110,4 +128,119 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.status-item {
+  padding: 0 8px;
+  border-right: 1px solid #919B9C;
+}
+
+.status-item:last-child {
+  border-right: none;
+}
+
+.save-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-dialog {
+  position: relative;
+  width: 600px;
+  height: 400px;
+  background: #ECE9D8;
+  border: 3px solid #0054E3;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.save-dialog-title {
+  background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+.save-dialog .file-explorer {
+  height: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+}
+
+.save-dialog .explorer-content {
+  flex: 1;
+}
+
+.save-dialog .file-explorer input {
+  color: #000;
+  background: #FFFFFF;
+  border: 1px solid #7A7A7A;
+  padding: 3px 5px;
+  font-family: 'Tahoma', sans-serif;
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+}
+
+.save-dialog .file-explorer input:focus {
+  border-color: #0078D7;
+}
+
+/* Windows XP style buttons */
+.save-dialog .file-explorer button {
+  padding: 6px 12px;
+  background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
+  border: 2px solid;
+  border-color: #fff #848484 #848484 #fff;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Tahoma', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  min-width: 75px;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.7);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.save-dialog .file-explorer button:hover {
+  background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
+}
+
+.save-dialog .file-explorer button:active {
+  background: linear-gradient(180deg, #DDD 0%, #EEE 45%, #f5f5f5 50%, #EEE 100%);
+  border-color: #848484 #fff #fff #848484;
+  padding: 7px 11px 5px 13px;
+}
+
+.save-dialog .file-explorer button.primary {
+  background: linear-gradient(180deg, #4CAF50 0%, #45a049 45%, #3d8b40 50%, #45a049 100%);
+  color: white;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+  border-color: #45a049 #2d622e #2d622e #45a049;
+}
+
+.save-dialog .file-explorer button.primary:hover {
+  background: linear-gradient(180deg, #5cbd60 0%, #4CAF50 45%, #45a049 50%, #4CAF50 100%);
+}
+
+.save-dialog .file-explorer button.primary:active {
+  background: linear-gradient(180deg, #45a049 0%, #4CAF50 45%, #5cbd60 50%, #4CAF50 100%);
+  border-color: #2d622e #45a049 #45a049 #2d622e;
 } 

@@ -1,80 +1,183 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useAuth } from '../../firebase/AuthContext';
-import { updateFile } from '../../firebase/fileService';
+import { createFile, updateFile } from '../../firebase/fileService';
+import FileExplorer from '../FileExplorer/FileExplorer';
 import './Notepad.css';
 
-const Notepad = ({ file, onClose }) => {
-  const [content, setContent] = useState(file.content || '');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const { currentUser } = useAuth();
-  const editorRef = useRef(null);
+const FILE_EXTENSION = '.txt';
+const DEFAULT_FILE_NAME = 'Untitled.txt';
+const ERROR_MESSAGES = {
+  SIGN_IN_REQUIRED: 'Please sign in to save files.',
+  SAVE_FAILED: 'Failed to save file. Please try again.',
+  EMPTY_FILENAME: 'Please enter a file name',
+  UNSAVED_CHANGES: 'Do you want to save changes?'
+};
 
-  useEffect(() => {
+const Notepad = memo(({ file: initialFile, onClose }) => {
+  const [content, setContent] = useState(initialFile?.content || '');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(!initialFile);
+  const [currentFile, setCurrentFile] = useState(initialFile);
+  const { currentUser } = useAuth();
+  
+  const editorRef = useRef(null);
+  const isInitialMount = useRef(true);
+
+  const getCurrentContent = useCallback(() => {
+    if (!editorRef.current) return content;
+    return editorRef.current.innerHTML || '';
+  }, [content]);
+
+  const validateFileName = useCallback((fileName) => {
+    if (!fileName?.trim()) {
+      throw new Error(ERROR_MESSAGES.EMPTY_FILENAME);
+    }
+    let validFileName = fileName.trim();
+    if (!validFileName.toLowerCase().endsWith(FILE_EXTENSION)) {
+      validFileName += FILE_EXTENSION;
+    }
+    return validFileName;
+  }, []);
+
+  const handleFormat = useCallback((command) => {
     if (editorRef.current) {
-      editorRef.current.innerHTML = content;
+      try {
+        editorRef.current.focus();
+        document.execCommand(command, false, null);
+        setHasUnsavedChanges(true);
+      } catch (error) {
+        console.error(`Error applying format ${command}:`, error);
+      }
     }
   }, []);
 
-  const handleFormat = (command) => {
-    if (editorRef.current) {
-      editorRef.current.focus();
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        document.execCommand(command, false, null);
-        setHasUnsavedChanges(true);
-      }
+  const handleSave = useCallback(async () => {
+    if (!currentUser) {
+      alert(ERROR_MESSAGES.SIGN_IN_REQUIRED);
+      return;
     }
-  };
 
-  const handleSave = () => {
-    if (currentUser && editorRef.current) {
-      const newContent = editorRef.current.innerHTML;
-      updateFile(currentUser.uid, file.id, {
-        ...file,
+    if (!currentFile) {
+      setShowSaveDialog(true);
+      return;
+    }
+
+    try {
+      const newContent = getCurrentContent();
+      await updateFile(currentUser.uid, currentFile.id, {
+        ...currentFile,
         content: newContent,
         modifiedAt: new Date().toISOString()
       });
       setContent(newContent);
       setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Error saving file:', error);
+      alert(ERROR_MESSAGES.SAVE_FAILED);
     }
-  };
+  }, [currentUser, currentFile, getCurrentContent]);
 
-  const handleClose = () => {
+  const handleSaveAs = useCallback(async (fileName) => {
+    if (!fileName) {
+      setShowSaveDialog(false);
+      return;
+    }
+
+    if (!currentUser) {
+      alert(ERROR_MESSAGES.SIGN_IN_REQUIRED);
+      return;
+    }
+
+    try {
+      const validFileName = validateFileName(fileName);
+      const newContent = getCurrentContent();
+      
+      const newFile = await createFile(currentUser.uid, {
+        name: validFileName,
+        content: newContent,
+        type: 'text',
+        createdAt: new Date().toISOString(),
+        modifiedAt: new Date().toISOString()
+      });
+
+      setCurrentFile(newFile);
+      setContent(newContent);
+      setHasUnsavedChanges(false);
+      setShowSaveDialog(false);
+
+      if (editorRef.current) {
+        editorRef.current.innerHTML = newContent;
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+      alert(error.message || ERROR_MESSAGES.SAVE_FAILED);
+    }
+  }, [currentUser, getCurrentContent, validateFileName]);
+
+  const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
-      const shouldSave = window.confirm('Do you want to save changes to ' + file.name + '?');
+      const shouldSave = window.confirm(ERROR_MESSAGES.UNSAVED_CHANGES);
       if (shouldSave) {
         handleSave();
+        return;
       }
     }
     onClose();
-  };
+  }, [hasUnsavedChanges, handleSave, onClose]);
 
-  const handleInput = () => {
+  const handleInput = useCallback(() => {
     if (editorRef.current) {
       setHasUnsavedChanges(true);
     }
-  };
+  }, []);
 
-  const handleKeyCommand = (e) => {
-    if (e.ctrlKey || e.metaKey) {
-      switch (e.key.toLowerCase()) {
-        case 'b':
-          e.preventDefault();
-          handleFormat('bold');
-          break;
-        case 'u':
-          e.preventDefault();
-          handleFormat('underline');
-          break;
-        case 's':
-          e.preventDefault();
-          handleSave();
-          break;
-        default:
-          break;
+  useEffect(() => {
+    const handleKeyCommand = (e) => {
+      if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case 'b':
+            e.preventDefault();
+            handleFormat('bold');
+            break;
+          case 'u':
+            e.preventDefault();
+            handleFormat('underline');
+            break;
+          case 's':
+            e.preventDefault();
+            handleSave();
+            break;
+          default:
+            break;
+        }
       }
+    };
+
+    document.addEventListener('keydown', handleKeyCommand);
+    return () => document.removeEventListener('keydown', handleKeyCommand);
+  }, [handleFormat, handleSave]);
+
+  useEffect(() => {
+    if (editorRef.current && isInitialMount.current) {
+      editorRef.current.innerHTML = content;
+      isInitialMount.current = false;
     }
-  };
+  }, [content]);
+
+  if (showSaveDialog) {
+    return (
+      <div className="save-dialog-overlay">
+        <div className="save-dialog">
+          <div className="save-dialog-title">Save As</div>
+          <FileExplorer
+            mode="saveAs"
+            onSaveAs={handleSaveAs}
+            initialFileName={DEFAULT_FILE_NAME}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="notepad-content">
@@ -82,20 +185,21 @@ const Notepad = ({ file, onClose }) => {
         <div className="menu-item">
           <span>File</span>
           <div className="menu-dropdown">
-            <div className="menu-option" onClick={handleSave}>Save (Ctrl+S)</div>
-            <div className="menu-separator"></div>
-            <div className="menu-option" onClick={handleClose}>Exit</div>
+            <button onClick={handleSave}>Save</button>
+            <button onClick={() => setShowSaveDialog(true)}>Save As...</button>
+            <div className="menu-separator" />
+            <button onClick={handleClose}>Exit</button>
           </div>
         </div>
         <div className="menu-item">
           <span>Format</span>
           <div className="menu-dropdown">
-            <div className="menu-option" onClick={() => handleFormat('bold')}>
+            <button onClick={() => handleFormat('bold')}>
               Bold (Ctrl+B)
-            </div>
-            <div className="menu-option" onClick={() => handleFormat('underline')}>
+            </button>
+            <button onClick={() => handleFormat('underline')}>
               Underline (Ctrl+U)
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -106,21 +210,25 @@ const Notepad = ({ file, onClose }) => {
           className="editor"
           contentEditable
           onInput={handleInput}
-          onKeyDown={handleKeyCommand}
           spellCheck={false}
+          role="textbox"
+          aria-multiline="true"
+          aria-label="Notepad editor"
         />
       </div>
 
       <div className="status-bar">
         <div className="status-item">
-          {hasUnsavedChanges ? 'Unsaved changes' : 'All changes saved'}
+          {hasUnsavedChanges ? 'Unsaved Changes' : 'Saved'}
         </div>
         <div className="status-item">
-          Last modified: {new Date(file.modifiedAt).toLocaleString()}
+          {currentFile && `Last modified: ${new Date(currentFile.modifiedAt).toLocaleString()}`}
         </div>
       </div>
     </div>
   );
-};
+});
+
+Notepad.displayName = 'Notepad';
 
 export default Notepad; 

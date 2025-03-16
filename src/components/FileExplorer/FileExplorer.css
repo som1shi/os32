@@ -141,14 +141,14 @@
 .file-item:hover {
   background-color: #e8e8e8;
   border-color: #ACA899;
-  height: 30%;
+  height:fit-content;
 }
 
 .file-item.selected {
   background-color: #316AC5;
   color: white;
   border-color: #153E7E;
-  height: 30%;
+  height:fit-content;
 }
 
 .file-icon {
@@ -190,4 +190,60 @@
   color: #000000;
   display: flex;
   align-items: center;
+}
+
+.save-as-bar {
+  padding: 12px;
+  background-color: #ECE9D8;
+  border-bottom: 1px solid #ACA899;
+}
+
+.save-as-bar form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-as-bar label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #000;
+}
+
+.save-as-input {
+  width: 300px;
+  height: 21px;
+  padding: 2px 4px;
+  border: 1px solid #7A7A7A;
+  background: white;
+  font-size: 11px;
+}
+
+.save-as-input:focus {
+  border-color: #0078D7;
+  outline: none;
+}
+
+.save-button,
+.cancel-button {
+  padding: 3px 12px;
+  font-size: 11px;
+  border: 1px solid #003C74;
+  background: linear-gradient(180deg, #EFF7FF 0%, #C6E4FF 50%, #9DD5FF 51%, #C6E4FF 100%);
+  color: #000;
+  cursor: pointer;
+  min-width: 75px;
+  height: 21px;
+}
+
+.save-button:hover,
+.cancel-button:hover {
+  background: linear-gradient(180deg, #F2F9FF 0%, #D6EEFF 50%, #BDEAFF 51%, #D6EEFF 100%);
+}
+
+.save-button:active,
+.cancel-button:active {
+  background: linear-gradient(180deg, #C6E4FF 0%, #9DD5FF 50%, #6BC3FF 51%, #9DD5FF 100%);
 } 
