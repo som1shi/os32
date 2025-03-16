@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PropTypes from 'prop-types';
 
 import Window from './Window';
 import AboutWindow from './AboutWindow';
@@ -12,7 +11,6 @@ import Leaderboard from '../Leaderboard';
 import StickyNote from './StickyNote';
 import UserProfile from '../UserProfile';
 import RefinerLeaderboardToggle from '../RefinerLeaderboardToggle';
-
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
@@ -453,14 +451,6 @@ const Desktop = ({ games }) => {
       </Modal>
     </div>
   );
-};
-
-Desktop.propTypes = {
-  games: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired
-  })).isRequired
 };
 
 export default Desktop;
