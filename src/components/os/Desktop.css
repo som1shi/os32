@@ -11,6 +11,10 @@
   --xp-window-border: #0c3d99;
   --xp-window-title: #1550af;
   --xp-window-title-inactive: #7a99d1;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .winxp-desktop {

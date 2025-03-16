@@ -11,6 +11,7 @@ import Leaderboard from '../Leaderboard';
 import StickyNote from './StickyNote';
 import UserProfile from '../UserProfile';
 import RefinerLeaderboardToggle from '../RefinerLeaderboardToggle';
+import IPodPlayer from '../iPodPlayer';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
@@ -52,6 +53,7 @@ const Desktop = ({ games }) => {
   const [showRefinerLeaderboard, setShowRefinerLeaderboard] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
   const [windowSize, setWindowSize] = useState(INITIAL_WINDOW_SIZE);
+  const [showIPodPlayer, setShowIPodPlayer] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -211,6 +213,33 @@ const Desktop = ({ games }) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }, []);
 
+  const toggleIPodPlayer = useCallback(() => {
+    const existingWindow = windows.find(w => w.id === 'ipod-player');
+    
+    if (existingWindow) {
+      if (minimizedWindows.includes('ipod-player')) {
+        setMinimizedWindows(prev => prev.filter(wId => wId !== 'ipod-player'));
+      }
+      setActiveWindow('ipod-player');
+      return;
+    }
+
+    const newWindow = {
+      id: 'ipod-player',
+      title: 'Music Player',
+      icon: '🎵',
+      component: <IPodPlayer onClose={() => closeWindow('ipod-player')} />,
+      isMaximized: false,
+      position: { x: 50 + (windows.length * 30), y: 50 + (windows.length * 30) },
+      size: { width: 300, height: 520 },
+      zIndex: windows.length + 1
+    };
+    
+    setWindows(prev => [...prev, newWindow]);
+    setActiveWindow('ipod-player');
+    setStartMenuOpen(false);
+  }, [windows, minimizedWindows, addWindow, closeWindow]);
+
   return (
     <div className="winxp-desktop" onClick={handleDesktopClick}>
       {/* Desktop Icons */}
@@ -235,6 +264,11 @@ const Desktop = ({ games }) => {
         <div className="desktop-icon" onClick={toggleInternetExplorer} onDoubleClick={toggleInternetExplorer}>
           <div className="icon">🌐</div>
           <div className="icon-text">Internet Explorer</div>
+        </div>
+
+        <div className="desktop-icon" onClick={toggleIPodPlayer} onDoubleClick={toggleIPodPlayer}>
+          <div className="icon">🎵</div>
+          <div className="icon-text">Music Player</div>
         </div>
 
         {currentUser && (
@@ -308,6 +342,9 @@ const Desktop = ({ games }) => {
           </div>
           <div className="quick-launch-item" onClick={toggleFileExplorer}>
             <div className="quick-icon">📁</div>
+          </div>
+          <div className="quick-launch-item" onClick={toggleIPodPlayer}>
+            <div className="quick-icon">🎵</div>
           </div>
           <div className="separator"></div>
         </div>
@@ -397,6 +434,10 @@ const Desktop = ({ games }) => {
               <div className="start-menu-item" onClick={toggleInternetExplorer}>
                 <div className="start-menu-icon">🌐</div>
                 <div className="start-menu-text">Internet Explorer</div>
+              </div>
+              <div className="start-menu-item" onClick={toggleIPodPlayer}>
+                <div className="start-menu-icon">🎵</div>
+                <div className="start-menu-text">Music Player</div>
               </div>
               {games.map(game => (
                 <div 
