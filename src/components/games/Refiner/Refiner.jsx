@@ -6,8 +6,7 @@ import {
     GameBoard,
     TargetBox,
     IntroScreen,
-    GameOverScreen,
-    AudioComponents
+    GameOverScreen
 } from './components';
 
 const Refiner = () => {
@@ -24,25 +23,20 @@ const Refiner = () => {
         scaryCells,
         selectionBox,
         isSelecting,
-        isMusicPlaying,
-        volume,
         gameDuration,
         shareFeedback,
+        scoreSubmitted,
+        submitting,
+        submitSuccess,
+        submitError,
         gridRef,
         targetBoxRef,
-                audioRef, 
-                correctSoundRef, 
-                completeGameSoundRef, 
-                hintRevealSoundRef, 
-        wrongSoundRef,
         setGameDuration,
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
         getCurrentSum,
         startGame,
-        toggleMusic,
-        handleVolumeChange,
         shareScore
     } = useRefinerLogic();
     
@@ -55,10 +49,6 @@ const Refiner = () => {
                 timeLeft={timeLeft}
                 gameDuration={gameDuration}
                 score={score}
-                isMusicPlaying={isMusicPlaying}
-                volume={volume}
-                toggleMusic={toggleMusic}
-                handleVolumeChange={handleVolumeChange}
             />
             
             <div className="refiner-container">
@@ -96,16 +86,12 @@ const Refiner = () => {
                     gameDuration={gameDuration}
                     shareScore={shareScore}
                     shareButtonText={shareButtonText}
+                    scoreSubmitted={scoreSubmitted}
+                    submitting={submitting}
+                    submitSuccess={submitSuccess}
+                    submitError={submitError}
                 />
             )}
-
-            <AudioComponents 
-                audioRef={audioRef}
-                correctSoundRef={correctSoundRef}
-                completeGameSoundRef={completeGameSoundRef}
-                hintRevealSoundRef={hintRevealSoundRef}
-                wrongSoundRef={wrongSoundRef}
-            />
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { findSimilarWords, getRandomWord, hasWord } from '../../../../services/embeddings';
+import useScoreSubmission from '../../../../firebase/useScoreSubmission';
 
 const BOARD_SIZE = 8;
 const MINES_COUNT = 8;
@@ -16,6 +17,9 @@ export default function useGameLogic() {
     const [score, setScore] = useState(0);
     const [showInfo, setShowInfo] = useState(false);
     const [shareText, setShareText] = useState('');
+    const [showScoreSubmitted, setShowScoreSubmitted] = useState(false);
+    
+    const { submitGameScore, submitting, error: submitError, success: submitSuccess } = useScoreSubmission();
 
     const handleCustomWordSubmit = async () => {
         try {
@@ -40,7 +44,6 @@ export default function useGameLogic() {
             setShowCustomInput(false);
             setCustomWord('');
         } catch (error) {
-            console.error('Error with custom word:', error);
             alert('Error processing word!');
         }
     };
@@ -67,8 +70,8 @@ export default function useGameLogic() {
             if (!win) {
                 setScore(0);
             }
+            setShowScoreSubmitted(false);
         } catch (error) {
-            console.error('Error starting new game:', error);
             alert('Error starting game!');
         }
     };
@@ -195,7 +198,27 @@ export default function useGameLogic() {
         );
         if (win) {
             setWin(true);
-            setScore(prev => prev + 500);
+            const finalScore = score + 500;
+            setScore(finalScore);
+            
+            submitScore(finalScore);
+        }
+    };
+    
+    const submitScore = async (finalScore) => {
+        try {
+            await submitGameScore('minesweeper', finalScore, {
+                targetWord,
+                boardSize: BOARD_SIZE,
+                minesCount: MINES_COUNT
+            });
+            
+            setShowScoreSubmitted(true);
+            
+            setTimeout(() => {
+                setShowScoreSubmitted(false);
+            }, 3000);
+        } catch (error) {
         }
     };
 
@@ -269,6 +292,10 @@ export default function useGameLogic() {
         showCustomInput,
         score,
         showInfo,
+        showScoreSubmitted,
+        submitting,
+        submitError,
+        submitSuccess,
         setFlagMode,
         setShowCustomInput,
         setCustomWord,

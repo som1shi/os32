@@ -21,7 +21,7 @@ const AboutWindow = ({ onClose }) => {
           <li><strong>WordSweeper</strong> - The Classic Minesweeper game with a twist.</li>
           <li><strong>Schrödinger's Chess</strong> - Chess where pieces exist in quantum superposition until observed.</li>
           <li><strong>Rotate Connect Four</strong> - Connect Four with dice rolls and board rotation mechanics.</li>
-          <li><strong>Macrodata Refinement</strong> - Sort scary numbers in this Severance-inspired terminal game.</li>
+          <li><strong>Refiner</strong> - Sort scary numbers in this Severance-inspired terminal game.</li>
           <li><strong>WikiConnect</strong> - Navigate through Wikipedia to connect two random articles.</li>
         </ul>
       </div>

@@ -1,0 +1,58 @@
+.refiner-leaderboard-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.duration-toggle {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(245, 245, 245, 0.9);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.duration-button {
+  flex: 1;
+  padding: 6px 8px;
+  margin: 0 4px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.duration-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.duration-button.active {
+  background-color: rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+}
+
+.windows-xp .duration-toggle {
+  background-color: #ECE9D8;
+  border: 1px solid #0055EA;
+}
+
+.windows-xp .duration-button {
+  font-family: 'Tahoma', sans-serif;
+  color: #000;
+}
+
+.windows-xp .duration-button.active {
+  background-color: #316AC5;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .duration-button {
+    padding: 4px;
+    font-size: 0.8rem;
+  }
+} 

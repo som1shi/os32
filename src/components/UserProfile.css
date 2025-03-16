@@ -1,0 +1,337 @@
+.user-profile-container {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  height: 100%;
+  overflow: auto;
+}
+
+.winxp-window-content .user-profile-container {
+  padding: 0;
+}
+
+.user-profile-card {
+  background-color: #fff;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.user-profile-header {
+  display: flex;
+  padding: 15px;
+  align-items: center;
+  background: linear-gradient(to bottom, #ECF6FD 0%, #D3EBFF 100%);
+  border-bottom: 1px solid #B5CFF7;
+}
+
+.user-avatar-large {
+  margin-right: 20px;
+}
+
+.user-avatar-large img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #0078d7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-info h2 {
+  color: #003399;
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.user-email {
+  color: #666;
+  margin: 0 0 15px 0;
+  font-size: 14px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.winxp-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.button-icon {
+  font-size: 14px;
+}
+
+.logout-button {
+  background: linear-gradient(to bottom, #F0F0F0 0%, #E1E1E1 100%);
+  color: #000;
+  border: 1px solid #999;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s;
+}
+
+.logout-button:hover {
+  background: linear-gradient(to bottom, #E5F1FB 0%, #C7E7F9 100%);
+  border-color: #0078D7;
+}
+
+.logout-button:active {
+  background: #C7E7F9;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.winxp-tabs {
+  display: flex;
+  background-color: #F0F0F0;
+  border-bottom: 1px solid #B5CFF7;
+  padding: 5px 15px 0;
+}
+
+.winxp-tab {
+  padding: 6px 12px;
+  margin-right: 4px;
+  background: linear-gradient(to bottom, #E1E1E1 0%, #D1D1D1 100%);
+  border: 1px solid #B5CFF7;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  position: relative;
+  bottom: -1px;
+}
+
+.winxp-tab.active {
+  background: #FFFFFF;
+  color: #003399;
+  border-bottom: 1px solid #FFFFFF;
+  z-index: 1;
+}
+
+.winxp-tab:hover:not(.active) {
+  background: linear-gradient(to bottom, #E8E8E8 0%, #D8D8D8 100%);
+  color: #333;
+}
+
+.user-stats {
+  margin: 0;
+  padding: 15px;
+  flex: 1;
+  overflow: auto;
+  background-color: #F9F9F9;
+}
+
+.winxp-section {
+  margin-bottom: 20px;
+  background: #FFFFFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 3px;
+  padding: 1px;
+}
+
+.winxp-section-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: linear-gradient(to bottom, #E3EFFF 0%, #D7E7FF 100%);
+  border-bottom: 1px solid #B5CFF7;
+}
+
+.section-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.winxp-section-header h3 {
+  color: #003399;
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.winxp-info-box {
+  padding: 15px;
+  background-color: #F5F9FF;
+  border: 1px solid #D9D9D9;
+  margin: 15px;
+  font-size: 12px;
+  color: #333;
+}
+
+.winxp-footer {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #F0F0F0;
+  border-top: 1px solid #D9D9D9;
+  font-size: 11px;
+  color: #666;
+}
+
+.winxp-tip {
+  display: flex;
+  align-items: center;
+}
+
+.tip-icon {
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.winxp-message-box {
+  display: flex;
+  padding: 20px;
+  background-color: #F5F9FF;
+  border: 1px solid #B5CFF7;
+  margin: 20px;
+  border-radius: 3px;
+}
+
+.winxp-message-icon {
+  font-size: 32px;
+  margin-right: 15px;
+  color: #0078D7;
+}
+
+.winxp-message-content h2 {
+  color: #003399;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.winxp-message-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #333;
+}
+
+.winxp-loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border: 2px solid #B5CFF7;
+  border-radius: 50%;
+  border-top-color: #0078D7;
+  animation: winxp-spin 1s linear infinite;
+}
+
+@keyframes winxp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-icon, .info-icon {
+  margin-right: 8px;
+}
+
+.game-icon {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+.loading-message,
+.error-message,
+.no-scores-message {
+  padding: 15px;
+  text-align: center;
+  background-color: #F5F5F5;
+  border: 1px solid #DDD;
+  border-radius: 3px;
+  color: #666;
+  font-size: 12px;
+  margin: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-message {
+  color: #C00;
+  background-color: #FFF0F0;
+  border-color: #FFD7D7;
+}
+
+.scores-table {
+  width: calc(100% - 30px);
+  border-collapse: collapse;
+  border: 1px solid #B5CFF7;
+  margin: 15px;
+}
+
+.scores-table th,
+.scores-table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid #D9D9D9;
+  font-size: 12px;
+}
+
+.scores-table th {
+  background: linear-gradient(to bottom, #E3EFFF 0%, #D7E7FF 100%);
+  color: #003399;
+  font-weight: bold;
+  border-bottom: 1px solid #B5CFF7;
+}
+
+.scores-table tr:nth-child(even) {
+  background-color: #F5F9FF;
+}
+
+.scores-table tr:hover {
+  background-color: #E5F1FB;
+}
+
+.scores-table tr:last-child td {
+  border-bottom: none;
+}
+
+.score-date {
+  color: #666;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .user-profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .user-avatar-large {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .scores-table th:nth-child(3),
+  .scores-table td:nth-child(3) {
+    display: none;
+  }
+  
+  .winxp-tabs {
+    padding: 5px 5px 0;
+  }
+  
+  .winxp-tab {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+} 

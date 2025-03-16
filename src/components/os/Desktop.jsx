@@ -4,6 +4,14 @@ import './Desktop.css';
 import Window from './Window';
 import AboutWindow from './AboutWindow';
 import InternetExplorer from './InternetExplorer';
+import Modal from '../Modal';
+import Login from '../Login';
+import Leaderboard from '../Leaderboard';
+import StickyNote from './StickyNote';
+import { useAuth } from '../../firebase/AuthContext';
+import UserProfile from '../UserProfile';
+import RefinerLeaderboardToggle from '../RefinerLeaderboardToggle';
+import { addConnectionStateListener } from '../../firebase/scoreService';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
@@ -13,6 +21,7 @@ import WikiConnect from '../games/WikiConnect/WikiConnect';
 
 const Desktop = ({ games }) => {
   const navigate = useNavigate();
+  const { currentUser, logOut } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [openWindows, setOpenWindows] = useState([]);
@@ -20,6 +29,14 @@ const Desktop = ({ games }) => {
   const [minimizedWindows, setMinimizedWindows] = useState([]);
   const [showAbout, setShowAbout] = useState(false);
   const [showInternetExplorer, setShowInternetExplorer] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showStickyNotes, setShowStickyNotes] = useState(true);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1024,
+    height: typeof window !== 'undefined' ? window.innerHeight : 768
+  });
   
   const gameComponents = {
     'minesweeper': Minesweeper,
@@ -29,12 +46,31 @@ const Desktop = ({ games }) => {
     'wikiconnect': WikiConnect
   };
   
+  const [showRefinerLeaderboard, setShowRefinerLeaderboard] = useState(true);
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     
-    return () => clearInterval(timer);
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+    
+    window.addEventListener('resize', handleResize);
+
+    const removeConnectionListener = addConnectionStateListener((online) => {
+      setIsOnline(online);
+    });
+    
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('resize', handleResize);
+      removeConnectionListener();
+    };
   }, []);
 
   const formatDate = (date) => {
@@ -146,6 +182,33 @@ const Desktop = ({ games }) => {
     setStartMenuOpen(false);
   };
 
+  const toggleUserProfile = () => {
+    setShowUserProfile(!showUserProfile);
+    setStartMenuOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(true);
+    setStartMenuOpen(false);
+  };
+
+  const handleLogoutClick = async () => {
+    try {
+      await logOut();
+      setStartMenuOpen(false);
+      setShowUserProfile(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  const toggleStickyNotes = () => {
+    setShowStickyNotes(!showStickyNotes);
+    setStartMenuOpen(false);
+  };
+
+  
+
   return (
     <div className="winxp-desktop" onClick={handleDesktopClick}>
       <div className="desktop-icons">
@@ -169,7 +232,41 @@ const Desktop = ({ games }) => {
           <div className="icon">🌐</div>
           <div className="icon-text">Internet Explorer</div>
         </div>
+
+        {currentUser && (
+          <div 
+            className="desktop-icon"
+            onClick={toggleUserProfile}
+            onDoubleClick={toggleUserProfile}
+          >
+            <div className="icon">👤</div>
+            <div className="icon-text">My Profile</div>
+          </div>
+        )}
       </div>
+      
+      {showStickyNotes && (
+        <>
+          <StickyNote 
+            title="WordSweeper Leaderboard" 
+            initialPosition={{ x: windowSize.width - 320, y: 50 }}
+            color="#ffff88"
+            onClose={() => setShowStickyNotes(false)}
+          >
+            <Leaderboard 
+              collectionName="wordsweeper" 
+              title="WordSweeper Top Scores"
+            />
+          </StickyNote>
+          
+          {showRefinerLeaderboard && (
+            <RefinerLeaderboardToggle
+              initialPosition={{ x: windowSize.width - 320, y: 350 }}
+              onClose={() => setShowRefinerLeaderboard(false)}
+            />
+          )}
+        </>
+      )}
       
       {openWindows.map(window => {
         const GameComponent = gameComponents[window.id];
@@ -227,6 +324,22 @@ const Desktop = ({ games }) => {
         </Window>
       )}
       
+      {showUserProfile && currentUser && (
+        <Window
+          title="User Profile"
+          icon="👤"
+          isActive={true}
+          initialPosition={{ x: 200, y: 100 }}
+          initialSize={{ width: 600, height: 500 }}
+          isMaximized={false}
+          zIndex={1002}
+          onClose={() => setShowUserProfile(false)}
+        >
+          <UserProfile onLogout={handleLogoutClick} />
+        </Window>
+      )}
+      
+      
       <div className="taskbar">
         <div 
           className={`win-start-button ${startMenuOpen ? 'active' : ''}`}
@@ -249,15 +362,14 @@ const Desktop = ({ games }) => {
           <div className="separator"></div>
         </div>
         
-        <div className="taskbar-items">
+        <div className="taskbar-windows">
           {openWindows.map(window => {
             const isMinimized = minimizedWindows.includes(window.id);
-            const isActive = activeWindowId === window.id && !isMinimized;
             
             return (
               <div 
                 key={window.id}
-                className={`taskbar-item ${isActive ? 'active' : ''} ${isMinimized ? 'minimized' : ''}`}
+                className={`taskbar-window ${activeWindowId === window.id && !isMinimized ? 'active' : ''}`}
                 onClick={() => isMinimized ? restoreWindow(window.id) : activateWindow(window.id)}
               >
                 <div className="taskbar-icon">{window.icon}</div>
@@ -265,122 +377,131 @@ const Desktop = ({ games }) => {
               </div>
             );
           })}
-          
-          {showInternetExplorer && (
-            <div 
-              className={`taskbar-item ${activeWindowId === 'ie' ? 'active' : ''}`}
-              onClick={() => setShowInternetExplorer(true)}
-            >
-              <div className="taskbar-icon">🌐</div>
-              <div className="taskbar-text">Internet Explorer</div>
-            </div>
-          )}
         </div>
         
         <div className="system-tray">
-          <div className="tray-icon">🔊</div>
-          <div className="tray-icon">🔌</div>
-          <div className="time">
-            {formatDate(currentTime)}
+          {currentUser && (
+            <div 
+              className="user-avatar-small"
+              onClick={toggleUserProfile}
+              title={currentUser.displayName || 'User Profile'}
+            >
+              <img 
+                src={currentUser.photoURL || '/default-avatar.png'} 
+                alt={currentUser.displayName || 'User'} 
+              />
+            </div>
+          )}
+          <div 
+            className="tray-icon" 
+            onClick={toggleStickyNotes}
+            title={showStickyNotes ? "Hide Leaderboards" : "Show Leaderboards"}
+          >
+            🏆
           </div>
+          <div 
+            className="tray-icon connection-indicator" 
+            title={isOnline ? "Online" : "Offline"}
+          >
+            {isOnline ? "🟢" : "🔴"}
+          </div>
+          <div className="time">{formatDate(currentTime)}</div>
         </div>
       </div>
       
       {startMenuOpen && (
         <div className="start-menu">
-          <div className="start-header">
-            <div className="user-info">
-              <div className="user-avatar">👤</div>
-              <div className="user-name">User</div>
-            </div>
-          </div>
-          
-          <div className="start-content">
-            <div className="start-left">
-              <div className="pinned-programs">
-                <div 
-                  className="program-item"
-                  onClick={toggleInternetExplorer}
-                >
-                  <div className="program-icon">🌐</div>
-                  <div className="program-name">Internet Explorer</div>
+          <div className="start-menu-header">
+            {currentUser ? (
+              <div className="start-user-info">
+                <div className="start-user-avatar">
+                  <img 
+                    src={currentUser.photoURL || '/default-avatar.png'} 
+                    alt={currentUser.displayName || 'User'} 
+                  />
                 </div>
-                <div className="program-item email">
-                  <div className="program-icon">📧</div>
-                  <div className="program-name">Email</div>
-                </div>
-                
-                <div className="separator"></div>
-                
-                {games.map(game => (
-                  <div 
-                    key={game.id} 
-                    className="program-item"
-                    onClick={() => handleIconClick(game.id)}
-                  >
-                    <div className="program-icon">{game.icon}</div>
-                    <div className="program-name">{game.title}</div>
-                  </div>
-                ))}
-                
-                <div className="separator"></div>
-                
-                <div 
-                  className="program-item"
-                  onClick={toggleAboutWindow}
-                >
-                  <div className="program-icon">ℹ️</div>
-                  <div className="program-name">About Games Collection</div>
+                <div className="start-user-name">
+                  {currentUser.displayName || 'User'}
                 </div>
               </div>
+            ) : (
+              <div className="start-user-info">
+                <div className="start-user-avatar">
+                  <img src="/default-avatar.png" alt="Guest" />
+                </div>
+                <div className="start-user-name">Guest</div>
+              </div>
+            )}
+          </div>
+          
+          <div className="start-menu-items">
+            <div className="start-menu-left">
+              <div className="start-menu-item" onClick={toggleAboutWindow}>
+                <div className="start-menu-icon">ℹ️</div>
+                <div className="start-menu-text">About</div>
+              </div>
+              
+              
+              <div className="start-menu-separator"></div>
+              
+              <div 
+                className="start-menu-item"
+                onClick={toggleStickyNotes}
+              >
+                <div className="start-menu-icon">🏆</div>
+                <div className="start-menu-text">
+                  {showStickyNotes ? "Hide Leaderboards" : "Show Leaderboards"}
+                </div>
+              </div>
+              <div className="start-menu-separator"></div>
+              <div className="start-menu-item" onClick={toggleInternetExplorer}>
+                <div className="start-menu-icon">🌐</div>
+                <div className="start-menu-text">Internet Explorer</div>
+              </div>
+              {games.map(game => (
+                <div 
+                  key={game.id} 
+                  className="start-menu-item"
+                  onClick={() => openGameWindow(game.id)}
+                >
+                  <div className="start-menu-icon">{game.icon}</div>
+                  <div className="start-menu-text">{game.title}</div>
+                </div>
+              ))}
             </div>
             
-            <div className="start-right">
-              <div className="system-item my-documents">
-                <div className="system-icon">📁</div>
-                <div className="system-name">My Documents</div>
-              </div>
-              <div className="system-item my-pictures">
-                <div className="system-icon">🖼️</div>
-                <div className="system-name">My Pictures</div>
-              </div>
-              <div className="system-item my-music">
-                <div className="system-icon">🎵</div>
-                <div className="system-name">My Music</div>
-              </div>
-              <div className="system-item my-computer">
-                <div className="system-icon">💻</div>
-                <div className="system-name">My Computer</div>
-              </div>
+            <div className="start-menu-right">
+            {currentUser ? (
+                <div className="start-menu-item" onClick={toggleUserProfile}>
+                  <div className="start-menu-icon">👤</div>
+                  <div className="start-menu-text">My Profile</div>
+                </div>
+              ) : (
+                <div className="start-menu-item" onClick={handleLoginClick}>
+                  <div className="start-menu-icon">🔑</div>
+                  <div className="start-menu-text">Sign In</div>
+                </div>
+              )}
+              {currentUser && (
+                <div className="start-menu-item" onClick={handleLogoutClick}>
+                  <div className="start-menu-icon">🚪</div>
+                  <div className="start-menu-text">Sign Out</div>
+                </div>
+              )}
               
-              <div className="separator"></div>
-              
-              <div className="system-item control-panel">
-                <div className="system-icon">⚙️</div>
-                <div className="system-name">Control Panel</div>
-              </div>
-              
-              <div className="separator"></div>
-              
-              <div className="system-item log-off">
-                <div className="system-icon">🔒</div>
-                <div className="system-name">Log Off</div>
-              </div>
-              <div className="system-item shut-down">
-                <div className="system-icon">⏻</div>
-                <div className="system-name">Shut Down</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="start-footer">
-            <div className="all-programs">
-              <div className="all-programs-icon">▶</div>
-              <div className="all-programs-text">All Programs</div>
             </div>
           </div>
         </div>
       )}
+      
+      <Modal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        title="Sign In"
+        width="400px"
+      >
+        <Login onClose={() => setShowLoginModal(false)} />
+      </Modal>
     </div>
   );
 };

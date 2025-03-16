@@ -3,6 +3,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import './App.css'
 import GameLoader from './components/GameLoader'
 import Desktop from './components/os/Desktop'
+import { AuthProvider } from './firebase/AuthContext'
 
 import Minesweeper from './components/games/Minesweeper/Minesweeper';
 import QuantumChess from './components/games/QuantumChess/QuantumChess';
@@ -32,7 +33,7 @@ function App() {
     },
     { 
       id: 'refiner', 
-      title: 'Macrodata Refinement', 
+      title: 'Refiner', 
       icon: '🔢',
       description: 'Sort scary numbers in this Severance-inspired terminal game.'
     },
@@ -45,14 +46,16 @@ function App() {
   ];
 
   return (
-    <Routes>
-      <Route path="/" element={<Home games={games} />} />
-      <Route path="/game/minesweeper" element={<Minesweeper />} />
-      <Route path="/game/quantumchess" element={<QuantumChess />} />
-      <Route path="/game/rotateconnectfour" element={<RotateConnectFour />} />
-      <Route path="/game/refiner" element={<Refiner />} />
-      <Route path="/game/wikiconnect" element={<WikiConnect />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Home games={games} />} />
+        <Route path="/game/minesweeper" element={<Minesweeper />} />
+        <Route path="/game/quantumchess" element={<QuantumChess />} />
+        <Route path="/game/rotateconnectfour" element={<RotateConnectFour />} />
+        <Route path="/game/refiner" element={<Refiner />} />
+        <Route path="/game/wikiconnect" element={<WikiConnect />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 

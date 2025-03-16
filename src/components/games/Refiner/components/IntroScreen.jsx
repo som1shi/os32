@@ -3,6 +3,7 @@ import React from 'react';
 const IntroScreen = ({ gameDuration, setGameDuration, startGame }) => {
     return (
         <div className="intro-screen">
+            <div className="back-button" onClick={() => window.history.back()}>×</div>
             <h1>Data Refinement</h1>
             <p>Drag to select numbers that add up to the target sum.</p>
             <p>If you struggle, look around for the scary numbers.</p>

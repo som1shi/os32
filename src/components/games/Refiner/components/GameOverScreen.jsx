@@ -1,9 +1,19 @@
 import React from 'react';
 
-const GameOverScreen = ({ score, gameDuration, shareScore, shareButtonText }) => {
+const GameOverScreen = ({ 
+    score, 
+    gameDuration, 
+    shareScore, 
+    shareButtonText,
+    scoreSubmitted,
+    submitting,
+    submitSuccess,
+    submitError
+}) => {
     return (
         <div className="game-over">
             <div className="game-over-content">
+            <div className="back-button" onClick={() => window.history.back()}>×</div>
                 <h2>Game Over</h2>
                 <div className="score-result">
                     <div className="score-value">{score}</div>
@@ -14,6 +24,7 @@ const GameOverScreen = ({ score, gameDuration, shareScore, shareButtonText }) =>
                     <div className="duration-value">{gameDuration}</div>
                     <div className="duration-label">Seconds</div>
                 </div>
+                
                 
                 <button className="play-again-button" onClick={() => window.location.reload()}>
                     Play Again

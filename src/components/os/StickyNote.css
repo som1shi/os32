@@ -1,0 +1,126 @@
+.sticky-note {
+  position: absolute;
+  width: 300px;
+  min-height: 200px;
+  background-color: #ffff88;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.sticky-note-header {
+  padding: 5px 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+}
+
+.sticky-note-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sticky-note-controls {
+  display: flex;
+  align-items: center;
+}
+
+.sticky-note-close,
+.sticky-note-minimize {
+  background: none;
+  border: none;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+
+.sticky-note-close:hover,
+.sticky-note-minimize:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.sticky-note-content {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.sticky-note-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sticky-note-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.sticky-note-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.sticky-note .leaderboard-container {
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+  background: transparent;
+}
+
+.sticky-note .leaderboard-container h2 {
+  font-size: 14px;
+  margin-top: 0;
+  padding-bottom: 5px;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.sticky-note .leaderboard-container h3 {
+  font-size: 12px;
+}
+
+.sticky-note .score-card {
+  padding: 6px;
+  margin-bottom: 3px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.sticky-note .score-rank {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.sticky-note .user-avatar {
+  width: 20px;
+  height: 20px;
+}
+
+.sticky-note .score-value {
+  font-size: 14px;
+}
+
+.sticky-note .score-date {
+  font-size: 10px;
+} 

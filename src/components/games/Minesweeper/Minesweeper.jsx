@@ -14,6 +14,10 @@ const Minesweeper = () => {
         showCustomInput,
         score,
         showInfo,
+        showScoreSubmitted,
+        submitting,
+        submitError,
+        submitSuccess,
         setFlagMode,
         setShowCustomInput,
         setCustomWord,
@@ -73,6 +77,53 @@ const Minesweeper = () => {
                         <span className="score-value">{minesLeft}</span>
                     </div>
                 </div>
+                
+                <div className="board">
+                    {board.map((row, i) => (
+                        <div key={i} className="row">
+                            {row.map((cell, j) => (
+                                <div
+                                    key={`${i}-${j}`}
+                                    className={`cell ${cell.isRevealed ? 'revealed' : ''} ${cell.isFlagged ? 'flagged' : ''} ${cell.isMine && cell.isRevealed ? 'mine' : ''} ${cell.neighborMines === 1 ? 'level-1' : cell.neighborMines === 2 ? 'level-2' : cell.neighborMines === 3 ? 'level-3' : ''}`}
+                                    onClick={(e) => handleCellClick(i, j, e)}
+                                    onContextMenu={(e) => handleCellClick(i, j, e)}
+                                >
+                                    {cell.isRevealed && (cell.isMine ? cell.word : cell.neighborMines > 0 ? cell.word : '')}
+                                    {!cell.isRevealed && cell.isFlagged && '🚩'}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+                
+                {gameOver && (
+                    <div className="game-over-message">
+                        <h2>Game Over!</h2>
+                        <p>You hit a mine. Better luck next time!</p>
+                        <button onClick={() => startNewGame()}>Play Again</button>
+                        <button onClick={handleShare}>Share Result</button>
+                    </div>
+                )}
+                
+                {win && (
+                    <div className="win-message">
+                        <h2>You Win!</h2>
+                        <p>Congratulations! You cleared the board!</p>
+                        <p>Final Score: {score}</p>
+                        {submitting && <p className="score-status submitting">Submitting score...</p>}
+                        {submitSuccess && <p className="score-status success">Score submitted successfully!</p>}
+                        {submitError && <p className="score-status error">Error submitting score: {submitError}</p>}
+                        <button onClick={() => startNewGame()}>Play Again</button>
+                        <button onClick={handleShare}>Share Result</button>
+                    </div>
+                )}
+                
+                {showScoreSubmitted && !gameOver && !win && (
+                    <div className="score-submitted-notification">
+                        <p>Score submitted successfully!</p>
+                    </div>
+                )}
+                
                 {showCustomInput && (
                     <>
                         <div className="custom-word-overlay" onClick={() => setShowCustomInput(false)} />
@@ -98,52 +149,19 @@ const Minesweeper = () => {
                                 <ul>
                                     <li>The target word represents mines you need to avoid</li>
                                     <li>Numbers are replaced with related words</li>
-                                    <li>Words closer to the target word are more dangerous</li>
-                                    <li>Left click to reveal cells</li>
-                                    <li>Right click or use Flag Mode to mark potential mines</li>
-                                    <li>Clear all safe cells to win!</li>
+                                    <li>The closer a word is to the target word, the more mines are nearby</li>
                                 </ul>
-                                <p>Word Colors:</p>
+                                <p>Game Rules:</p>
                                 <ul>
-                                    <li><span className="blue-text">Blue</span>: Distantly related words</li>
-                                    <li><span className="orange-text">Orange</span>: Moderately related words</li>
-                                    <li><span className="red-text">Red</span>: Closely related words</li>
+                                    <li>Click on cells to reveal them</li>
+                                    <li>Right-click or toggle "Flags" to mark potential mines</li>
+                                    <li>Avoid cells containing the target word</li>
+                                    <li>Clear all non-mine cells to win</li>
                                 </ul>
                             </div>
-                            <button onClick={() => setShowInfo(false)}>Got it!</button>
+                            <button onClick={() => setShowInfo(false)}>Close</button>
                         </div>
                     </>
-                )}
-                <div className="board">
-                    {board.map((row, i) => (
-                        <div key={i} className="row">
-                            {row.map((cell, j) => (
-                                <div
-                                    key={`${i}-${j}`}
-                                    className={`cell ${cell.isRevealed ? 'revealed' : ''} ${
-                                        cell.isFlagged ? 'flagged' : ''
-                                    } ${gameOver && cell.isMine ? 'mine' : ''} ${
-                                        cell.word ? `level-${cell.neighborMines}` : ''
-                                    }`}
-                                    onClick={(e) => handleCellClick(i, j, e)}
-                                    onContextMenu={(e) => handleCellClick(i, j, e)}
-                                >
-                                    {cell.isRevealed && !cell.isMine && cell.word}
-                                    {cell.isFlagged && '🚩'}
-                                    {cell.isRevealed && cell.isMine && cell.word}
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-                {(gameOver || win) && (
-                    <div className="game-over">
-                        <h2>{win ? 'You Win!' : 'Game Over!'}</h2>
-                        <div className="game-over-buttons">
-                            <button onClick={() => startNewGame()}>Play Again</button>
-                            {win && <button onClick={handleShare} className="share-button">Share 🔗</button>}
-                        </div>
-                    </div>
                 )}
             </div>
         </div>

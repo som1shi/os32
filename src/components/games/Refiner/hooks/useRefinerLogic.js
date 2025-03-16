@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import useScoreSubmission from '../../../../firebase/useScoreSubmission';
 
 export default function useRefinerLogic() {
     const [numbers, setNumbers] = useState([]);
@@ -6,7 +7,6 @@ export default function useRefinerLogic() {
     const [targetSum, setTargetSum] = useState(0);
     const [successfulSelections, setSuccessfulSelections] = useState([]);
     const [score, setScore] = useState(0);
-    const [targetsHit, setTargetsHit] = useState(0);
     const [timeLeft, setTimeLeft] = useState(10);
     const [gameActive, setGameActive] = useState(false);
     const [gameOver, setGameOver] = useState(false);
@@ -27,17 +27,10 @@ export default function useRefinerLogic() {
     const [gameDuration, setGameDuration] = useState(60);
     
     const [shareFeedback, setShareFeedback] = useState(false);
-    
-    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-    const [volume, setVolume] = useState(0.2);
-    const audioRef = useRef(null);
-    
-    const correctSoundRef = useRef(null);
-    const completeGameSoundRef = useRef(null);
-    const hintRevealSoundRef = useRef(null);
-    const wrongSoundRef = useRef(null);
-    
-    const [showVolumeControl, setShowVolumeControl] = useState(false);
+    const [scoreSubmitted, setScoreSubmitted] = useState(false);
+    const { submitGameScore, submitting, error: submitError, success: submitSuccess } = useScoreSubmission();
+    const scoreRef = useRef(0);
+    const scoreSubmissionInitiatedRef = useRef(false);
     
     const generateRandomNumber = (row, col) => {
         return {
@@ -249,12 +242,9 @@ export default function useRefinerLogic() {
                         targetBox.classList.remove('changing-target');
                     }, 500);
                     
-                    console.log(`Replaced ${replacements} numbers with new ones. New target: ${newTarget}`);
                 }, 300);
             }, 800);
         }
-        
-        playSound(correctSoundRef);
     };
 
     useEffect(() => {
@@ -262,20 +252,30 @@ export default function useRefinerLogic() {
             const currentSum = getCurrentSum();
             
             if (currentSum === targetSum) {
-                setScore(prev => prev + 1);
-                setTargetsHit(prev => prev + 1);
+                const newScore = score + 1;
+                scoreRef.current = newScore;
+                setScore(newScore);
                 
                 replaceSelectedNumbers();
             } else if (currentSum > 0) {
-                playSound(wrongSoundRef);
-                
                 setTimeout(() => {
                     setSelectedNumbers([]);
                     setNumbers(prev => prev.map(n => ({...n, selected: false})));
                 }, 300);
             }
         }
-    }, [selectedNumbers]);
+    }, [selectedNumbers, targetSum, score]);
+    
+    useEffect(() => {
+        scoreRef.current = score;
+    }, [score]);
+    
+    useEffect(() => {
+        if (!gameActive && !gameOver) {
+            setScoreSubmitted(false);
+            scoreSubmissionInitiatedRef.current = false;
+        }
+    }, [gameActive, gameOver]);
     
     useEffect(() => {
         if (!gameActive && !gameOver) {
@@ -292,7 +292,6 @@ export default function useRefinerLogic() {
                 const solution = findSolution(numbers, targetSum);
                 
                 if (solution.length > 0) {
-                    console.log("Activating scary numbers hint");
                     setScaryCells(solution);
                     setHintShown(true);
                 }
@@ -323,74 +322,14 @@ export default function useRefinerLogic() {
         };
     }, []);
     
-    useEffect(() => {
-        if (!audioRef.current) {
-            audioRef.current = new Audio('/sounds/refiner-ambient.wav');
-            audioRef.current.loop = true;
-            audioRef.current.volume = volume;
-        }
-        
-        if (!correctSoundRef.current) {
-            correctSoundRef.current = new Audio('/sounds/refiner-correct.wav');
-            correctSoundRef.current.volume = volume * 0.7;
-        }
-        
-        if (!completeGameSoundRef.current) {
-            completeGameSoundRef.current = new Audio('/sounds/refiner-compete.mp3');
-            completeGameSoundRef.current.volume = volume * 0.8;
-        }
-        
-        if (!hintRevealSoundRef.current) {
-            hintRevealSoundRef.current = new Audio('/sounds/refiner-hint-reveal.wav');
-            hintRevealSoundRef.current.volume = volume * 0.6;
-        }
-        
-        if (!wrongSoundRef.current) {
-            wrongSoundRef.current = new Audio('/sounds/refiner-wrong.mp3');
-            wrongSoundRef.current.volume = volume * 0.6;
-        }
-        
-        const resumeAudio = () => {
-            if (audioRef.current) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const audioContext = new AudioContext();
-                    audioContext.resume();
-                }
-                
-                if (isMusicPlaying) {
-                    audioRef.current.play().catch(e => console.log('Auto-play prevented:', e));
-                }
-            }
-        };
-        
-        window.addEventListener('click', resumeAudio);
-        window.addEventListener('touchstart', resumeAudio);
-        
-        return () => {
-            window.removeEventListener('click', resumeAudio);
-            window.removeEventListener('touchstart', resumeAudio);
-            
-            [
-                audioRef, 
-                correctSoundRef, 
-                completeGameSoundRef, 
-                hintRevealSoundRef, 
-                wrongSoundRef
-            ].forEach(ref => {
-                if (ref.current) {
-                    ref.current.pause();
-                    ref.current.currentTime = 0;
-                }
-            });
-        };
-    }, [isMusicPlaying, volume]);
-    
     const startGame = () => {
         setGameActive(true);
         setGameOver(false);
         setScore(0);
-        setTargetsHit(0);
+        scoreRef.current = 0;
+        setScoreSubmitted(false);
+        scoreSubmissionInitiatedRef.current = false;
+        
         setTimeLeft(gameDuration);
         setNumbers(generateNumbers());
         setSelectedNumbers([]);
@@ -409,12 +348,6 @@ export default function useRefinerLogic() {
                 return prev - 1;
             });
         }, 1000);
-        
-        if (!isMusicPlaying && audioRef.current) {
-            audioRef.current.play();
-            setIsMusicPlaying(true);
-        }
-        preloadSounds();
     };
     
     const handleMouseDown = (e) => {
@@ -509,11 +442,39 @@ export default function useRefinerLogic() {
         clearInterval(timerRef.current);
         setGameActive(false);
         setGameOver(true);
-        playSound(completeGameSoundRef);
+        
+        const finalScore = scoreRef.current;
+        
+        if (!scoreSubmitted && !submitting && !scoreSubmissionInitiatedRef.current) {
+            setScoreSubmitted(true);
+            scoreSubmissionInitiatedRef.current = true;
+            
+            submitScore(finalScore);
+        }
+    };
+    
+    const submitScore = async (finalScore) => {
+        try {
+            if (submitting || submitSuccess) {
+                return;
+            }
+            
+            const collectionName = `refiner-${gameDuration}`;
+            
+            const result = await submitGameScore(collectionName, finalScore, {
+                gameDuration,
+                timestamp: new Date().toISOString()
+            });
+            
+        } catch (error) {
+        } finally {
+            setScoreSubmitted(true);
+            scoreSubmissionInitiatedRef.current = true;
+        }
     };
     
     const shareScore = () => {
-        const gameUrl = "https://som1shi.github.io/refiner";
+        const gameUrl = "https://os32.vercel.app/game/refiner";
         const shareText = `I refined ${score} targets in ${gameDuration} seconds playing Refiner! Can you beat my score?`;
         copyToClipboard(`${shareText}\n\n${gameUrl}`);
         setShareFeedback(true);
@@ -536,118 +497,6 @@ export default function useRefinerLogic() {
         setShareFeedback(true);
         setTimeout(() => setShareFeedback(false), 2000);
     };
-    
-    const toggleMusic = () => {
-        if (!isMusicPlaying) {
-            audioRef.current.play().catch(e => console.log('Play prevented:', e));
-            setIsMusicPlaying(true);
-        } else {
-            setShowVolumeControl(!showVolumeControl);
-        }
-        
-        try {
-            localStorage.setItem('refinerMusicEnabled', isMusicPlaying ? 'true' : 'false');
-        } catch (e) {
-            console.log('Could not save music preference');
-        }
-    };
-
-    const muteMusic = () => {
-        audioRef.current.pause();
-        setIsMusicPlaying(false);
-        setShowVolumeControl(false);
-        
-        try {
-            localStorage.setItem('refinerMusicEnabled', 'false');
-        } catch (e) {
-            console.log('Could not save music preference');
-        }
-    };
-
-    const playSound = (soundRef) => {
-        if (!soundRef || !soundRef.current) return;
-        
-        try {
-            soundRef.current.pause();
-            soundRef.current.currentTime = 0;
-            
-            if (soundRef === correctSoundRef) {
-                soundRef.current.volume = volume * 0.7;
-            } else if (soundRef === wrongSoundRef) {
-                soundRef.current.volume = volume * 0.6;
-            } else if (soundRef === completeGameSoundRef) {
-                soundRef.current.volume = volume * 0.8;
-            } else if (soundRef === hintRevealSoundRef) {
-                soundRef.current.volume = volume * 0.6;
-            }
-            
-            setTimeout(() => {
-                const playPromise = soundRef.current.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log('Sound play prevented:', error);
-                        
-                        setTimeout(() => {
-                            soundRef.current.play().catch(e => console.log('Retry failed:', e));
-                        }, 100);
-                    });
-                }
-            }, 10);
-        } catch (e) {
-            console.error("Error playing sound:", e);
-        }
-    };
-
-    const handleVolumeChange = (e) => {
-        const newVolume = parseFloat(e.target.value);
-        setVolume(newVolume);
-        
-        if (audioRef.current) {
-            audioRef.current.volume = newVolume;
-        }
-        
-        if (correctSoundRef.current) {
-            correctSoundRef.current.volume = newVolume * 0.7;
-        }
-        
-        if (completeGameSoundRef.current) {
-            completeGameSoundRef.current.volume = newVolume * 0.8;
-        }
-        
-        if (hintRevealSoundRef.current) {
-            hintRevealSoundRef.current.volume = newVolume * 0.6;
-        }
-        
-        if (wrongSoundRef.current) {
-            wrongSoundRef.current.volume = newVolume * 0.6;
-        }
-        
-        try {
-            localStorage.setItem('refinerMusicVolume', newVolume.toString());
-        } catch (e) {
-            console.log('Could not save volume preference');
-        }
-    };
-
-    const preloadSounds = () => {
-        try {
-            if (correctSoundRef.current) {
-                correctSoundRef.current.load();
-            }
-            if (wrongSoundRef.current) {
-                wrongSoundRef.current.load();
-            }
-            if (completeGameSoundRef.current) {
-                completeGameSoundRef.current.load();
-            }
-            if (hintRevealSoundRef.current) {
-                hintRevealSoundRef.current.load();
-            }
-        } catch (e) {
-            console.log('Error preloading sounds:', e);
-        }
-    };
 
     return {
         numbers,
@@ -662,27 +511,20 @@ export default function useRefinerLogic() {
         scaryCells,
         selectionBox,
         isSelecting,
-        isMusicPlaying,
-        volume,
         gameDuration,
         shareFeedback,
+        scoreSubmitted,
+        submitting,
+        submitSuccess,
+        submitError,
         gridRef,
         targetBoxRef,
-        diceFaceRef: null,
-        audioRef,
-        correctSoundRef,
-        completeGameSoundRef,
-        hintRevealSoundRef,
-        wrongSoundRef,
         setGameDuration,
-        setShowVolumeControl,
         handleMouseDown,
         handleMouseMove,
         handleMouseUp,
         getCurrentSum,
         startGame,
-        toggleMusic,
-        handleVolumeChange,
         shareScore
     };
 } 

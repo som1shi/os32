@@ -33,6 +33,18 @@
     user-select: none;
 }
 
+.score-value {
+    color: #FF0000 !important;
+    font-size: 36px !important;
+    text-shadow: 0 0 5px rgba(255,0,0,0.5);
+    letter-spacing: 2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    text-align: center;
+}
+
 .timer-container {
     position: relative;
     width: 200px;
@@ -315,13 +327,32 @@
     }
 }
 
+.game-over button {
+    background: #000;
+    color: #7AF3D0;
+    border: 2px solid #7AF3D0;
+    padding: 12px 25px;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border-radius: 2;
+}
+
+.game-over button:hover {
+    background: rgba(122, 243, 208, 0.2);
+    box-shadow: 0 0 15px rgba(122, 243, 208, 0.5);
+}
+
 .refiner .game-over {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
+    width: 50%;
+    height: 50%;
     background: rgba(0, 0, 0, 0.95);
     display: flex;
     flex-direction: column;
@@ -951,4 +982,44 @@
 
 * {
     user-select: none !important;
+}
+
+.score-submission-status {
+    margin: 10px 0;
+    min-height: 24px;
+    text-align: center;
+}
+
+.score-submission-status p {
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+}
+
+.score-submission-status .submitting {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ccc;
+}
+
+.score-submission-status .success {
+    background-color: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+}
+
+.score-submission-status .error {
+    background-color: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+}
+
+.score-submission-status .pending {
+    background-color: rgba(255, 255, 0, 0.2);
+    color: #ffff00;
+}
+
+.score-submission-status .not-submitted {
+    background-color: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
 } 

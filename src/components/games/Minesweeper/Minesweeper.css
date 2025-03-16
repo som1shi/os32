@@ -10,7 +10,6 @@
     border: 3px solid #0054E3;
     overflow: hidden;
     box-sizing: border-box;
-    color: #000;
 }
 
 .minesweeper .window-header {
@@ -137,7 +136,6 @@
     border: 1px solid #919B9C;
     max-height: calc(100vh - 30px);
     overflow: auto;
-    color: #000;
 }
 
 .controls {
@@ -570,4 +568,93 @@
     background: linear-gradient(180deg, #DDD 0%, #EEE 45%, #f5f5f5 50%, #EEE 100%);
     border-color: #848484 #fff #fff #848484;
     padding: 7px 11px 5px 13px;
+}
+
+.score-status {
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.score-status.submitting {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.score-status.success {
+    background-color: #e6ffe6;
+    color: #006600;
+}
+
+.score-status.error {
+    background-color: #ffe6e6;
+    color: #cc0000;
+}
+
+.score-submitted-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 102, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    z-index: 1000;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.game-over-message,
+.win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    width: 300px;
+}
+
+.game-over-message h2,
+.win-message h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.win-message h2 {
+    color: #006600;
+}
+
+.game-over-message p,
+.win-message p {
+    margin-bottom: 15px;
+}
+
+.game-over-message button,
+.win-message button {
+    background-color: #4a6ea9;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.game-over-message button:hover,
+.win-message button:hover {
+    background-color: #3a5a8c;
 } 
