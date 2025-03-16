@@ -251,7 +251,7 @@ export default function useGameLogic() {
             text += '\n';
         }
         
-        text += `\nPlay at https://som1shi.github.io/wordsweeper`;
+        text += `\nPlay at https://os32.vercel.app/fames/wordsweeper`;
         return text;
     };
 

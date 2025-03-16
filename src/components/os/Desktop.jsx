@@ -4,6 +4,7 @@ import './Desktop.css';
 import Window from './Window';
 import AboutWindow from './AboutWindow';
 import InternetExplorer from './InternetExplorer';
+import FileExplorer from '../FileExplorer/FileExplorer';
 import Modal from '../Modal';
 import Login from '../Login';
 import Leaderboard from '../Leaderboard';
@@ -18,6 +19,7 @@ import QuantumChess from '../games/QuantumChess/QuantumChess';
 import RotateConnectFour from '../games/RotateConnectFour/RotateConnectFour';
 import Refiner from '../games/Refiner/Refiner';
 import WikiConnect from '../games/WikiConnect/WikiConnect';
+import Notepad from '../Notepad/Notepad';
 
 const Desktop = ({ games }) => {
   const navigate = useNavigate();
@@ -32,11 +34,15 @@ const Desktop = ({ games }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showStickyNotes, setShowStickyNotes] = useState(true);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showFileExplorer, setShowFileExplorer] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
     height: typeof window !== 'undefined' ? window.innerHeight : 768
   });
+  const [showNotepad, setShowNotepad] = useState(false);
+  const [notepadFile, setNotepadFile] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const gameComponents = {
     'minesweeper': Minesweeper,
@@ -207,11 +213,53 @@ const Desktop = ({ games }) => {
     setStartMenuOpen(false);
   };
 
-  
+  const toggleFileExplorer = () => {
+    setShowFileExplorer(!showFileExplorer);
+    setStartMenuOpen(false);
+  };
+
+  const handleNewNotepad = () => {
+    setNotepadFile({
+      id: 'temp',
+      name: 'Untitled.txt',
+      content: '',
+      type: 'text',
+      createdAt: new Date().toISOString(),
+      modifiedAt: new Date().toISOString()
+    });
+    setShowNotepad(true);
+  };
+
+  const handleNotepadSaveState = (hasChanges) => {
+    setHasUnsavedChanges(hasChanges);
+  };
+
+  const handleOpenFile = (file) => {
+    setNotepadFile(file);
+    setShowNotepad(true);
+  };
 
   return (
     <div className="winxp-desktop" onClick={handleDesktopClick}>
       <div className="desktop-icons">
+        <div 
+          className="desktop-icon"
+          onClick={toggleFileExplorer}
+          onDoubleClick={toggleFileExplorer}
+        >
+          <div className="icon">📁</div>
+          <div className="icon-text">My Documents</div>
+        </div>
+
+        <div 
+          className="desktop-icon"
+          onClick={handleNewNotepad}
+          onDoubleClick={handleNewNotepad}
+        >
+          <div className="icon">📝</div>
+          <div className="icon-text">Notepad</div>
+        </div>
+
         {games.map(game => (
           <div 
             key={game.id} 
@@ -339,6 +387,44 @@ const Desktop = ({ games }) => {
         </Window>
       )}
       
+      {showFileExplorer && (
+        <Window
+          title="File Explorer"
+          icon="📁"
+          isActive={true}
+          initialPosition={{ x: 100, y: 100 }}
+          initialSize={{ width: 800, height: 600 }}
+          isMaximized={false}
+          zIndex={1003}
+          onClose={() => setShowFileExplorer(false)}
+        >
+          <FileExplorer onOpenFile={handleOpenFile} />
+        </Window>
+      )}
+      
+      {showNotepad && notepadFile && (
+        <Window
+          title={`${notepadFile.name} - Notepad`}
+          icon="📝"
+          isActive={true}
+          initialPosition={{ x: 120, y: 120 }}
+          initialSize={{ width: 600, height: 400 }}
+          isMaximized={false}
+          zIndex={1004}
+          onClose={() => {
+            setShowNotepad(false);
+            setNotepadFile(null);
+          }}
+        >
+          <Notepad 
+            file={notepadFile}
+            onClose={() => {
+              setShowNotepad(false);
+              setNotepadFile(null);
+            }}
+          />
+        </Window>
+      )}
       
       <div className="taskbar">
         <div 
@@ -356,8 +442,11 @@ const Desktop = ({ games }) => {
           >
             <div className="quick-icon">🌐</div>
           </div>
-          <div className="quick-launch-item">
-            <div className="quick-icon">📧</div>
+          <div 
+            className="quick-launch-item"
+            onClick={toggleFileExplorer}
+          >
+            <div className="quick-icon">📁</div>
           </div>
           <div className="separator"></div>
         </div>
@@ -436,11 +525,15 @@ const Desktop = ({ games }) => {
           
           <div className="start-menu-items">
             <div className="start-menu-left">
-              <div className="start-menu-item" onClick={toggleAboutWindow}>
-                <div className="start-menu-icon">ℹ️</div>
-                <div className="start-menu-text">About</div>
+              <div className="start-menu-item" onClick={toggleFileExplorer}>
+                <div className="start-menu-icon">📁</div>
+                <div className="start-menu-text">My Documents</div>
               </div>
               
+              <div className="start-menu-item" onClick={handleNewNotepad}>
+                <div className="start-menu-icon">📝</div>
+                <div className="start-menu-text">Notepad</div>
+              </div>
               
               <div className="start-menu-separator"></div>
               
@@ -471,6 +564,11 @@ const Desktop = ({ games }) => {
             </div>
             
             <div className="start-menu-right">
+
+            <div className="start-menu-item" onClick={toggleAboutWindow}>
+                <div className="start-menu-icon">ℹ️</div>
+                <div className="start-menu-text">About</div>
+              </div>
             {currentUser ? (
                 <div className="start-menu-item" onClick={toggleUserProfile}>
                   <div className="start-menu-icon">👤</div>

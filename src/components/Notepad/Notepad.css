@@ -1,0 +1,113 @@
+.notepad-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #ECE9D8;
+  font-family: 'Tahoma', sans-serif;
+  overflow: hidden;
+}
+
+.menu-bar {
+  display: flex;
+  background: #FFFFFF;
+  border-bottom: 1px solid #a2a9b1;
+  height: 24px;
+  padding: 0 5px;
+  font-size: 14px;
+  position: relative;
+  z-index: 20;
+}
+
+.menu-item {
+  color: #000;
+  position: relative;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background-color: #316AC5;
+  color: white;
+}
+
+.menu-item:hover .menu-dropdown {
+  display: block;
+}
+
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ECE9D8;
+  border: 1px solid #919B9C;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  min-width: 150px;
+  z-index: 30;
+}
+
+.menu-option {
+  padding: 6px 20px;
+  font-size: 13px;
+  color: #000;
+}
+
+.menu-option:hover {
+  background-color: #316AC5;
+  color: white;
+}
+
+.menu-separator {
+  height: 1px;
+  background: #919B9C;
+  margin: 4px 0;
+}
+
+.editor-container {
+  flex: 1;
+  background: #FFFFFF;
+  border: 1px solid #919B9C;
+  margin: 2px;
+  overflow: auto;
+}
+
+.editor {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  outline: none;
+  padding: 10px;
+  font-family: 'Tahoma', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #000;
+  background: transparent;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  cursor: text;
+}
+
+.editor b {
+  font-weight: bold;
+}
+
+.editor i {
+  font-style: italic;
+}
+
+.editor u {
+  text-decoration: underline;
+}
+
+.status-bar {
+  height: 24px;
+  background: #ECE9D8;
+  border-top: 1px solid #919B9C;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+} 

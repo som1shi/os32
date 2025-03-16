@@ -1,0 +1,45 @@
+.context-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+}
+
+.context-menu {
+  position: fixed;
+  background: #ECE9D8;
+  border: 1px solid #919B9C;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  padding: 2px;
+  min-width: 180px;
+  z-index: 9999;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 20px;
+  cursor: pointer;
+  font-family: 'Tahoma', sans-serif;
+  font-size: 11px;
+  color: #000;
+}
+
+.context-menu-item:hover {
+  background-color: #316AC5;
+  color: white;
+}
+
+.context-menu-icon {
+  margin-right: 8px;
+  width: 16px;
+  text-align: center;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background-color: #919B9C;
+  margin: 3px 2px;
+} 

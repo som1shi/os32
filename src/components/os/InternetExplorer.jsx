@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import './InternetExplorer.css';
 
 const InternetExplorer = () => {
-  const [url, setUrl] = useState('https://html5test.com');
-  const [displayUrl, setDisplayUrl] = useState('https://html5test.com');
-  const [history, setHistory] = useState(['https://html5test.com']);
+  const [url, setUrl] = useState('https://som1shi.github.io');
+  const [displayUrl, setDisplayUrl] = useState('https://som1shi.github.io');
+  const [history, setHistory] = useState(['https://som1shi.github.io']);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
