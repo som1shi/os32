@@ -1,11 +1,11 @@
 .login-container {
-  background-color: #fff;
-  border: 1px solid #0078d7;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(to bottom, #ECE9D8 0%, #E3DFD0 100%);
+  border: 1px solid #0A246A;
+  border-radius: 3px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 400px;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  font-family: 'Tahoma', sans-serif;
   overflow: hidden;
 }
 
@@ -45,23 +45,25 @@
 
 .login-content {
   padding: 20px;
+  background: #ECE9D8;
 }
 
 .login-message {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #333;
+  color: #000;
   text-align: center;
+  font-size: 11px;
 }
 
 .login-error {
-  background-color: #fff0f0;
-  color: #c00;
-  padding: 10px;
-  border-radius: 3px;
+  background-color: #FFF1F1;
+  color: #FF0000;
+  padding: 8px;
+  border: 1px solid #FF0000;
   margin-bottom: 15px;
   text-align: center;
-  font-size: 14px;
+  font-size: 11px;
 }
 
 .google-login-button {
@@ -69,40 +71,41 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 10px 15px;
-  background-color: #fff;
-  color: #444;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  font-size: 14px;
-  font-weight: bold;
+  padding: 6px 12px;
+  background: linear-gradient(to bottom, #FEFEFE 0%, #E3E3E3 100%);
+  color: #000;
+  border: 2px solid;
+  border-color: #FFFFFF #848484 #848484 #FFFFFF;
+  font-size: 11px;
+  font-weight: normal;
   cursor: pointer;
-  transition: background-color 0.2s;
   margin-bottom: 15px;
+  box-shadow: 1px 1px 0px #B5B5B5;
 }
 
 .google-login-button:hover {
-  background-color: #f5f5f5;
+  background: linear-gradient(to bottom, #E3E3E3 0%, #FEFEFE 100%);
 }
 
-.google-login-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.google-login-button:active {
+  border-color: #848484 #FFFFFF #FFFFFF #848484;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .google-icon {
-  margin-right: 10px;
+  margin-right: 8px;
+  filter: grayscale(100%);
 }
 
 .login-footer {
-  border-top: 1px solid #eee;
+  border-top: 1px solid #848484;
   padding-top: 15px;
   text-align: center;
 }
 
 .privacy-note {
-  color: #666;
-  font-size: 12px;
+  color: #000;
+  font-size: 11px;
   margin: 0;
 }
 

@@ -23,14 +23,6 @@ const Login = ({ onClose }) => {
 
   return (
     <div className="login-container">
-      <div className="login-header">
-        <h2>Sign In</h2>
-        {onClose && (
-          <button className="close-button" onClick={onClose}>
-            ✕
-          </button>
-        )}
-      </div>
       
       <div className="login-content">
         <p className="login-message">

@@ -359,11 +359,10 @@
 .custom-word-input::before {
     content: 'Custom Word';
     display: block;
+    top: 0;
     position: absolute;
-    top: -32px;
     left: 0;
     right: 0;
-    height: 32px;
     background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
     color: white;
     font-family: 'VT323', monospace;
@@ -488,6 +487,88 @@
     display: none;
 }
 
+.game-over-message,
+.win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #ECE9D8 0%, #FFFFFF 100%);
+    border: 2px solid;
+    border-color: #848484 #fff #fff #848484;
+    border-radius: 3px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    width: 300px;
+    font-family: 'Tahoma', sans-serif;
+}
+
+.game-over-message::before,
+.win-message::before {
+    content: 'Game Over';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
+    color: white;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 3px 3px 0 0;
+    border: 2px solid;
+    border-color: #848484 #fff #fff #848484;
+    text-align: left;
+}
+
+.win-message::before {
+    content: 'Congratulations!';
+}
+
+.game-over-message h2,
+.win-message h2 {
+    margin: 0 0 15px 0;
+    color: #000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.game-over-message p,
+.win-message p {
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #000;
+}
+
+.game-over-message button,
+.win-message button {
+    padding: 6px 12px;
+    background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
+    border: 2px solid;
+    border-color: #fff #848484 #848484 #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    color: #000;
+    margin: 5px;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.7);
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.game-over-message button:active,
+.win-message button:active {
+    background: linear-gradient(180deg, #DDD 0%, #EEE 45%, #f5f5f5 50%, #EEE 100%);
+    border-color: #848484 #fff #fff #848484;
+    padding: 7px 11px 5px 13px;
+}
+
 .info-modal {
     position: fixed;
     top: 50%;
@@ -502,30 +583,33 @@
     min-width: 300px;
     max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    font-family: 'Tahoma', sans-serif;
+    color: #000;
 }
 
 .info-modal::before {
-    content: 'Game Info';
-    display: block;
+    content: 'How to Play';
+    top: 0;
     position: absolute;
-    top: -32px;
     left: 0;
     right: 0;
-    height: 32px;
     background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
     color: white;
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    padding: 6px 12px;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 8px 12px;
     border-radius: 3px 3px 0 0;
     border: 2px solid;
     border-color: #848484 #fff #fff #848484;
+    text-align: left;
 }
 
 .info-modal h3 {
     margin: 0 0 15px 0;
     font-family: 'Tahoma', sans-serif;
     font-size: 14px;
+    font-weight: bold;
     color: #000;
 }
 
@@ -534,16 +618,14 @@
     font-size: 12px;
     line-height: 1.5;
     margin-bottom: 15px;
+    color: #000;
 }
 
 .info-content ul {
     margin: 10px 0;
     padding-left: 20px;
+    color: #000;
 }
-
-.info-content .blue-text { color: #0000FF; }
-.info-content .orange-text { color: #FF6B00; }
-.info-content .red-text { color: #FF0000; }
 
 .info-modal button {
     padding: 6px 12px;
@@ -558,10 +640,6 @@
     color: #000;
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.7);
     box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
-}
-
-.info-modal button:hover {
-    background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
 }
 
 .info-modal button:active {
@@ -609,52 +687,4 @@
     10% { opacity: 1; transform: translateY(0); }
     80% { opacity: 1; transform: translateY(0); }
     100% { opacity: 0; transform: translateY(-20px); }
-}
-
-.game-over-message,
-.win-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 100;
-    width: 300px;
-}
-
-.game-over-message h2,
-.win-message h2 {
-    margin-top: 0;
-    color: #333;
-}
-
-.win-message h2 {
-    color: #006600;
-}
-
-.game-over-message p,
-.win-message p {
-    margin-bottom: 15px;
-}
-
-.game-over-message button,
-.win-message button {
-    background-color: #4a6ea9;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    margin: 5px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.game-over-message button:hover,
-.win-message button:hover {
-    background-color: #3a5a8c;
 } 

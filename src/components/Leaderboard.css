@@ -1,21 +1,27 @@
 .leaderboard-container {
-  background-color: white;
+  background: #ECE9D8;
+  border: 1px solid #0054E3;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
   position: relative;
   max-width: 600px;
   width: 100%;
+  font-family: "Tahoma", sans-serif;
 }
 
 .leaderboard-container h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 1.5rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+  margin: -20px -20px 20px -20px;
+  padding: 8px 15px;
+  background: linear-gradient(to bottom, #0054E3 0%, #0047C2 45%, #003DAB 46%, #003DAB 54%, #0047C2 55%, #0054E3 100%);
+  color: white;
+  font-size: 13px;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 1px solid #003DAB;
+  font-family: "Tahoma", sans-serif;
+  letter-spacing: 0;
 }
 
 .leaderboard-container h3 {
@@ -43,7 +49,8 @@
   justify-content: center;
   padding: 30px;
   text-align: center;
-  color: #666;
+  color: #1E395B;
+  font-size: 11px;
 }
 
 .leaderboard-loading.updating {
@@ -59,12 +66,12 @@
 }
 
 .loading-spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 2px solid #D8D2BD;
+  border-top: 2px solid #003DAB;
   border-radius: 50%;
-  border-top: 4px solid #3498db;
-  width: 40px;
-  height: 40px;
-  margin-bottom: 15px;
+  width: 20px;
+  height: 20px;
+  margin-bottom: 8px;
   animation: spin 1s linear infinite;
 }
 
@@ -74,31 +81,25 @@
 }
 
 .leaderboard-error {
-  padding: 20px;
+  padding: 12px;
   text-align: center;
-  color: #d9534f;
-  background-color: #f9f2f2;
-  border-radius: 6px;
-  margin: 10px 0;
+  color: #CC0000;
+  background: #FFFFFF;
+  border: 1px solid #CC0000;
+  border-radius: 3px;
+  margin: 8px 0;
+  font-size: 11px;
 }
 
 .retry-button {
-  background-color: #5cb85c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  margin-top: 10px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.retry-button:hover {
-  background-color: #4cae4c;
+  background: linear-gradient(to bottom, #FFFFFF 0%, #ECE9D8 100%);
+  color: #000000;
+  border: 1px solid #7A7A7A;
+  border-radius: 3px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: "Tahoma", sans-serif;
+  box-shadow: 1px 1px 0px #FFFFFF;
 }
 
 .retry-button.small {
@@ -118,13 +119,14 @@
 }
 
 .offline-message {
-  margin-top: 10px;
-  font-style: italic;
-  color: #856404;
-  background-color: #fff3cd;
+  margin-top: 8px;
+  font-style: normal;
+  color: #CC6600;
+  background: #FFFBF0;
   padding: 8px;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  border: 1px solid #CC6600;
+  border-radius: 3px;
+  font-size: 11px;
 }
 
 .connection-status {
@@ -150,29 +152,25 @@
 .score-card {
   display: flex;
   align-items: center;
-  padding: 10px 15px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  background-color: #f9f9f9;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.score-card:hover {
-  transform: translateY(-2px);
-  background-color: #f5f5f5;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  background: white;
+  border: 1px solid #D8D2BD;
+  border-radius: 3px;
 }
 
 .score-card.highlight {
-  background-color: #e8f4fd;
-  border-left: 3px solid #3498db;
+  background: #E8F4FD;
+  border: 1px solid #70C0E7;
 }
 
 .score-rank {
+  font-size: 12px;
   font-weight: bold;
   min-width: 30px;
   text-align: center;
-  font-size: 1.1rem;
-  color: #777;
+  color: #1E395B;
+  font-family: "Tahoma", sans-serif;
 }
 
 .score-info {
@@ -183,30 +181,31 @@
 }
 
 .score-user {
-  display: flex;
-  align-items: center;
-  color: #333;
+  color: #000000;
+  font-size: 12px;
 }
 
 .user-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin-right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  margin-right: 8px;
   object-fit: cover;
+  border: 1px solid #D8D2BD;
 }
 
 .lb-score-value {
   font-weight: bold;
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 12px;
+  color: #1E395B;
+  font-family: "Tahoma", sans-serif;
 }
 
 .score-date {
-  color: #999;
-  font-size: 0.8rem;
-  margin-left: 15px;
-  white-space: nowrap;
+  color: #7A7A7A;
+  font-size: 11px;
+  margin-left: 12px;
+  font-family: "Tahoma", sans-serif;
 }
 
 .top-scores.faded {
@@ -262,7 +261,7 @@
 
 @media (max-width: 600px) {
   .leaderboard-container {
-    padding: 15px;
+    padding: 12px;
   }
   
   .score-date {
@@ -270,12 +269,12 @@
   }
   
   .user-avatar {
-    width: 25px;
-    height: 25px;
-    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
   }
   
   .score-card {
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
 } 

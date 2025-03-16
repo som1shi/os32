@@ -3,7 +3,7 @@ import { getTopScores, getUserBestScore, subscribeToLeaderboard, addConnectionSt
 import { useAuth } from '../firebase/AuthContext';
 import './Leaderboard.css';
 
-const Leaderboard = ({ collectionName, title = 'Leaderboard' }) => {
+const Leaderboard = ({ collectionName }) => {
   const [scores, setScores] = useState([]);
   const [userBestScore, setUserBestScore] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -119,22 +119,9 @@ const Leaderboard = ({ collectionName, title = 'Leaderboard' }) => {
     });
   }, []);
 
-  const getCollectionDisplayName = useCallback(() => {
-    if (collectionName === 'wordsweeper') {
-      return 'WordSweeper';
-    } else if (collectionName.startsWith('refiner-')) {
-      const seconds = collectionName.split('-')[1];
-      return `Refiner (${seconds} seconds)`;
-    }
-    return collectionName;
-  }, [collectionName]);
-
-  const displayTitle = useMemo(() => title || getCollectionDisplayName(), [title, getCollectionDisplayName]);
-
   if (loading) {
     return (
       <div className="leaderboard-container">
-        <h2>{displayTitle}</h2>
         <div className={`leaderboard-loading ${!initialLoad ? 'updating' : ''}`}>
           <div className="loading-spinner"></div>
           <p>{initialLoad ? 'Loading scores' : 'Updating scores'}{retryCount > 0 ? ` (Attempt ${retryCount}/${MAX_RETRIES})` : ''}...</p>
@@ -173,7 +160,6 @@ const Leaderboard = ({ collectionName, title = 'Leaderboard' }) => {
   if (error) {
     return (
       <div className="leaderboard-container">
-        <h2>{displayTitle}</h2>
         <div className="leaderboard-error">
           <p>{error}</p>
           <button 
@@ -195,8 +181,6 @@ const Leaderboard = ({ collectionName, title = 'Leaderboard' }) => {
 
   return (
     <div className="leaderboard-container">
-      <h2>{displayTitle}</h2>
-      
       {!isOnline && (
         <div className="connection-status offline">
           <span>⚠️ Offline Mode</span>
