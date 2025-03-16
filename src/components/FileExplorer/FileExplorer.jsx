@@ -11,10 +11,11 @@ const ERROR_MESSAGES = {
   FILE_EXISTS: 'A file with this name already exists. Do you want to replace it?',
   SIGN_IN_PROMPT: 'You need to sign in to create files. Would you like to sign in now?',
   ERROR_RENAME: 'Error renaming file:',
-  ERROR_DELETE: 'Error deleting file:'
+  ERROR_DELETE: 'Error deleting file:',
+  SAVE_FAILED: 'Error saving file. Please try again later.'
 };
 
-const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initialFileName = '' }) => {
+const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initialFileName = '', currentContent = '' }) => {
   const [files, setFiles] = useState([]);
   const [contextMenu, setContextMenu] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -117,13 +118,19 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     const fileName = validateFileName(saveAsFileName);
     if (!fileName) return;
 
-    if (files.some(file => file.name === fileName)) {
+    const existingFile = files.find(file => file.name === fileName);
+    if (existingFile) {
       const overwrite = window.confirm(ERROR_MESSAGES.FILE_EXISTS);
       if (!overwrite) return;
     }
 
-    await onSaveAs(fileName);
-  }, [currentUser, files, onSaveAs, saveAsFileName, validateFileName]);
+    try {
+      await onSaveAs(fileName, currentContent);
+    } catch (error) {
+      console.error('Error in Save As:', error);
+      alert(ERROR_MESSAGES.SAVE_FAILED);
+    }
+  }, [currentUser, files, onSaveAs, saveAsFileName, validateFileName, currentContent]);
 
   const handleContextMenu = useCallback((e, file = null) => {
     e.preventDefault();

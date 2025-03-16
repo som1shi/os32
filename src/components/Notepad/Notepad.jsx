@@ -24,8 +24,11 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
   const isInitialMount = useRef(true);
 
   const getCurrentContent = useCallback(() => {
-    if (!editorRef.current) return content;
-    return editorRef.current.innerHTML || '';
+    if (editorRef.current) {
+      const content = editorRef.current.innerHTML;
+      return content || '';
+    }
+    return content;
   }, [content]);
 
   const validateFileName = useCallback((fileName) => {
@@ -58,6 +61,10 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
     }
 
     if (!currentFile) {
+      if (editorRef.current) {
+        const currentContent = editorRef.current.innerHTML;
+        setContent(currentContent);
+      }
       setShowSaveDialog(true);
       return;
     }
@@ -77,7 +84,15 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
     }
   }, [currentUser, currentFile, getCurrentContent]);
 
-  const handleSaveAs = useCallback(async (fileName) => {
+  const handleShowSaveDialog = useCallback(() => {
+    if (editorRef.current) {
+      const currentContent = editorRef.current.innerHTML;
+      setContent(currentContent);
+    }
+    setShowSaveDialog(true);
+  }, []);
+
+  const handleSaveAs = useCallback(async (fileName, contentFromDialog) => {
     if (!fileName) {
       setShowSaveDialog(false);
       return;
@@ -90,23 +105,23 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
 
     try {
       const validFileName = validateFileName(fileName);
-      const newContent = getCurrentContent();
+      const contentToSave = contentFromDialog || getCurrentContent();
       
       const newFile = await createFile(currentUser.uid, {
         name: validFileName,
-        content: newContent,
+        content: contentToSave,
         type: 'text',
         createdAt: new Date().toISOString(),
         modifiedAt: new Date().toISOString()
       });
 
       setCurrentFile(newFile);
-      setContent(newContent);
+      setContent(contentToSave);
       setHasUnsavedChanges(false);
       setShowSaveDialog(false);
 
       if (editorRef.current) {
-        editorRef.current.innerHTML = newContent;
+        editorRef.current.innerHTML = contentToSave;
       }
     } catch (error) {
       console.error('Error saving file:', error);
@@ -173,6 +188,7 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
             mode="saveAs"
             onSaveAs={handleSaveAs}
             initialFileName={DEFAULT_FILE_NAME}
+            currentContent={getCurrentContent()}
           />
         </div>
       </div>
@@ -186,7 +202,7 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
           <span>File</span>
           <div className="menu-dropdown">
             <button onClick={handleSave}>Save</button>
-            <button onClick={() => setShowSaveDialog(true)}>Save As...</button>
+            <button onClick={handleShowSaveDialog}>Save As...</button>
             <div className="menu-separator" />
             <button onClick={handleClose}>Exit</button>
           </div>
