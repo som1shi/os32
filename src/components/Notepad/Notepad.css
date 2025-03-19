@@ -146,10 +146,11 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
 }
 
 .save-dialog {
@@ -159,7 +160,7 @@
   background: #ECE9D8;
   border: 3px solid #0054E3;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: 2001;
   display: flex;
   flex-direction: column;
 }
@@ -202,7 +203,6 @@
   border-color: #0078D7;
 }
 
-/* Windows XP style buttons */
 .save-dialog .file-explorer button {
   padding: 6px 12px;
   background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);

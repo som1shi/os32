@@ -105,7 +105,7 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
 
     try {
       const validFileName = validateFileName(fileName);
-      const contentToSave = contentFromDialog || getCurrentContent();
+      const contentToSave = contentFromDialog || (editorRef.current ? editorRef.current.innerHTML : content);
       
       const newFile = await createFile(currentUser.uid, {
         name: validFileName,
@@ -119,15 +119,11 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
       setContent(contentToSave);
       setHasUnsavedChanges(false);
       setShowSaveDialog(false);
-
-      if (editorRef.current) {
-        editorRef.current.innerHTML = contentToSave;
-      }
     } catch (error) {
       console.error('Error saving file:', error);
       alert(error.message || ERROR_MESSAGES.SAVE_FAILED);
     }
-  }, [currentUser, getCurrentContent, validateFileName]);
+  }, [currentUser, validateFileName, content]);
 
   const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -181,17 +177,65 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
 
   if (showSaveDialog) {
     return (
-      <div className="save-dialog-overlay">
-        <div className="save-dialog">
-          <div className="save-dialog-title">Save As</div>
-          <FileExplorer
-            mode="saveAs"
-            onSaveAs={handleSaveAs}
-            initialFileName={DEFAULT_FILE_NAME}
-            currentContent={getCurrentContent()}
-          />
+      <>
+        <div className="notepad-content">
+          <div className="menu-bar">
+            <div className="menu-item">
+              <span>File</span>
+              <div className="menu-dropdown">
+                <button onClick={handleSave}>Save</button>
+                <button onClick={handleShowSaveDialog}>Save As...</button>
+                <div className="menu-separator" />
+                <button onClick={handleClose}>Exit</button>
+              </div>
+            </div>
+            <div className="menu-item">
+              <span>Format</span>
+              <div className="menu-dropdown">
+                <button onClick={() => handleFormat('bold')}>
+                  Bold (Ctrl+B)
+                </button>
+                <button onClick={() => handleFormat('underline')}>
+                  Underline (Ctrl+U)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="editor-container">
+            <div
+              ref={editorRef}
+              className="editor"
+              contentEditable
+              onInput={handleInput}
+              spellCheck={false}
+              role="textbox"
+              aria-multiline="true"
+              aria-label="Notepad editor"
+            />
+          </div>
+
+          <div className="status-bar">
+            <div className="status-item">
+              {hasUnsavedChanges ? 'Unsaved Changes' : 'Saved'}
+            </div>
+            <div className="status-item">
+              {currentFile && `Last modified: ${new Date(currentFile.modifiedAt).toLocaleString()}`}
+            </div>
+          </div>
         </div>
-      </div>
+        <div className="save-dialog-overlay">
+          <div className="save-dialog">
+            <div className="save-dialog-title">Save As</div>
+            <FileExplorer
+              mode="saveAs"
+              onSaveAs={handleSaveAs}
+              initialFileName={currentFile?.name || DEFAULT_FILE_NAME}
+              currentContent={editorRef.current ? editorRef.current.innerHTML : content}
+            />
+          </div>
+        </div>
+      </>
     );
   }
 

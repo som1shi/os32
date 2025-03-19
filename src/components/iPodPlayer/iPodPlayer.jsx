@@ -20,8 +20,8 @@ const IPodPlayer = ({ onClose }) => {
   
   const audioRef = useRef(null);
   
-  const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-  const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+  const CLIENT_ID = import.meta.env.SPOTIFY_CLIENT_ID;
+  const REDIRECT_URI = import.meta.env.REDIRECT_URI;
   const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
   const RESPONSE_TYPE = "token";
   const SCOPES = 'user-read-private user-read-email streaming user-library-read user-modify-playback-state';
