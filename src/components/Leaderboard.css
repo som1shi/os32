@@ -327,11 +327,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
 }
 
 .score-user {
+  display: flex;
+  align-items: center;
   color: #000000;
   font-size: 12px;
+  min-width: 0;
+  max-width: 70%;
 }
 
 .user-avatar {
@@ -341,6 +346,14 @@
   margin-right: 8px;
   object-fit: cover;
   border: 1px solid #D8D2BD;
+  flex-shrink: 0;
+}
+
+.score-user span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .lb-score-value {
@@ -348,6 +361,8 @@
   font-size: 12px;
   color: #1E395B;
   font-family: "Tahoma", sans-serif;
+  margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .score-date {
@@ -355,6 +370,7 @@
   font-size: 11px;
   margin-left: 12px;
   font-family: "Tahoma", sans-serif;
+  flex-shrink: 0;
 }
 
 .top-scores.faded {

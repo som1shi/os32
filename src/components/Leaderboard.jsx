@@ -4,9 +4,9 @@ import { useAuth } from '../firebase/AuthContext';
 import './Leaderboard.css';
 
 const GAMES = [
-  { id: 'colormania', name: 'Color Mania' },
   { id: 'refiner', name: 'Refiner' },
-  { id: 'wordsweeper', name: 'Word Sweeper' },
+  { id: 'colormania', name: 'Color Mania' },
+  { id: 'wordsweeper', name: 'Word Sweeper' }
 ];
 
 const REFINER_TIMES = [
@@ -18,8 +18,8 @@ const REFINER_TIMES = [
 ];
 
 const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
-  const [selectedGame, setSelectedGame] = useState(initialGame || 'wordsweeper');
-  const [selectedTime, setSelectedTime] = useState(initialTime || '30');
+  const [selectedGame, setSelectedGame] = useState(initialGame || 'refiner');
+  const [selectedTime, setSelectedTime] = useState(initialTime || '60');
   const [scores, setScores] = useState([]);
   const [userBestScore, setUserBestScore] = useState(null);
   const [loading, setLoading] = useState(true);
