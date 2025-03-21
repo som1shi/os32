@@ -30,7 +30,8 @@ const VALID_COLLECTIONS = [
   'refiner-180',
   'refiner-300',
   'refiner-600',
-  'wordsweeper'
+  'wordsweeper',
+  'colormania'
 ];
 
 if (typeof window !== 'undefined') {

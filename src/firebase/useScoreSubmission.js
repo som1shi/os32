@@ -10,6 +10,7 @@ const COLLECTION_MAPPING = {
   'refiner-300': 'refiner-300',
   'refiner-600': 'refiner-600',
   'refiner': 'refiner-30',
+  'colormania': 'colormania'
 };
 
 /**

@@ -10,6 +10,7 @@ import QuantumChess from './components/games/QuantumChess/QuantumChess';
 import RotateConnectFour from './components/games/RotateConnectFour/RotateConnectFour';
 import Refiner from './components/games/Refiner/Refiner';
 import WikiConnect from './components/games/WikiConnect/WikiConnect';
+import ColorMania from './components/games/ColorMania/ColorMania';
 
 function App() {
   const games = [
@@ -43,6 +44,12 @@ function App() {
       icon: '🔗',
       description: 'Navigate through Wikipedia to connect two random articles.'
     },
+    { 
+      id: 'colormania', 
+      title: 'ColorMania', 
+      icon: '🎨',
+      description: 'Match colors of adjacent tiles to fill the board and earn points.'
+    },
   ];
 
   return (
@@ -54,6 +61,7 @@ function App() {
         <Route path="/game/rotateconnectfour" element={<RotateConnectFour />} />
         <Route path="/game/refiner" element={<Refiner />} />
         <Route path="/game/wikiconnect" element={<WikiConnect />} />
+        <Route path="/game/colormania" element={<ColorMania />} />
       </Routes>
     </AuthProvider>
   );
