@@ -1,5 +1,5 @@
-import React from 'react';
-import { PENALTY_TIME } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { PENALTY_TIME, GRID_WIDTH, GRID_HEIGHT } from '../constants';
 import useMatchFinder from '../hooks/useMatchFinder';
 import useAnimations from '../hooks/useAnimations';
 
@@ -13,6 +13,53 @@ const GameBoard = ({
 }) => {
   const { findMatchingDirections } = useMatchFinder();
   const { createFallingAnimation, createScorePopup } = useAnimations();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [flattenedCells, setFlattenedCells] = useState([]);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  useEffect(() => {
+    const cells = [];
+    
+    if (isMobile) {
+      for (let colIndex = 0; colIndex < GRID_WIDTH; colIndex++) {
+        for (let rowIndex = 0; rowIndex < GRID_HEIGHT; rowIndex++) {
+          cells.push({
+            key: `cell-${rowIndex}-${colIndex}`,
+            className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
+            rowIndex,
+            colIndex,
+            color: grid[rowIndex][colIndex],
+            gridRow: colIndex + 1,
+            gridColumn: GRID_HEIGHT - rowIndex
+          });
+        }
+      }
+    } else {
+      for (let rowIndex = 0; rowIndex < GRID_HEIGHT; rowIndex++) {
+        for (let colIndex = 0; colIndex < GRID_WIDTH; colIndex++) {
+          cells.push({
+            key: `cell-${rowIndex}-${colIndex}`,
+            className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
+            rowIndex,
+            colIndex,
+            color: grid[rowIndex][colIndex],
+            gridRow: rowIndex + 1,
+            gridColumn: colIndex + 1
+          });
+        }
+      }
+    }
+    
+    setFlattenedCells(cells);
+  }, [grid, isMobile]);
   
   const handleCellClick = (rowIndex, colIndex) => {
     if (gameOver || !gameStarted || grid[rowIndex][colIndex] !== null) return;
@@ -38,20 +85,6 @@ const GameBoard = ({
     createScorePopup(rowIndex, colIndex, pointsGained);
   };
 
-  // Flatten the grid for rendering in CSS grid
-  const flattenedCells = [];
-  for (let rowIndex = 0; rowIndex < grid.length; rowIndex++) {
-    for (let colIndex = 0; colIndex < grid[rowIndex].length; colIndex++) {
-      flattenedCells.push({
-        key: `cell-${rowIndex}-${colIndex}`,
-        className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
-        rowIndex,
-        colIndex,
-        color: grid[rowIndex][colIndex]
-      });
-    }
-  }
-
   return (
     <div className="cm-game-board">
       {flattenedCells.map(cell => (
@@ -61,6 +94,10 @@ const GameBoard = ({
           data-row={cell.rowIndex}
           data-col={cell.colIndex}
           onClick={() => handleCellClick(cell.rowIndex, cell.colIndex)}
+          style={isMobile ? { 
+            gridRow: cell.gridRow, 
+            gridColumn: cell.gridColumn
+          } : undefined}
         />
       ))}
     </div>

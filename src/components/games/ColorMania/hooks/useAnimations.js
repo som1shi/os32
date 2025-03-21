@@ -56,13 +56,37 @@ const useAnimations = () => {
     totalPopup.className = 'cm-score-popup';
     totalPopup.innerText = `+${pointsGained}`;
     totalPopup.style.position = 'fixed';
-    totalPopup.style.top = `${boardRect.top + rowIndex * 30}px`;
-    totalPopup.style.left = `${boardRect.left + colIndex * 30}px`;
+    
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+      const cellElement = document.querySelector(`.cm-cell[data-row="${rowIndex}"][data-col="${colIndex}"]`);
+      
+      if (cellElement) {
+        const cellRect = cellElement.getBoundingClientRect();
+        totalPopup.style.top = `${cellRect.top - 20}px`;
+        totalPopup.style.left = `${cellRect.left + (cellRect.width / 2)}px`;
+      } else {
+        const cellWidth = boardRect.width / 15;
+        const cellHeight = boardRect.height / 24;
+        
+        totalPopup.style.top = `${boardRect.top + colIndex * cellHeight}px`;
+        totalPopup.style.left = `${boardRect.left + (15 - rowIndex) * cellWidth}px`;
+      }
+    } else {
+      const cellWidth = boardRect.width / 24;
+      const cellHeight = boardRect.height / 15;
+      totalPopup.style.top = `${boardRect.top + rowIndex * cellHeight}px`;
+      totalPopup.style.left = `${boardRect.left + colIndex * cellWidth}px`;
+    }
+    
     totalPopup.style.color = '#FFFFFF';
     totalPopup.style.fontSize = '32px';
     totalPopup.style.fontWeight = 'bold';
     totalPopup.style.zIndex = '250';
     totalPopup.style.textShadow = '0 0 6px #000';
+    totalPopup.style.textAlign = 'center';
+    totalPopup.style.transform = 'translate(-50%, -50%)';
     
     document.body.appendChild(totalPopup);
     
