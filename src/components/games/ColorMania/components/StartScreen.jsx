@@ -4,10 +4,9 @@ const StartScreen = ({ onStart }) => {
   return (
     <div className="cm-start-screen">
       <h2>ColorMania</h2>
-      <p>Click an empty tile to remove matching colored tiles.</p>
-      <p>When you click on a blank tile, the game checks the first colored tile in each direction (up, down, left, right).</p>
-      <p>If at least 2 tiles of the same color are found, they will be removed (become blank).</p>
-      <p>You have 120 seconds to play. Each incorrect click (less than 2 matching tiles) reduces your time by 10 seconds.</p>
+      <p>Click on a blank space to reveal matching colored tiles! If the color of the blank area lines up with its neighbors vertically or horizontally, you'll collect those tiles.</p> 
+      <p>Earn 1 point for each tile and watch your score climb!</p> 
+      <p>You have 120 seconds to play, but be cautious—every incorrect click costs you 10 seconds!</p>
       <button onClick={onStart}>Start Game</button>
     </div>
   );
