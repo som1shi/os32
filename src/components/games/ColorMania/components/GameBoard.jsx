@@ -38,20 +38,30 @@ const GameBoard = ({
     createScorePopup(rowIndex, colIndex, pointsGained);
   };
 
+  // Flatten the grid for rendering in CSS grid
+  const flattenedCells = [];
+  for (let rowIndex = 0; rowIndex < grid.length; rowIndex++) {
+    for (let colIndex = 0; colIndex < grid[rowIndex].length; colIndex++) {
+      flattenedCells.push({
+        key: `cell-${rowIndex}-${colIndex}`,
+        className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
+        rowIndex,
+        colIndex,
+        color: grid[rowIndex][colIndex]
+      });
+    }
+  }
+
   return (
     <div className="cm-game-board">
-      {grid.map((row, rowIndex) => (
-        <div key={`row-${rowIndex}`} className="cm-row">
-          {row.map((cell, colIndex) => (
-            <div
-              key={`cell-${rowIndex}-${colIndex}`}
-              className={`cm-cell ${cell || 'empty'}`}
-              data-row={rowIndex}
-              data-col={colIndex}
-              onClick={() => handleCellClick(rowIndex, colIndex)}
-            />
-          ))}
-        </div>
+      {flattenedCells.map(cell => (
+        <div
+          key={cell.key}
+          className={cell.className}
+          data-row={cell.rowIndex}
+          data-col={cell.colIndex}
+          onClick={() => handleCellClick(cell.rowIndex, cell.colIndex)}
+        />
       ))}
     </div>
   );
