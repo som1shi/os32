@@ -57,6 +57,7 @@ const useGameState = () => {
         if (prevTime <= 1) {
           clearInterval(timer);
           setGameOver(true);
+          submitScore(score);
           return 0;
         }
         return prevTime - 1;
@@ -64,7 +65,7 @@ const useGameState = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, score, submitScore]);
 
   useEffect(() => {
     if (timeLeft === 0 && !gameOver) {

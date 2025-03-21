@@ -237,7 +237,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
     const scoresQuery = query(
       collection(db, validatedCollection),
       orderBy('score', 'desc'),
-      limit(limitCount * 2)
+      limit(limitCount)
     );
     
     const querySnapshot = await getDocs(scoresQuery);
@@ -287,7 +287,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       timestamp: Date.now()
     });
     
-    return scores.slice(0, limitCount);
+    return scores;
   } catch (error) {
     console.error('Error fetching top scores:', error);
     
@@ -435,7 +435,7 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
         timestamp: Date.now()
       });
       
-      callback(scores.slice(0, limitCount));
+      callback(scores);
     }, (error) => {
       console.error('Snapshot error:', error);
       

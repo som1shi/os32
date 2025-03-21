@@ -40,6 +40,8 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
   const fetchUserBestScore = useCallback(async () => {
     if (!currentUser) return;
     
+    setUserBestScore(null);
+    
     try {
       const bestScore = await getUserBestScore(currentUser.uid, getCollectionName());
       setUserBestScore(bestScore);
@@ -51,11 +53,13 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
   const handleGameChange = useCallback((e) => {
     setSelectedGame(e.target.value);
     setLoading(true);
+    setUserBestScore(null);
   }, []);
 
   const handleTimeChange = useCallback((e) => {
     setSelectedTime(e.target.value);
     setLoading(true);
+    setUserBestScore(null);
   }, []);
 
   const fetchScores = useCallback(async (forceRefresh = false) => {
