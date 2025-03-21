@@ -22,7 +22,7 @@ let connectionStateListeners = [];
 
 const userCache = new Map();
 const leaderboardCache = new Map();
-const CACHE_EXPIRATION = 60000;
+const CACHE_EXPIRATION = 300000;
 
 const VALID_COLLECTIONS = [
   'refiner-30',
@@ -135,6 +135,17 @@ const batchFetchUserData = async (userIds) => {
   return userIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
 };
 
+const getCachedLeaderboard = (cacheKey, limitCount) => {
+  const cachedData = leaderboardCache.get(cacheKey);
+  if (cachedData) {
+    return {
+      scores: [...cachedData.scores].slice(0, limitCount),
+      timestamp: cachedData.timestamp
+    };
+  }
+  return null;
+};
+
 export const submitScore = async (userId, collectionName, score, gameDetails = {}) => {
   try {
     const validatedCollection = validateCollection(collectionName);
@@ -204,15 +215,23 @@ export const submitScore = async (userId, collectionName, score, gameDetails = {
   }
 };
 
-export const getTopScores = async (collectionName, limitCount = 10) => {
+export const getTopScores = async (collectionName, limitCount = 5, forceRefresh = false) => {
   try {
     const validatedCollection = validateCollection(collectionName);
     
     const cacheKey = validatedCollection;
-    const cachedData = leaderboardCache.get(cacheKey);
+    const cachedData = getCachedLeaderboard(cacheKey, limitCount);
     
-    if (cachedData && (Date.now() - cachedData.timestamp) < CACHE_EXPIRATION) {
-      return cachedData.scores.slice(0, limitCount);
+    if (!forceRefresh && cachedData && (Date.now() - cachedData.timestamp) < CACHE_EXPIRATION) {
+      return cachedData.scores;
+    }
+    
+    if (!forceRefresh && cachedData) {
+      setTimeout(() => {
+        getTopScores(collectionName, limitCount, true)
+          .catch(err => console.error('Background refresh failed:', err));
+      }, 100);
+      return cachedData.scores;
     }
     
     const scoresQuery = query(
@@ -245,11 +264,20 @@ export const getTopScores = async (collectionName, limitCount = 10) => {
         userCache.get(scoreData.userId) || { displayName: scoreData.playerName || 'Unknown Player' } :
         { displayName: scoreData.playerName || 'Unknown Player' };
       
+      let photoURL = userData.photoURL || null;
+      if (photoURL) {
+        if (photoURL.includes('=s96-c')) {
+          photoURL = photoURL.replace('=s96-c', '=s32-c');
+        } else if (photoURL.includes('&s96-c')) {
+          photoURL = photoURL.replace('&s96-c', '&s32-c');
+        }
+      }
+      
       return {
         ...scoreData,
         user: {
           displayName: userData.displayName || scoreData.playerName || 'Unknown Player',
-          photoURL: userData.photoURL
+          photoURL: photoURL
         }
       };
     });
@@ -261,6 +289,14 @@ export const getTopScores = async (collectionName, limitCount = 10) => {
     
     return scores.slice(0, limitCount);
   } catch (error) {
+    console.error('Error fetching top scores:', error);
+    
+    const cacheKey = validateCollection(collectionName);
+    const cachedData = getCachedLeaderboard(cacheKey, limitCount);
+    if (cachedData) {
+      return cachedData.scores;
+    }
+    
     throw error;
   }
 };
@@ -330,26 +366,30 @@ export const getUserRecentScores = async (userId, limitCount = 10) => {
   }
 };
 
-export const subscribeToLeaderboard = (collectionName, limitCount = 10, callback) => {
+export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback) => {
   try {
     const validatedCollection = validateCollection(collectionName);
     
     const cacheKey = validatedCollection;
-    const cachedData = leaderboardCache.get(cacheKey);
+    const cachedData = getCachedLeaderboard(cacheKey, limitCount);
     
-    if (cachedData && (Date.now() - cachedData.timestamp) < CACHE_EXPIRATION) {
+    if (cachedData) {
       setTimeout(() => {
-        callback(cachedData.scores.slice(0, limitCount));
+        callback(cachedData.scores);
       }, 0);
     }
     
     const scoresQuery = query(
       collection(db, validatedCollection),
       orderBy('score', 'desc'),
-      limit(limitCount * 2)
+      limit(limitCount)
     );
     
     return onSnapshot(scoresQuery, async (snapshot) => {
+      if (snapshot.empty && cachedData) {
+        return;
+      }
+      
       const userIds = [];
       const scoresData = [];
       
@@ -372,11 +412,20 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 10, callback
           userCache.get(scoreData.userId) || { displayName: scoreData.playerName || 'Unknown Player' } :
           { displayName: scoreData.playerName || 'Unknown Player' };
         
+        let photoURL = userData.photoURL || null;
+        if (photoURL) {
+          if (photoURL.includes('=s96-c')) {
+            photoURL = photoURL.replace('=s96-c', '=s32-c');
+          } else if (photoURL.includes('&s96-c')) {
+            photoURL = photoURL.replace('&s96-c', '&s32-c');
+          }
+        }
+        
         return {
           ...scoreData,
           user: {
             displayName: userData.displayName || scoreData.playerName || 'Unknown Player',
-            photoURL: userData.photoURL
+            photoURL: photoURL
           }
         };
       });
@@ -388,9 +437,17 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 10, callback
       
       callback(scores.slice(0, limitCount));
     }, (error) => {
-      callback([]);
+      console.error('Snapshot error:', error);
+      
+      const cachedData = getCachedLeaderboard(cacheKey, limitCount);
+      if (cachedData) {
+        callback(cachedData.scores);
+      } else {
+        callback([]);
+      }
     });
   } catch (error) {
+    console.error('Subscribe error:', error);
     return () => {};
   }
 }; 

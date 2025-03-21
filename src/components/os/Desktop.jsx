@@ -10,7 +10,6 @@ import Login from '../Login';
 import Leaderboard from '../Leaderboard';
 import StickyNote from './StickyNote';
 import UserProfile from '../UserProfile';
-import RefinerLeaderboardToggle from '../RefinerLeaderboardToggle';
 import IPodPlayer from '../iPodPlayer';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
@@ -50,7 +49,6 @@ const Desktop = ({ games }) => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showStickyNotes, setShowStickyNotes] = useState(true);
-  const [showRefinerLeaderboard, setShowRefinerLeaderboard] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
   const [windowSize, setWindowSize] = useState(INITIAL_WINDOW_SIZE);
   const [showIPodPlayer, setShowIPodPlayer] = useState(false);
@@ -283,7 +281,7 @@ const Desktop = ({ games }) => {
       {showStickyNotes && (
         <>
           <StickyNote 
-            title="WordSweeper Leaderboard" 
+            title="Leaderboard" 
             initialPosition={{ x: windowSize.width - 320, y: 50 }}
             color="#ffff88"
             onClose={() => setShowStickyNotes(false)}
@@ -291,12 +289,6 @@ const Desktop = ({ games }) => {
             <Leaderboard collectionName="wordsweeper" title="WordSweeper Top Scores" />
           </StickyNote>
           
-          {showRefinerLeaderboard && (
-            <RefinerLeaderboardToggle
-              initialPosition={{ x: windowSize.width - 320, y: 350 }}
-              onClose={() => setShowRefinerLeaderboard(false)}
-            />
-          )}
         </>
       )}
       

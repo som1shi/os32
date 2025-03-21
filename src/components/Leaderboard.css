@@ -91,7 +91,90 @@
   font-size: 11px;
 }
 
-.retry-button {
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.leaderboard-header h3 {
+  margin: 0;
+}
+
+.leaderboard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #D8D2BD;
+  padding-bottom: 15px;
+}
+
+.select-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-container label {
+  font-size: 12px;
+  color: #555;
+  font-weight: bold;
+}
+
+.select-container select {
+  font-family: "Tahoma", sans-serif;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid #7A7A7A;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #FFFFFF 0%, #ECE9D8 100%);
+  min-width: 120px;
+}
+
+/* Windows XP style dropdown */
+.winxp-dropdown {
+  border: 1px solid #7B9EBD !important;
+  background: #FFFFFF !important;
+  color: #000000;
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px !important;
+  padding: 3px 5px !important;
+  border-radius: 2px !important;
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4' viewBox='0 0 8 4'%3E%3Cpath fill='%23003399' d='M0 0h8L4 4z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  padding-right: 24px !important;
+}
+
+.winxp-dropdown:hover {
+  border-color: #3C7FB1 !important;
+}
+
+.winxp-dropdown:focus {
+  outline: none;
+  border-color: #2F5376 !important;
+}
+
+.winxp-dropdown option {
+  background-color: white;
+  color: black;
+  font-size: 11px;
+}
+
+.select-container select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.refresh-button {
   background: linear-gradient(to bottom, #FFFFFF 0%, #ECE9D8 100%);
   color: #000000;
   border: 1px solid #7A7A7A;
@@ -100,6 +183,72 @@
   font-size: 11px;
   font-family: "Tahoma", sans-serif;
   box-shadow: 1px 1px 0px #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Windows XP style button */
+.winxp-button {
+  background: linear-gradient(to bottom, #EFF7FF 0%, #B9D6FB 50%, #92C3FE 51%, #BCDAFF 100%) !important;
+  color: #000000;
+  border: 1px solid #3C7FB1 !important;
+  border-radius: 3px;
+  padding: 3px 10px !important;
+  font-size: 11px;
+  font-family: "Tahoma", sans-serif;
+  box-shadow: none !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.winxp-button:hover {
+  background: linear-gradient(to bottom, #F9FCFF 0%, #CAE3FF 50%, #A6D2FF 51%, #D1E8FF 100%) !important;
+}
+
+.winxp-button:active {
+  background: linear-gradient(to bottom, #D8EFFD 0%, #C5DEFA 50%, #A5C4E8 51%, #BCDAFF 100%) !important;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.winxp-button:disabled {
+  background: linear-gradient(to bottom, #F5F5F5 0%, #E5E5E5 50%, #D5D5D5 51%, #E5E5E5 100%) !important;
+  border-color: #A0A0A0 !important;
+  color: #707070;
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.winxp-button.small {
+  padding: 2px 6px !important;
+  font-size: 10px;
+}
+
+.refresh-button:hover {
+  background: linear-gradient(to bottom, #FFFFFF 0%, #F0EFE7 100%);
+}
+
+.refresh-button:active {
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.retry-button,
+.refresh-button {
+  background: linear-gradient(to bottom, #FFFFFF 0%, #ECE9D8 100%);
+  color: #000000;
+  border: 1px solid #7A7A7A;
+  border-radius: 3px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: "Tahoma", sans-serif;
+  box-shadow: 1px 1px 0px #FFFFFF;
+  cursor: pointer;
 }
 
 .retry-button.small {
