@@ -94,7 +94,6 @@ const IPodPlayer = memo(({ onClose }) => {
   const getArtistTracks = useCallback(async (artistId, artistName) => {
     setIsLoading(true);
     try {
-      // First try direct lookup with artist ID
       const searchUrl = `https://itunes.apple.com/lookup?id=${artistId}&entity=song&limit=50`;
       
       const response = await fetch(searchUrl);
@@ -103,7 +102,6 @@ const IPodPlayer = memo(({ onClose }) => {
       
       const data = await response.json();
       
-      // Filter to include only songs by this artist (exact name match)
       const exactArtistName = artistName.toLowerCase().trim();
       let tracks = data.results
         .filter(item => 
@@ -119,7 +117,6 @@ const IPodPlayer = memo(({ onClose }) => {
           type: 'track'
         }));
       
-      // If no tracks found with lookup, try searching directly by artist name
       if (tracks.length < 3) {
         const backupUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&attribute=artistTerm&limit=50`;
         
@@ -128,7 +125,6 @@ const IPodPlayer = memo(({ onClose }) => {
         if (backupResponse.ok) {
           const backupData = await backupResponse.json();
           
-          // Filter to include only songs by this artist (exact name match)
           const backupTracks = backupData.results
             .filter(item => 
               item.artistName.toLowerCase().trim() === exactArtistName)
@@ -148,7 +144,6 @@ const IPodPlayer = memo(({ onClose }) => {
         }
       }
       
-      // If still no tracks found with exact match, use less strict matching
       if (tracks.length === 0) {
         const fallbackUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&limit=25`;
         
@@ -206,7 +201,6 @@ const IPodPlayer = memo(({ onClose }) => {
                 })
                 .catch((error) => {
                   console.error("Audio playback error:", error);
-                  // Handle autoplay restrictions
                   if (error.name === "NotAllowedError") {
                     setAudioError("Click play to start (autoplay restricted)");
                   } else {
@@ -288,8 +282,6 @@ const IPodPlayer = memo(({ onClose }) => {
     try {
       await searchItunesAPI(searchQuery, activeMenu === 'artists' ? 'artist' : 'song');
       
-      // Clear search query after search is performed
-      // This gives better feedback to the user that their search was processed
       setSearchQuery('');
     } catch (error) {
       console.error("Search error:", error);
@@ -326,7 +318,6 @@ const IPodPlayer = memo(({ onClose }) => {
   }, []);
 
   const handleMenuClick = useCallback((menu) => {
-    // Clear search query and results when changing pages
     if (menu !== activeMenu) {
       if ((activeMenu === 'songs' || activeMenu === 'artists') && 
           (menu !== 'songs' && menu !== 'artists')) {
@@ -342,7 +333,6 @@ const IPodPlayer = memo(({ onClose }) => {
   }, [activeMenu]);
 
   const handleBackButton = useCallback(() => {
-    // When going back from search screens, clear search query and results
     if (activeMenu === 'songs' || activeMenu === 'artists') {
       setSearchQuery('');
       setPlaylist([]);
@@ -355,7 +345,6 @@ const IPodPlayer = memo(({ onClose }) => {
     await getArtistTracks(artist.id, artist.name);
   }, [getArtistTracks]);
 
-  // Clean up audio resources when component unmounts
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -371,7 +360,6 @@ const IPodPlayer = memo(({ onClose }) => {
     }
   }, [handleSearch]);
 
-  // Memoize song and artist items to improve rendering performance
   const renderArtistItem = useCallback((artist) => (
     <div 
       key={artist.id} 
