@@ -22,7 +22,8 @@ let connectionStateListeners = [];
 
 const userCache = new Map();
 const leaderboardCache = new Map();
-const CACHE_EXPIRATION = 300000;
+const CACHE_EXPIRATION = 120000;
+const FETCH_TIMEOUT = 10000;
 
 const VALID_COLLECTIONS = [
   'refiner-30',
@@ -84,55 +85,81 @@ const safeTimestamp = (scoreData) => {
 };
 
 const batchFetchUserData = async (userIds) => {
-  const uncachedUserIds = userIds.filter(id => !userCache.has(id));
+  if (!userIds || userIds.length === 0) {
+    return [];
+  }
+  
+  const uniqueUserIds = [...new Set(userIds)];
+  
+  const uncachedUserIds = uniqueUserIds.filter(id => !userCache.has(id));
   
   if (uncachedUserIds.length === 0) {
-    return userIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
+    return uniqueUserIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
   }
   
   const batchSize = 10;
+  
+  const fetchPromises = [];
   
   for (let i = 0; i < uncachedUserIds.length; i += batchSize) {
     const batch = uncachedUserIds.slice(i, i + batchSize);
     if (batch.length === 0) continue;
     
-    try {
-      if (batch.length === 1) {
-        const userRef = doc(db, 'users', batch[0]);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          userCache.set(batch[0], userData);
+    fetchPromises.push((async () => {
+      try {
+        if (batch.length === 1) {
+          const userRef = doc(db, 'users', batch[0]);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            userCache.set(batch[0], userData);
+          } else {
+            userCache.set(batch[0], { displayName: 'Unknown Player' });
+          }
         } else {
-          userCache.set(batch[0], { displayName: 'Unknown Player' });
+          const usersQuery = query(
+            collection(db, 'users'),
+            where('__name__', 'in', batch)
+          );
+          
+          const userSnapshots = await getDocs(usersQuery);
+          
+          const foundUserIds = new Set();
+          
+          userSnapshots.forEach(userDoc => {
+            userCache.set(userDoc.id, userDoc.data());
+            foundUserIds.add(userDoc.id);
+          });
+          
+          batch.forEach(userId => {
+            if (!foundUserIds.has(userId) && !userCache.has(userId)) {
+              userCache.set(userId, { displayName: 'Unknown Player' });
+            }
+          });
         }
-      } else {
-        const usersQuery = query(
-          collection(db, 'users'),
-          where('__name__', 'in', batch)
-        );
-        
-        const userSnapshots = await getDocs(usersQuery);
-        userSnapshots.forEach(userDoc => {
-          userCache.set(userDoc.id, userDoc.data());
-        });
-        
+      } catch (err) {
+        console.error('Error fetching user batch:', err);
         batch.forEach(userId => {
           if (!userCache.has(userId)) {
             userCache.set(userId, { displayName: 'Unknown Player' });
           }
         });
       }
-    } catch (err) {
-      batch.forEach(userId => {
-        if (!userCache.has(userId)) {
-          userCache.set(userId, { displayName: 'Unknown Player' });
-        }
-      });
-    }
+    })());
   }
   
-  return userIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
+  try {
+    await withTimeout(Promise.all(fetchPromises), FETCH_TIMEOUT);
+  } catch (err) {
+    console.error('User fetch timeout:', err);
+    uncachedUserIds.forEach(userId => {
+      if (!userCache.has(userId)) {
+        userCache.set(userId, { displayName: 'Unknown Player' });
+      }
+    });
+  }
+  
+  return uniqueUserIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
 };
 
 const getCachedLeaderboard = (cacheKey, limitCount) => {
@@ -144,6 +171,22 @@ const getCachedLeaderboard = (cacheKey, limitCount) => {
     };
   }
   return null;
+};
+
+const withTimeout = (promise, timeoutMs) => {
+  let timeoutHandle;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(new Error('Operation timed out'));
+    }, timeoutMs);
+  });
+
+  return Promise.race([
+    promise,
+    timeoutPromise
+  ]).finally(() => {
+    clearTimeout(timeoutHandle);
+  });
 };
 
 export const submitScore = async (userId, collectionName, score, gameDetails = {}) => {
@@ -222,25 +265,23 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
     const cacheKey = validatedCollection;
     const cachedData = getCachedLeaderboard(cacheKey, limitCount);
     
-    if (!forceRefresh && cachedData && (Date.now() - cachedData.timestamp) < CACHE_EXPIRATION) {
-      return cachedData.scores;
-    }
-    
     if (!forceRefresh && cachedData) {
-      setTimeout(() => {
-        getTopScores(collectionName, limitCount, true)
-          .catch(err => console.error('Background refresh failed:', err));
-      }, 100);
+      if ((Date.now() - cachedData.timestamp) >= CACHE_EXPIRATION) {
+        setTimeout(() => {
+          getTopScores(collectionName, limitCount, true)
+            .catch(err => console.error('Background refresh failed:', err));
+        }, 100);
+      }
       return cachedData.scores;
     }
     
     const scoresQuery = query(
       collection(db, validatedCollection),
       orderBy('score', 'desc'),
-      limit(limitCount)
+      limit(limitCount * 2)
     );
     
-    const querySnapshot = await getDocs(scoresQuery);
+    const querySnapshot = await withTimeout(getDocs(scoresQuery), FETCH_TIMEOUT);
     
     const userIds = [];
     const scoresData = [];
@@ -257,7 +298,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       });
     });
     
-    await batchFetchUserData(userIds);
+    await withTimeout(batchFetchUserData(userIds), FETCH_TIMEOUT);
     
     const scores = scoresData.map(scoreData => {
       const userData = scoreData.userId ? 
@@ -287,7 +328,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       timestamp: Date.now()
     });
     
-    return scores;
+    return scores.slice(0, limitCount);
   } catch (error) {
     console.error('Error fetching top scores:', error);
     
@@ -297,7 +338,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       return cachedData.scores;
     }
     
-    throw error;
+    return [];
   }
 };
 
@@ -377,6 +418,10 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
       setTimeout(() => {
         callback(cachedData.scores);
       }, 0);
+    } else {
+      setTimeout(() => {
+        callback([]);
+      }, 0);
     }
     
     const scoresQuery = query(
@@ -385,8 +430,23 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
       limit(limitCount)
     );
     
+    const timeoutId = setTimeout(() => {
+      if (cachedData) {
+        callback(cachedData.scores);
+      } else {
+        callback([]);
+      }
+    }, 5000);
+    
     return onSnapshot(scoresQuery, async (snapshot) => {
-      if (snapshot.empty && cachedData) {
+      clearTimeout(timeoutId);
+      
+      if (snapshot.empty) {
+        if (cachedData) {
+          callback(cachedData.scores);
+        } else {
+          callback([]);
+        }
         return;
       }
       
@@ -405,7 +465,11 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
         });
       });
       
-      await batchFetchUserData(userIds);
+      try {
+        await withTimeout(batchFetchUserData(userIds), FETCH_TIMEOUT);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
       
       const scores = scoresData.map(scoreData => {
         const userData = scoreData.userId ? 
@@ -437,6 +501,7 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
       
       callback(scores);
     }, (error) => {
+      clearTimeout(timeoutId);
       console.error('Snapshot error:', error);
       
       const cachedData = getCachedLeaderboard(cacheKey, limitCount);
@@ -448,6 +513,14 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
     });
   } catch (error) {
     console.error('Subscribe error:', error);
+    
+    const cachedData = getCachedLeaderboard(cacheKey, limitCount);
+    if (cachedData) {
+      callback(cachedData.scores);
+    } else {
+      callback([]);
+    }
+    
     return () => {};
   }
 }; 

@@ -1,14 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, connectAuthEmulator } from 'firebase/auth';
 import { 
   getFirestore, 
-  CACHE_SIZE_UNLIMITED, 
   initializeFirestore, 
   persistentLocalCache,
-  persistentMultipleTabManager
+  persistentMultipleTabManager,
+  connectFirestoreEmulator
 } from 'firebase/firestore';
-import { getAnalytics } from 'firebase/analytics';
-
+import { getAnalytics, isSupported } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,13 +19,12 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-
 const app = initializeApp(firebaseConfig);
 
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager(),
-    cacheSizeBytes: 100 * 1024 * 1024
+    cacheSizeBytes: 50 * 1024 * 1024
   })
 });
 
@@ -34,8 +32,25 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 let analytics = null;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
+const initAnalytics = async () => {
+  try {
+    if (typeof window !== 'undefined' && await isSupported()) {
+      analytics = getAnalytics(app);
+    }
+  } catch (error) {
+    console.error('Analytics initialization error:', error);
+  }
+};
+initAnalytics();
+
+if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
+  try {
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectAuthEmulator(auth, 'http://localhost:9099');
+    console.log('Using Firebase emulators');
+  } catch (error) {
+    console.error('Emulator connection error:', error);
+  }
 }
 
 export { db, auth, googleProvider, analytics }; 
