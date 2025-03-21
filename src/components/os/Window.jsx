@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Window.css';
 
@@ -27,7 +27,7 @@ const Window = ({
   const windowRef = useRef(null);
   const navigate = useNavigate();
   
-  const handleMouseDown = (e) => {
+  const handleMouseDown = useCallback((e) => {
     if (isMaximized) return;
     
     if (e.target.closest('.window-header') && !e.target.closest('.window-controls')) {
@@ -37,10 +37,11 @@ const Window = ({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
       });
+      e.preventDefault();
     }
-  };
+  }, [isMaximized]);
   
-  const handleResizeMouseDown = (e, direction) => {
+  const handleResizeMouseDown = useCallback((e, direction) => {
     if (isMaximized) return;
     
     e.stopPropagation();
@@ -50,14 +51,20 @@ const Window = ({
       x: e.clientX,
       y: e.clientY
     });
-  };
+    e.preventDefault();
+  }, [isMaximized]);
   
   useEffect(() => {
+    if (!isDragging && !isResizing) return;
+    
     const handleMouseMove = (e) => {
       if (isDragging) {
+        const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - size.width));
+        const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - size.height - 30));
+        
         setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y
+          x: newX,
+          y: newY
         });
       } else if (isResizing) {
         const deltaX = e.clientX - dragOffset.x;
@@ -69,18 +76,22 @@ const Window = ({
         let newY = position.y;
         
         if (resizeDirection.includes('e')) {
-          newWidth = Math.max(300, size.width + deltaX);
+          newWidth = Math.max(300, Math.min(size.width + deltaX, window.innerWidth - position.x));
         }
         if (resizeDirection.includes('w')) {
-          newWidth = Math.max(300, size.width - deltaX);
-          newX = position.x + deltaX;
+          const maxDeltaX = size.width - 300;
+          const boundedDeltaX = Math.max(-maxDeltaX, Math.min(deltaX, position.x));
+          newWidth = Math.max(300, size.width - boundedDeltaX);
+          newX = position.x + boundedDeltaX;
         }
         if (resizeDirection.includes('s')) {
-          newHeight = Math.max(200, size.height + deltaY);
+          newHeight = Math.max(200, Math.min(size.height + deltaY, window.innerHeight - position.y - 30));
         }
         if (resizeDirection.includes('n')) {
-          newHeight = Math.max(200, size.height - deltaY);
-          newY = position.y + deltaY;
+          const maxDeltaY = size.height - 200;
+          const boundedDeltaY = Math.max(-maxDeltaY, Math.min(deltaY, position.y));
+          newHeight = Math.max(200, size.height - boundedDeltaY);
+          newY = position.y + boundedDeltaY;
         }
         
         setSize({ width: newWidth, height: newHeight });
@@ -97,18 +108,16 @@ const Window = ({
       setIsResizing(false);
     };
     
-    if (isDragging || isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
+    document.addEventListener('mousemove', handleMouseMove, { passive: false });
+    document.addEventListener('mouseup', handleMouseUp);
     
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dragOffset, position, size, resizeDirection, isMaximized]);
+  }, [isDragging, isResizing, dragOffset, position, size, resizeDirection]);
   
-  const handleMaximize = () => {
+  const handleMaximize = useCallback(() => {
     if (isMaximized) {
       setSize(prevSize);
       setPosition(prevPosition);
@@ -121,27 +130,29 @@ const Window = ({
       setPosition({ x: 0, y: 0 });
       if (onMaximize) onMaximize(true);
     }
-  };
+  }, [isMaximized, onMaximize, prevPosition, prevSize, position, size]);
   
-  const handleClose = () => {
+  const handleClose = useCallback((e) => {
+    e.stopPropagation();
     if (onClose) {
       onClose();
     } else {
       navigate('/');
     }
-  };
+  }, [navigate, onClose]);
   
-  const handleMinimize = () => {
+  const handleMinimize = useCallback((e) => {
+    e.stopPropagation();
     if (onMinimize) {
       onMinimize();
     }
-  };
+  }, [onMinimize]);
   
   const windowStyle = {
     left: isMaximized ? 0 : position.x,
     top: isMaximized ? 0 : position.y,
-    width: isMaximized ? '100%' : size.width,
-    height: isMaximized ? `calc(100% - 30px)` : size.height,
+    width: isMaximized ? '100%' : `${size.width}px`,
+    height: isMaximized ? `calc(100% - 30px)` : `${size.height}px`,
     zIndex
   };
   
@@ -158,13 +169,13 @@ const Window = ({
           <div className="window-title-text">{title}</div>
         </div>
         <div className="window-controls">
-          <button className="window-button minimize" onClick={handleMinimize}>
+          <button className="window-button minimize" onClick={handleMinimize} type="button" aria-label="Minimize">
             <span>_</span>
           </button>
-          <button className="window-button maximize" onClick={handleMaximize}>
+          <button className="window-button maximize" onClick={handleMaximize} type="button" aria-label="Maximize">
             <span>{isMaximized ? '❐' : '□'}</span>
           </button>
-          <button className="window-button close" onClick={handleClose}>
+          <button className="window-button close" onClick={handleClose} type="button" aria-label="Close">
             <span>✕</span>
           </button>
         </div>
@@ -176,18 +187,50 @@ const Window = ({
       
       {!isMaximized && (
         <>
-          <div className="resize-handle n" onMouseDown={(e) => handleResizeMouseDown(e, 'n')}></div>
-          <div className="resize-handle e" onMouseDown={(e) => handleResizeMouseDown(e, 'e')}></div>
-          <div className="resize-handle s" onMouseDown={(e) => handleResizeMouseDown(e, 's')}></div>
-          <div className="resize-handle w" onMouseDown={(e) => handleResizeMouseDown(e, 'w')}></div>
-          <div className="resize-handle ne" onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}></div>
-          <div className="resize-handle se" onMouseDown={(e) => handleResizeMouseDown(e, 'se')}></div>
-          <div className="resize-handle sw" onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}></div>
-          <div className="resize-handle nw" onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}></div>
+          <div 
+            className="resize-handle n" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'n')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle e" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle s" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 's')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle w" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle ne" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle se" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle sw" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+            aria-hidden="true"
+          ></div>
+          <div 
+            className="resize-handle nw" 
+            onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+            aria-hidden="true"
+          ></div>
         </>
       )}
     </div>
   );
 };
 
-export default Window; 
+export default memo(Window); 

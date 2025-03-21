@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { useAuth } from '../../firebase/AuthContext';
 import { getFiles, createFile, deleteFile, updateFile } from '../../firebase/fileService';
 import ContextMenu from './ContextMenu';
@@ -21,11 +21,14 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
   const [selectedFile, setSelectedFile] = useState(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [saveAsFileName, setSaveAsFileName] = useState(initialFileName);
+  const [isKeyboardNav, setIsKeyboardNav] = useState(false);
 
   const { currentUser, signInWithGoogle } = useAuth();
 
   const renameInputRef = useRef(null);
   const saveAsInputRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const fileListRef = useRef(null);
 
   const getNextFileName = useCallback(() => {
     const existingNames = files.map(file => file.name);
@@ -41,16 +44,22 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
   }, [files]);
 
   const validateFileName = useCallback((name) => {
-    const trimmedName = name.trim();
+    const trimmedName = name?.trim();
     if (!trimmedName) return null;
-    return trimmedName.endsWith(FILE_EXTENSION) ? trimmedName : `${trimmedName}${FILE_EXTENSION}`;
+    
+    const sanitized = trimmedName.replace(/[\\/:*?"<>|]/g, '_');
+    return sanitized.endsWith(FILE_EXTENSION) ? sanitized : `${sanitized}${FILE_EXTENSION}`;
   }, []);
 
   const handleCreateFile = useCallback(async () => {
     if (!currentUser) {
-      const shouldLogin = window.confirm(ERROR_MESSAGES.SIGN_IN_PROMPT);
-      if (shouldLogin) {
-        await signInWithGoogle();
+      try {
+        const shouldLogin = window.confirm(ERROR_MESSAGES.SIGN_IN_PROMPT);
+        if (shouldLogin) {
+          await signInWithGoogle();
+        }
+      } catch (error) {
+        console.error('Error during sign in:', error);
       }
       return;
     }
@@ -75,21 +84,41 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     
     if (!selectedFile || !renameInputRef.current || !currentUser) return;
 
-    const newName = validateFileName(renameInputRef.current.value);
-    if (newName && newName !== selectedFile.name) {
-      try {
+    try {
+      const newName = validateFileName(renameInputRef.current.value);
+      if (!newName) {
+        throw new Error('Invalid filename');
+      }
+      
+      if (newName !== selectedFile.name) {
+        const nameExists = files.some(f => 
+          f.id !== selectedFile.id && f.name.toLowerCase() === newName.toLowerCase()
+        );
+        
+        if (nameExists) {
+          const overwrite = window.confirm(ERROR_MESSAGES.FILE_EXISTS);
+          if (!overwrite) {
+            setIsRenaming(false);
+            setSelectedFile(null);
+            return;
+          }
+        }
+        
         await updateFile(currentUser.uid, selectedFile.id, {
           ...selectedFile,
           name: newName,
           modifiedAt: new Date().toISOString()
         });
-      } catch (error) {
-        console.error(ERROR_MESSAGES.ERROR_RENAME, error);
+      }
+    } catch (error) {
+      console.error(ERROR_MESSAGES.ERROR_RENAME, error);
+    } finally {
+      if (isMountedRef.current) {
+        setIsRenaming(false);
+        setSelectedFile(null);
       }
     }
-    setIsRenaming(false);
-    setSelectedFile(null);
-  }, [selectedFile, currentUser, validateFileName]);
+  }, [selectedFile, currentUser, validateFileName, files]);
 
   const handleRenameCancel = useCallback(() => {
     setIsRenaming(false);
@@ -97,9 +126,12 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
   }, []);
 
   const handleDeleteFile = useCallback(async (fileId) => {
-    if (!currentUser || !window.confirm(ERROR_MESSAGES.DELETE_CONFIRM)) return;
-
+    if (!currentUser) return;
+    
     try {
+      const confirmed = window.confirm(ERROR_MESSAGES.DELETE_CONFIRM);
+      if (!confirmed) return;
+      
       await deleteFile(currentUser.uid, fileId);
     } catch (error) {
       console.error(ERROR_MESSAGES.ERROR_DELETE, error);
@@ -115,20 +147,27 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     e.preventDefault();
     if (!currentUser || !onSaveAs) return;
 
-    const fileName = validateFileName(saveAsFileName);
-    if (!fileName) return;
-
-    const existingFile = files.find(file => file.name === fileName);
-    if (existingFile) {
-      const overwrite = window.confirm(ERROR_MESSAGES.FILE_EXISTS);
-      if (!overwrite) return;
-    }
-
     try {
+      const fileName = validateFileName(saveAsFileName);
+      if (!fileName) {
+        throw new Error('Please enter a valid filename');
+      }
+
+      const existingFile = files.find(file => 
+        file.name.toLowerCase() === fileName.toLowerCase()
+      );
+      
+      if (existingFile) {
+        const overwrite = window.confirm(ERROR_MESSAGES.FILE_EXISTS);
+        if (!overwrite) return;
+      }
+
       await onSaveAs(fileName, currentContent);
     } catch (error) {
       console.error('Error in Save As:', error);
-      alert(ERROR_MESSAGES.SAVE_FAILED);
+      if (isMountedRef.current) {
+        alert(error.message || ERROR_MESSAGES.SAVE_FAILED);
+      }
     }
   }, [currentUser, files, onSaveAs, saveAsFileName, validateFileName, currentContent]);
 
@@ -153,10 +192,64 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     });
   }, [currentUser, handleCreateFile, handleDeleteFile, handleRenameFile, onOpenFile]);
 
+  const handleKeyDown = useCallback((e, file) => {
+    if (!file) return;
+    
+    switch (e.key) {
+      case 'Enter':
+        e.preventDefault();
+        if (mode === 'saveAs') {
+          setSaveAsFileName(file.name);
+        } else {
+          onOpenFile(file);
+        }
+        break;
+      case 'F2':
+        e.preventDefault();
+        handleRenameFile(file);
+        break;
+      case 'Delete':
+        e.preventDefault();
+        handleDeleteFile(file.id);
+        break;
+      case 'ArrowDown':
+      case 'ArrowUp':
+        e.preventDefault();
+        setIsKeyboardNav(true);
+        const fileItems = Array.from(fileListRef.current?.querySelectorAll('.file-item') || []);
+        const currentIndex = fileItems.findIndex(item => item.dataset.id === file.id);
+        const nextIndex = e.key === 'ArrowDown' 
+          ? Math.min(currentIndex + 1, fileItems.length - 1)
+          : Math.max(currentIndex - 1, 0);
+        
+        if (nextIndex !== currentIndex && fileItems[nextIndex]) {
+          const nextFileId = fileItems[nextIndex].dataset.id;
+          const nextFile = files.find(f => f.id === nextFileId);
+          if (nextFile) {
+            setSelectedFile(nextFile);
+            fileItems[nextIndex].focus();
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }, [files, handleDeleteFile, handleRenameFile, mode, onOpenFile]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (currentUser) {
       const unsubscribe = getFiles(currentUser.uid, (newFiles) => {
-        setFiles(newFiles);
+        if (isMountedRef.current) {
+          setFiles(newFiles);
+        }
       });
       return () => unsubscribe();
     } else {
@@ -179,24 +272,48 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
   }, [isRenaming]);
 
   useEffect(() => {
-    const handleClick = () => contextMenu && setContextMenu(null);
+    const handleClick = () => {
+      if (contextMenu && isMountedRef.current) {
+        setContextMenu(null);
+      }
+      
+      if (isKeyboardNav && isMountedRef.current) {
+        setIsKeyboardNav(false);
+      }
+    };
+    
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
-  }, [contextMenu]);
-  
-  const renderToolbar = () => (
+  }, [contextMenu, isKeyboardNav]);
+
+  const renderToolbar = useMemo(() => (
     <div className="explorer-toolbar">
       <div className="toolbar-buttons">
-        <button className="toolbar-button" aria-label="Back">
-          <span className="button-icon">←</span>
+        <button 
+          className="toolbar-button" 
+          aria-label="Back"
+          type="button"
+          disabled
+        >
+          <span className="button-icon" aria-hidden="true">←</span>
           Back
         </button>
-        <button className="toolbar-button" aria-label="Forward">
-          <span className="button-icon">→</span>
+        <button 
+          className="toolbar-button" 
+          aria-label="Forward"
+          type="button"
+          disabled
+        >
+          <span className="button-icon" aria-hidden="true">→</span>
           Forward
         </button>
-        <button className="toolbar-button" aria-label="Up">
-          <span className="button-icon">↑</span>
+        <button 
+          className="toolbar-button" 
+          aria-label="Up"
+          type="button"
+          disabled
+        >
+          <span className="button-icon" aria-hidden="true">↑</span>
           Up
         </button>
         <div className="toolbar-separator" />
@@ -205,8 +322,9 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
             className="toolbar-button" 
             onClick={handleCreateFile}
             aria-label="Create new text document"
+            type="button"
           >
-            <span className="button-icon">📄</span>
+            <span className="button-icon" aria-hidden="true">📄</span>
             New Text Document
           </button>
         )}
@@ -216,16 +334,17 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         <span className="address-text">My Documents</span>
       </div>
     </div>
-  );
+  ), [mode, handleCreateFile]);
 
-  const renderSaveAsBar = () => (
+  const renderSaveAsBar = useMemo(() => (
     mode === 'saveAs' && (
       <div className="save-as-bar">
         <form onSubmit={handleSaveAs}>
-          <label>
+          <label htmlFor="save-as-input">
             File name:
             <input
               ref={saveAsInputRef}
+              id="save-as-input"
               type="text"
               value={saveAsFileName}
               onChange={(e) => setSaveAsFileName(e.target.value)}
@@ -244,15 +363,18 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         </form>
       </div>
     )
-  );
+  ), [mode, saveAsFileName, handleSaveAs, onSaveAs]);
 
-  const renderFileList = () => (
+  const renderFileList = useCallback(() => (
     <div 
       className="files-container"
       onContextMenu={(e) => {
         e.stopPropagation();
         handleContextMenu(e, null);
       }}
+      ref={fileListRef}
+      role="list"
+      aria-label="File list"
     >
       {!currentUser ? (
         <div className="login-prompt">
@@ -261,23 +383,37 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
             onClick={signInWithGoogle} 
             className="login-button"
             aria-label="Sign in with Google"
+            type="button"
           >
             Sign in with Google
           </button>
+        </div>
+      ) : files.length === 0 ? (
+        <div className="empty-folder">
+          <p>No files found. Create a new document to get started.</p>
         </div>
       ) : (
         files.map((file) => (
           <div 
             key={file.id}
+            data-id={file.id}
             className={`file-item ${selectedFile?.id === file.id ? 'selected' : ''}`}
-            onClick={() => mode === 'saveAs' ? setSaveAsFileName(file.name) : onOpenFile(file)}
+            onClick={() => {
+              setSelectedFile(file);
+              if (mode === 'saveAs') {
+                setSaveAsFileName(file.name);
+              } else {
+                onOpenFile(file);
+              }
+            }}
             onContextMenu={(e) => {
               e.stopPropagation();
               setSelectedFile(file);
               handleContextMenu(e, file);
             }}
-            role="button"
-            aria-label={file.name}
+            onKeyDown={(e) => handleKeyDown(e, file)}
+            role="listitem"
+            aria-selected={selectedFile?.id === file.id}
             tabIndex={0}
           >
             {isRenaming && selectedFile?.id === file.id ? (
@@ -309,7 +445,19 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         ))
       )}
     </div>
-  );
+  ), [
+    currentUser, 
+    files, 
+    selectedFile, 
+    isRenaming, 
+    mode, 
+    signInWithGoogle, 
+    handleContextMenu, 
+    handleKeyDown, 
+    handleRenameSubmit, 
+    handleRenameCancel, 
+    onOpenFile
+  ]);
 
   return (
     <div 
@@ -318,14 +466,14 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
       role="region"
       aria-label="File Explorer"
     >
-      {renderToolbar()}
-      {renderSaveAsBar()}
+      {renderToolbar}
+      {renderSaveAsBar}
       
       <div className="explorer-content">
         <div className="sidebar">
-          <div className="folder-tree">
-            <div className="tree-item active">
-              <span>📁My Documents</span>
+          <div className="folder-tree" role="tree">
+            <div className="tree-item active" role="treeitem" aria-selected="true" tabIndex={0}>
+              <span aria-hidden="true">📁</span>My Documents
             </div>
           </div>
         </div>
@@ -333,7 +481,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         {renderFileList()}
       </div>
 
-      <div className="status-bar">
+      <div className="status-bar" role="status">
         <div className="status-item">
           {currentUser ? `${files.length} object${files.length !== 1 ? 's' : ''}` : 'Not signed in'}
         </div>

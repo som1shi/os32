@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Window from './Window';
@@ -51,14 +51,16 @@ const Desktop = ({ games }) => {
   const [showStickyNotes, setShowStickyNotes] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
   const [windowSize, setWindowSize] = useState(INITIAL_WINDOW_SIZE);
-  const [showIPodPlayer, setShowIPodPlayer] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    const handleResize = () => setWindowSize({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
+    
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
     
     window.addEventListener('resize', handleResize);
     const removeConnectionListener = addConnectionStateListener(setIsOnline);
@@ -71,43 +73,48 @@ const Desktop = ({ games }) => {
   }, []);
 
   const addWindow = useCallback((id, title, icon, component) => {
-    const existingWindow = windows.find(w => w.id === id);
-    
-    if (existingWindow) {
-      if (minimizedWindows.includes(id)) {
-        setMinimizedWindows(prev => prev.filter(wId => wId !== id));
+    setWindows(prev => {
+      const existingWindowIndex = prev.findIndex(w => w.id === id);
+      
+      if (existingWindowIndex !== -1) {
+        if (minimizedWindows.includes(id)) {
+          setMinimizedWindows(prevMinimized => prevMinimized.filter(wId => wId !== id));
+        }
+        setActiveWindow(id);
+        return prev;
       }
-      setActiveWindow(id);
-      return;
-    }
 
-    const newWindow = {
-      id,
-      title,
-      icon,
-      component,
-      isMaximized: false,
-      position: { x: 50 + (windows.length * 30), y: 50 + (windows.length * 30) },
-      size: { width: 800, height: 600 },
-      zIndex: windows.length + 1
-    };
-    
-    setWindows(prev => [...prev, newWindow]);
-    setActiveWindow(id);
-    setStartMenuOpen(false);
-  }, [windows, minimizedWindows]);
+      const newWindow = {
+        id,
+        title,
+        icon,
+        component,
+        isMaximized: false,
+        position: { x: 50 + (prev.length * 30), y: 50 + (prev.length * 30) },
+        size: { width: 800, height: 600 },
+        zIndex: prev.length + 1
+      };
+      
+      setActiveWindow(id);
+      setStartMenuOpen(false);
+      return [...prev, newWindow];
+    });
+  }, [minimizedWindows]);
 
   const closeWindow = useCallback((windowId) => {
-    setWindows(prev => prev.filter(w => w.id !== windowId));
-    setMinimizedWindows(prev => prev.filter(id => id !== windowId));
+    setWindows(prev => {
+      const filteredWindows = prev.filter(w => w.id !== windowId);
+      
+      if (activeWindow === windowId) {
+        const remainingWindows = filteredWindows.filter(w => !minimizedWindows.includes(w.id));
+        setActiveWindow(remainingWindows.length > 0 ? remainingWindows[remainingWindows.length - 1].id : null);
+      }
+      
+      return filteredWindows;
+    });
     
-    if (activeWindow === windowId) {
-      const remainingWindows = windows.filter(w => 
-        w.id !== windowId && !minimizedWindows.includes(w.id)
-      );
-      setActiveWindow(remainingWindows.length > 0 ? remainingWindows[remainingWindows.length - 1].id : null);
-    }
-  }, [windows, minimizedWindows, activeWindow]);
+    setMinimizedWindows(prev => prev.filter(id => id !== windowId));
+  }, [activeWindow, minimizedWindows]);
 
   const minimizeWindow = useCallback((windowId) => {
     if (!minimizedWindows.includes(windowId)) {
@@ -115,12 +122,13 @@ const Desktop = ({ games }) => {
     }
     
     if (activeWindow === windowId) {
-      const visibleWindows = windows.filter(w => 
-        w.id !== windowId && !minimizedWindows.includes(w.id)
-      );
-      setActiveWindow(visibleWindows.length > 0 ? visibleWindows[visibleWindows.length - 1].id : null);
+      setWindows(prev => {
+        const visibleWindows = prev.filter(w => w.id !== windowId && !minimizedWindows.includes(w.id));
+        setActiveWindow(visibleWindows.length > 0 ? visibleWindows[visibleWindows.length - 1].id : null);
+        return prev;
+      });
     }
-  }, [windows, minimizedWindows, activeWindow]);
+  }, [activeWindow, minimizedWindows]);
 
   const restoreWindow = useCallback((windowId) => {
     setMinimizedWindows(prev => prev.filter(id => id !== windowId));
@@ -130,16 +138,19 @@ const Desktop = ({ games }) => {
   const activateWindow = useCallback((windowId) => {
     if (activeWindow !== windowId) {
       setActiveWindow(windowId);
-      setWindows(prev => prev.map(w => ({
-        ...w,
-        zIndex: w.id === windowId ? Math.max(...prev.map(w => w.zIndex)) + 1 : w.zIndex
-      })));
+      setWindows(prev => {
+        const maxZIndex = Math.max(...prev.map(w => w.zIndex));
+        return prev.map(w => ({
+          ...w,
+          zIndex: w.id === windowId ? maxZIndex + 1 : w.zIndex
+        }));
+      });
     }
   }, [activeWindow]);
 
   const handleNewNotepad = useCallback(() => {
     const newFile = {
-      id: 'temp',
+      id: `temp-${Date.now()}`,
       name: 'Untitled.txt',
       content: '',
       type: 'text',
@@ -147,40 +158,59 @@ const Desktop = ({ games }) => {
       modifiedAt: new Date().toISOString()
     };
     addWindow(
-      'notepad',
+      `notepad-${Date.now()}`,
       'Untitled.txt - Notepad',
       '📝',
-      <Notepad file={newFile} onClose={() => closeWindow('notepad')} />
+      <Notepad 
+        file={newFile} 
+        onClose={() => closeWindow(`notepad-${Date.now()}`)} 
+      />
     );
   }, [addWindow, closeWindow]);
 
   const handleOpenFile = useCallback((file) => {
+    if (!file || !file.id) return;
+    
+    const notepadId = `notepad-${file.id}`;
     addWindow(
-      'notepad',
+      notepadId,
       `${file.name} - Notepad`,
       '📝',
-      <Notepad file={file} onClose={() => closeWindow('notepad')} />
+      <Notepad 
+        file={file} 
+        onClose={() => closeWindow(notepadId)} 
+      />
     );
   }, [addWindow, closeWindow]);
 
   const toggleFileExplorer = useCallback(() => {
-    addWindow('explorer', 'File Explorer', '📁', <FileExplorer onOpenFile={handleOpenFile} />);
+    addWindow(
+      'explorer',
+      'File Explorer',
+      '📁',
+      <FileExplorer onOpenFile={handleOpenFile} />
+    );
   }, [addWindow, handleOpenFile]);
 
   const toggleAboutWindow = useCallback(() => {
-    addWindow('about', 'About OS32.exe', 'ℹ️', <AboutWindow onClose={() => closeWindow('about')} />);
+    addWindow(
+      'about',
+      'About OS32.exe',
+      'ℹ️',
+      <AboutWindow onClose={() => closeWindow('about')} />
+    );
     setStartMenuOpen(false);
   }, [addWindow, closeWindow]);
 
   const toggleInternetExplorer = useCallback(() => {
-    addWindow('explorer', 'Internet Explorer', '🌐', <InternetExplorer />);
+    addWindow('internet', 'Internet Explorer', '🌐', <InternetExplorer />);
     setStartMenuOpen(false);
   }, [addWindow]);
 
   const toggleUserProfile = useCallback(() => {
-    addWindow('profile', 'User Profile', '👤', <UserProfile onLogout={handleLogoutClick} />);
+    addWindow('profile', 'User Profile', '👤', <UserProfile onLogout={logOut} />);
     setStartMenuOpen(false);
-  }, [addWindow]);
+  }, [addWindow, logOut]);
 
   const handleLoginClick = useCallback(() => {
     setShowLoginModal(true);
@@ -212,118 +242,249 @@ const Desktop = ({ games }) => {
   }, []);
 
   const toggleIPodPlayer = useCallback(() => {
-    const existingWindow = windows.find(w => w.id === 'ipod-player');
-    
-    if (existingWindow) {
-      if (minimizedWindows.includes('ipod-player')) {
-        setMinimizedWindows(prev => prev.filter(wId => wId !== 'ipod-player'));
-      }
-      setActiveWindow('ipod-player');
-      return;
-    }
-
-    const newWindow = {
-      id: 'ipod-player',
-      title: 'Music Player',
-      icon: '🎵',
-      component: <IPodPlayer onClose={() => closeWindow('ipod-player')} />,
-      isMaximized: false,
-      position: { x: 50 + (windows.length * 30), y: 50 + (windows.length * 30) },
-      size: { width: 300, height: 520 },
-      zIndex: windows.length + 1
-    };
-    
-    setWindows(prev => [...prev, newWindow]);
-    setActiveWindow('ipod-player');
+    addWindow(
+      'ipod-player',
+      'Music Player',
+      '🎵',
+      <IPodPlayer onClose={() => closeWindow('ipod-player')} />
+    );
     setStartMenuOpen(false);
-  }, [windows, minimizedWindows, addWindow, closeWindow]);
+  }, [addWindow, closeWindow]);
+
+  const desktopIcons = useMemo(() => (
+    <div className="desktop-icons">
+      <div className="desktop-icon" onClick={toggleFileExplorer}>
+        <div className="icon">📁</div>
+        <div className="icon-text">My Documents</div>
+      </div>
+
+      <div className="desktop-icon" onClick={handleNewNotepad}>
+        <div className="icon">📝</div>
+        <div className="icon-text">Notepad</div>
+      </div>
+
+      {games.map(game => (
+        <div 
+          key={game.id} 
+          className="desktop-icon" 
+          onClick={() => navigate(`/game/${game.id}`)}
+        >
+          <div className="icon">{game.icon}</div>
+          <div className="icon-text">{game.title}</div>
+        </div>
+      ))}
+      
+      <div className="desktop-icon" onClick={toggleInternetExplorer}>
+        <div className="icon">🌐</div>
+        <div className="icon-text">Internet Explorer</div>
+      </div>
+
+      <div className="desktop-icon" onClick={toggleIPodPlayer}>
+        <div className="icon">🎵</div>
+        <div className="icon-text">Music Player</div>
+      </div>
+
+      {currentUser && (
+        <div className="desktop-icon" onClick={toggleUserProfile}>
+          <div className="icon">👤</div>
+          <div className="icon-text">My Profile</div>
+        </div>
+      )}
+    </div>
+  ), [
+    currentUser, 
+    games, 
+    handleNewNotepad, 
+    navigate, 
+    toggleFileExplorer, 
+    toggleInternetExplorer, 
+    toggleIPodPlayer, 
+    toggleUserProfile
+  ]);
+
+  const renderWindows = useMemo(() => (
+    windows.map(window => {
+      const isMinimized = minimizedWindows.includes(window.id);
+      if (isMinimized) return null;
+
+      return (
+        <Window
+          key={window.id}
+          title={window.title}
+          icon={window.icon}
+          isActive={activeWindow === window.id}
+          initialPosition={window.position}
+          initialSize={window.size}
+          isMaximized={window.isMaximized}
+          zIndex={window.zIndex}
+          onClose={() => closeWindow(window.id)}
+          onMinimize={() => minimizeWindow(window.id)}
+          onMaximize={(isMax) => {
+            setWindows(prev => prev.map(w => 
+              w.id === window.id ? { ...w, isMaximized: isMax } : w
+            ));
+          }}
+          onClick={() => activateWindow(window.id)}
+        >
+          {window.component}
+        </Window>
+      );
+    })
+  ), [windows, minimizedWindows, activeWindow, closeWindow, minimizeWindow, activateWindow]);
+
+  const taskbarWindows = useMemo(() => (
+    <div className="taskbar-windows">
+      {windows.map(window => {
+        const isMinimized = minimizedWindows.includes(window.id);
+        return (
+          <div 
+            key={window.id}
+            className={`taskbar-window ${activeWindow === window.id && !isMinimized ? 'active' : ''}`}
+            onClick={() => isMinimized ? restoreWindow(window.id) : activateWindow(window.id)}
+          >
+            <div className="taskbar-icon">{window.icon}</div>
+            <div className="taskbar-text">{window.title}</div>
+          </div>
+        );
+      })}
+    </div>
+  ), [windows, minimizedWindows, activeWindow, restoreWindow, activateWindow]);
+
+  const startMenu = useMemo(() => (
+    startMenuOpen && (
+      <div className="start-menu">
+        <div className="start-menu-header">
+          {currentUser ? (
+            <div className="start-user-info">
+              <div className="start-user-avatar">
+                <img 
+                  src={currentUser.photoURL || '/default-avatar.png'} 
+                  alt={currentUser.displayName || 'User'} 
+                />
+              </div>
+              <div className="start-user-name">{currentUser.displayName || 'User'}</div>
+            </div>
+          ) : (
+            <div className="start-user-info">
+              <div className="start-user-avatar">
+                <img src="/default-avatar.png" alt="Guest" />
+              </div>
+              <div className="start-user-name">Guest</div>
+            </div>
+          )}
+        </div>
+        
+        <div className="start-menu-items">
+          <div className="start-menu-left">
+            <div className="start-menu-item" onClick={toggleFileExplorer}>
+              <div className="start-menu-icon">📁</div>
+              <div className="start-menu-text">My Documents</div>
+            </div>
+            
+            <div className="start-menu-item" onClick={handleNewNotepad}>
+              <div className="start-menu-icon">📝</div>
+              <div className="start-menu-text">Notepad</div>
+            </div>
+            
+            <div className="start-menu-separator" />
+            
+            <div className="start-menu-item" onClick={toggleStickyNotes}>
+              <div className="start-menu-icon">🏆</div>
+              <div className="start-menu-text">
+                {showStickyNotes ? "Hide Leaderboards" : "Show Leaderboards"}
+              </div>
+            </div>
+            <div className="start-menu-separator" />
+            <div className="start-menu-item" onClick={toggleInternetExplorer}>
+              <div className="start-menu-icon">🌐</div>
+              <div className="start-menu-text">Internet Explorer</div>
+            </div>
+            <div className="start-menu-item" onClick={toggleIPodPlayer}>
+              <div className="start-menu-icon">🎵</div>
+              <div className="start-menu-text">Music Player</div>
+            </div>
+            {games.map(game => (
+              <div 
+                key={game.id} 
+                className="start-menu-item"
+                onClick={() => {
+                  const GameComponent = GAME_COMPONENTS[game.id];
+                  if (GameComponent) {
+                    addWindow(game.id, game.title, game.icon, <GameComponent />);
+                  }
+                }}
+              >
+                <div className="start-menu-icon">{game.icon}</div>
+                <div className="start-menu-text">{game.title}</div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="start-menu-right">
+            <div className="start-menu-item" onClick={toggleAboutWindow}>
+              <div className="start-menu-icon">ℹ️</div>
+              <div className="start-menu-text">About</div>
+            </div>
+            {currentUser ? (
+              <>
+                <div className="start-menu-item" onClick={toggleUserProfile}>
+                  <div className="start-menu-icon">👤</div>
+                  <div className="start-menu-text">My Profile</div>
+                </div>
+                <div className="start-menu-item" onClick={handleLogoutClick}>
+                  <div className="start-menu-icon">🚪</div>
+                  <div className="start-menu-text">Sign Out</div>
+                </div>
+              </>
+            ) : (
+              <div className="start-menu-item" onClick={handleLoginClick}>
+                <div className="start-menu-icon">🔑</div>
+                <div className="start-menu-text">Sign In</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  ), [
+    startMenuOpen,
+    currentUser,
+    games,
+    handleLoginClick,
+    handleLogoutClick,
+    handleNewNotepad,
+    toggleAboutWindow,
+    toggleFileExplorer,
+    toggleInternetExplorer,
+    toggleIPodPlayer,
+    toggleStickyNotes,
+    toggleUserProfile,
+    showStickyNotes,
+    addWindow
+  ]);
 
   return (
     <div className="winxp-desktop" onClick={handleDesktopClick}>
-      {/* Desktop Icons */}
-      <div className="desktop-icons">
-        <div className="desktop-icon" onClick={toggleFileExplorer} onDoubleClick={toggleFileExplorer}>
-          <div className="icon">📁</div>
-          <div className="icon-text">My Documents</div>
-        </div>
-
-        <div className="desktop-icon" onClick={handleNewNotepad} onDoubleClick={handleNewNotepad}>
-          <div className="icon">📝</div>
-          <div className="icon-text">Notepad</div>
-        </div>
-
-        {games.map(game => (
-          <div key={game.id} className="desktop-icon" onClick={() => navigate(`/game/${game.id}`)} onDoubleClick={() => navigate(`/game/${game.id}`)}>
-            <div className="icon">{game.icon}</div>
-            <div className="icon-text">{game.title}</div>
-          </div>
-        ))}
-        
-        <div className="desktop-icon" onClick={toggleInternetExplorer} onDoubleClick={toggleInternetExplorer}>
-          <div className="icon">🌐</div>
-          <div className="icon-text">Internet Explorer</div>
-        </div>
-
-        <div className="desktop-icon" onClick={toggleIPodPlayer} onDoubleClick={toggleIPodPlayer}>
-          <div className="icon">🎵</div>
-          <div className="icon-text">Music Player</div>
-        </div>
-
-        {currentUser && (
-          <div className="desktop-icon" onClick={toggleUserProfile} onDoubleClick={toggleUserProfile}>
-            <div className="icon">👤</div>
-            <div className="icon-text">My Profile</div>
-          </div>
-        )}
-      </div>
+      {desktopIcons}
       
-      {/* Sticky Notes */}
       {showStickyNotes && (
-        <>
-          <StickyNote 
-            title="Leaderboard" 
-            initialPosition={{ x: windowSize.width - 320, y: 50 }}
-            color="#ffff88"
-            onClose={() => setShowStickyNotes(false)}
-          >
-            <Leaderboard collectionName="wordsweeper" title="WordSweeper Top Scores" />
-          </StickyNote>
-          
-        </>
+        <StickyNote 
+          title="Leaderboard" 
+          initialPosition={{ x: windowSize.width - 320, y: 50 }}
+          color="#ffff88"
+          onClose={() => setShowStickyNotes(false)}
+        >
+          <Leaderboard initialGame="wordsweeper" limitCount={5} />
+        </StickyNote>
       )}
       
-      {/* Windows */}
-      {windows.map(window => {
-        const isMinimized = minimizedWindows.includes(window.id);
-        if (isMinimized) return null;
-
-        return (
-          <Window
-            key={window.id}
-            title={window.title}
-            icon={window.icon}
-            isActive={activeWindow === window.id}
-            initialPosition={window.position}
-            initialSize={window.size}
-            isMaximized={window.isMaximized}
-            zIndex={window.zIndex}
-            onClose={() => closeWindow(window.id)}
-            onMinimize={() => minimizeWindow(window.id)}
-            onMaximize={(isMax) => {
-              setWindows(prev => prev.map(w => 
-                w.id === window.id ? { ...w, isMaximized: isMax } : w
-              ));
-            }}
-            onClick={() => activateWindow(window.id)}
-          >
-            {window.component}
-          </Window>
-        );
-      })}
+      {renderWindows}
       
-      {/* Taskbar */}
       <div className="taskbar">
-        <div className={`win-start-button ${startMenuOpen ? 'active' : ''}`} onClick={() => setStartMenuOpen(prev => !prev)}>
+        <div 
+          className={`win-start-button ${startMenuOpen ? 'active' : ''}`} 
+          onClick={() => setStartMenuOpen(prev => !prev)}
+        >
           <div className="start-logo"></div>
           <span>Start</span>
         </div>
@@ -341,21 +502,7 @@ const Desktop = ({ games }) => {
           <div className="separator"></div>
         </div>
         
-        <div className="taskbar-windows">
-          {windows.map(window => {
-            const isMinimized = minimizedWindows.includes(window.id);
-            return (
-              <div 
-                key={window.id}
-                className={`taskbar-window ${activeWindow === window.id && !isMinimized ? 'active' : ''}`}
-                onClick={() => isMinimized ? restoreWindow(window.id) : activateWindow(window.id)}
-              >
-                <div className="taskbar-icon">{window.icon}</div>
-                <div className="taskbar-text">{window.title}</div>
-              </div>
-            );
-          })}
-        </div>
+        {taskbarWindows}
         
         <div className="system-tray">
           {currentUser && (
@@ -364,7 +511,11 @@ const Desktop = ({ games }) => {
               onClick={toggleUserProfile}
               title={currentUser.displayName || 'User Profile'}
             >
-              <img src={currentUser.photoURL || '/default-avatar.png'} alt={currentUser.displayName || 'User'} />
+              <img 
+                src={currentUser.photoURL || '/default-avatar.png'} 
+                alt={currentUser.displayName || 'User'} 
+                onError={(e) => {e.target.src = '/default-avatar.png'}} 
+              />
             </div>
           )}
           <div 
@@ -381,99 +532,8 @@ const Desktop = ({ games }) => {
         </div>
       </div>
       
-      {/* Start Menu */}
-      {startMenuOpen && (
-        <div className="start-menu">
-          <div className="start-menu-header">
-            {currentUser ? (
-              <div className="start-user-info">
-                <div className="start-user-avatar">
-                  <img src={currentUser.photoURL || '/default-avatar.png'} alt={currentUser.displayName || 'User'} />
-                </div>
-                <div className="start-user-name">{currentUser.displayName || 'User'}</div>
-              </div>
-            ) : (
-              <div className="start-user-info">
-                <div className="start-user-avatar">
-                  <img src="/default-avatar.png" alt="Guest" />
-                </div>
-                <div className="start-user-name">Guest</div>
-              </div>
-            )}
-          </div>
-          
-          <div className="start-menu-items">
-            <div className="start-menu-left">
-              <div className="start-menu-item" onClick={toggleFileExplorer}>
-                <div className="start-menu-icon">📁</div>
-                <div className="start-menu-text">My Documents</div>
-              </div>
-              
-              <div className="start-menu-item" onClick={handleNewNotepad}>
-                <div className="start-menu-icon">📝</div>
-                <div className="start-menu-text">Notepad</div>
-              </div>
-              
-              <div className="start-menu-separator" />
-              
-              <div className="start-menu-item" onClick={toggleStickyNotes}>
-                <div className="start-menu-icon">🏆</div>
-                <div className="start-menu-text">
-                  {showStickyNotes ? "Hide Leaderboards" : "Show Leaderboards"}
-                </div>
-              </div>
-              <div className="start-menu-separator" />
-              <div className="start-menu-item" onClick={toggleInternetExplorer}>
-                <div className="start-menu-icon">🌐</div>
-                <div className="start-menu-text">Internet Explorer</div>
-              </div>
-              <div className="start-menu-item" onClick={toggleIPodPlayer}>
-                <div className="start-menu-icon">🎵</div>
-                <div className="start-menu-text">Music Player</div>
-              </div>
-              {games.map(game => (
-                <div 
-                  key={game.id} 
-                  className="start-menu-item"
-                  onClick={() => {
-                    const GameComponent = GAME_COMPONENTS[game.id];
-                    addWindow(game.id, game.title, game.icon, <GameComponent />);
-                  }}
-                >
-                  <div className="start-menu-icon">{game.icon}</div>
-                  <div className="start-menu-text">{game.title}</div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="start-menu-right">
-              <div className="start-menu-item" onClick={toggleAboutWindow}>
-                <div className="start-menu-icon">ℹ️</div>
-                <div className="start-menu-text">About</div>
-              </div>
-              {currentUser ? (
-                <>
-                  <div className="start-menu-item" onClick={toggleUserProfile}>
-                    <div className="start-menu-icon">👤</div>
-                    <div className="start-menu-text">My Profile</div>
-                  </div>
-                  <div className="start-menu-item" onClick={handleLogoutClick}>
-                    <div className="start-menu-icon">🚪</div>
-                    <div className="start-menu-text">Sign Out</div>
-                  </div>
-                </>
-              ) : (
-                <div className="start-menu-item" onClick={handleLoginClick}>
-                  <div className="start-menu-icon">🔑</div>
-                  <div className="start-menu-text">Sign In</div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {startMenu}
       
-      {/* Login Modal */}
       <Modal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
@@ -486,4 +546,4 @@ const Desktop = ({ games }) => {
   );
 };
 
-export default Desktop;
+export default memo(Desktop);

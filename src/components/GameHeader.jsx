@@ -1,20 +1,26 @@
-import React from 'react';
+import React, { useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const GameHeader = ({ title }) => {
   const navigate = useNavigate();
   
+  const handleBackClick = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+  
   return (
-    <div className="game-header">
+    <header className="game-header">
       <h1>{title}</h1>
       <button 
         className="back-button"
-        onClick={() => navigate('/')}
+        onClick={handleBackClick}
+        type="button"
+        aria-label="Back to Games"
       >
         Back to Games
       </button>
-    </div>
+    </header>
   );
 };
 
-export default GameHeader; 
+export default memo(GameHeader); 

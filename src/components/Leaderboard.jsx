@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { getTopScores, getUserBestScore, subscribeToLeaderboard, addConnectionStateListener } from '../firebase/scoreService';
 import { useAuth } from '../firebase/AuthContext';
 import './Leaderboard.css';
@@ -29,6 +29,7 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
   const { currentUser } = useAuth();
   const unsubscribeRef = useRef(null);
   const initialLoadCompleted = useRef(false);
+  const isMountedRef = useRef(true);
   
   const getCollectionName = useCallback(() => {
     if (selectedGame === 'refiner') {
@@ -38,31 +39,37 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
   }, [selectedGame, selectedTime]);
 
   const fetchUserBestScore = useCallback(async () => {
-    if (!currentUser) return;
-    
-    setUserBestScore(null);
+    if (!currentUser || !isMountedRef.current) return;
     
     try {
       const bestScore = await getUserBestScore(currentUser.uid, getCollectionName());
-      setUserBestScore(bestScore);
+      if (isMountedRef.current) {
+        setUserBestScore(bestScore);
+      }
     } catch (err) {
       console.error('Error fetching user best score:', err);
     }
   }, [currentUser, getCollectionName]);
 
   const handleGameChange = useCallback((e) => {
-    setSelectedGame(e.target.value);
+    const value = e.target.value;
+    setSelectedGame(value);
     setLoading(true);
     setUserBestScore(null);
+    initialLoadCompleted.current = false;
   }, []);
 
   const handleTimeChange = useCallback((e) => {
-    setSelectedTime(e.target.value);
+    const value = e.target.value;
+    setSelectedTime(value);
     setLoading(true);
     setUserBestScore(null);
+    initialLoadCompleted.current = false;
   }, []);
 
   const fetchScores = useCallback(async (forceRefresh = false) => {
+    if (!isMountedRef.current) return;
+    
     try {
       if (forceRefresh) {
         setRefreshing(true);
@@ -79,31 +86,49 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
       
       if (!initialLoadCompleted.current || forceRefresh) {
         try {
-          const topScores = await getTopScores(collectionName, limitCount, forceRefresh);
-          setScores(topScores);
-          initialLoadCompleted.current = true;
-          setLoading(false);
-          setRefreshing(false);
-          setError(null);
+          const topScores = await getTopScores(collectionName, limitCount, true);
+          if (isMountedRef.current) {
+            setScores(topScores);
+            setLoading(false);
+            setRefreshing(false);
+            setError(null);
+            initialLoadCompleted.current = true;
+          }
         } catch (err) {
           console.error('Initial fetch failed:', err);
+          if (isMountedRef.current) {
+            setError('Failed to load leaderboard data. Please try again.');
+            setLoading(false);
+            setRefreshing(false);
+          }
         }
       }
       
       unsubscribeRef.current = subscribeToLeaderboard(collectionName, limitCount, (newScores) => {
-        setScores(newScores);
-        setLoading(false);
-        setRefreshing(false);
-        setError(null);
-        initialLoadCompleted.current = true;
+        if (isMountedRef.current) {
+          setScores(newScores);
+          setLoading(false);
+          setRefreshing(false);
+          setError(null);
+          initialLoadCompleted.current = true;
+        }
+      }, (err) => {
+        if (isMountedRef.current) {
+          console.error('Subscription error:', err);
+          setError('Connection error. Please try refreshing.');
+          setLoading(false);
+          setRefreshing(false);
+        }
       });
       
       await fetchUserBestScore();
     } catch (err) {
       console.error('Error fetching scores:', err);
-      setError('Failed to load leaderboard data. Please check your connection.');
-      setLoading(false);
-      setRefreshing(false);
+      if (isMountedRef.current) {
+        setError('Failed to load leaderboard data. Please check your connection.');
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [fetchUserBestScore, getCollectionName, limitCount, refreshing]);
 
@@ -112,28 +137,39 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
   }, [fetchScores]);
 
   useEffect(() => {
+    isMountedRef.current = true;
+    
     const removeConnectionListener = addConnectionStateListener((online) => {
-      setIsOnline(online);
-      
-      if (online && error) {
-        fetchScores();
+      if (isMountedRef.current) {
+        setIsOnline(online);
+        
+        if (online && error) {
+          fetchScores();
+        }
       }
     });
     
     return () => {
+      isMountedRef.current = false;
       removeConnectionListener();
       
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
+        unsubscribeRef.current = null;
       }
     };
   }, [error, fetchScores]);
 
   useEffect(() => {
-    fetchScores();
+    if (isMountedRef.current) {
+      initialLoadCompleted.current = false;
+      fetchScores();
+    }
   }, [fetchScores, selectedGame, selectedTime]);
 
   const formatDate = useCallback((date) => {
+    if (!date) return '';
+    
     return new Date(date).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
@@ -145,6 +181,42 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
     e.target.onerror = null; 
     e.target.src = '/default-avatar.png';
   }, []);
+
+  const dropdownOptions = useMemo(() => {
+    return {
+      games: GAMES.map(game => (
+        <option key={game.id} value={game.id}>{game.name}</option>
+      )),
+      times: REFINER_TIMES.map(time => (
+        <option key={time.id} value={time.id}>{time.name}</option>
+      ))
+    };
+  }, []);
+
+  const userScoreSection = useMemo(() => {
+    if (!currentUser || !userBestScore) return null;
+    
+    return (
+      <div className="user-best-score">
+        <h3>Your Best Score</h3>
+        <div className="score-card highlight">
+          <div className="score-info">
+            <div className="score-user">
+              <img 
+                src={currentUser.photoURL || '/default-avatar.png'} 
+                alt={currentUser.displayName || 'You'} 
+                className="user-avatar"
+                onError={handleAvatarError} 
+              />
+              <span>{currentUser.displayName || 'You'}</span>
+            </div>
+            <div className="lb-score-value">{userBestScore.score}</div>
+          </div>
+          <div className="score-date">{formatDate(userBestScore.timestamp)}</div>
+        </div>
+      </div>
+    );
+  }, [currentUser, userBestScore, formatDate, handleAvatarError]);
 
   return (
     <div className="leaderboard-container">
@@ -158,9 +230,7 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
             disabled={loading || refreshing}
             className="winxp-dropdown"
           >
-            {GAMES.map(game => (
-              <option key={game.id} value={game.id}>{game.name}</option>
-            ))}
+            {dropdownOptions.games}
           </select>
         </div>
         
@@ -174,9 +244,7 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
               disabled={loading || refreshing}
               className="winxp-dropdown"
             >
-              {REFINER_TIMES.map(time => (
-                <option key={time.id} value={time.id}>{time.name}</option>
-              ))}
+              {dropdownOptions.times}
             </select>
           </div>
         )}
@@ -185,63 +253,49 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
           className="refresh-button winxp-button"
           onClick={handleRefresh}
           disabled={loading || refreshing}
+          type="button"
+          aria-label="Refresh leaderboard"
         >
-          <span className="retry-icon">↻</span>
+          <span className="retry-icon" aria-hidden="true">↻</span>
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
       {(loading || refreshing) && (
-        <div className="leaderboard-loading">
-          <div className="loading-spinner"></div>
+        <div className="leaderboard-loading" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true"></div>
           <p>{loading ? 'Loading scores...' : 'Refreshing scores...'}</p>
         </div>
       )}
       
       {error && !loading && (
-        <div className="leaderboard-error">
+        <div className="leaderboard-error" role="alert">
           <p>{error}</p>
           <button 
             className="retry-button winxp-button"
             onClick={() => fetchScores(true)}
+            type="button"
           >
-            <span className="retry-icon">↻</span> Retry
+            <span className="retry-icon" aria-hidden="true">↻</span> Retry
           </button>
         </div>
       )}
       
       {!isOnline && !loading && (
-        <div className="connection-status offline">
+        <div className="connection-status offline" role="status">
           <span>⚠️ Offline Mode</span>
           <button 
             className="retry-button small winxp-button"
             onClick={() => fetchScores(true)}
+            type="button"
+            aria-label="Retry connection"
           >
-            <span className="retry-icon">↻</span>
+            <span className="retry-icon" aria-hidden="true">↻</span>
           </button>
         </div>
       )}
       
-      {!loading && !error && userBestScore && (
-        <div className="user-best-score">
-          <h3>Your Best Score</h3>
-          <div className="score-card highlight">
-            <div className="score-info">
-              <div className="score-user">
-                <img 
-                  src={currentUser.photoURL || '/default-avatar.png'} 
-                  alt="User" 
-                  className="user-avatar"
-                  onError={handleAvatarError} 
-                />
-                <span>{currentUser.displayName || 'You'}</span>
-              </div>
-              <div className="lb-score-value">{userBestScore.score}</div>
-            </div>
-            <div className="score-date">{formatDate(userBestScore.timestamp)}</div>
-          </div>
-        </div>
-      )}
+      {!loading && !error && userBestScore && userScoreSection}
       
       {!loading && !error && (
         <div className="top-scores">
@@ -259,13 +313,13 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
                   <div className="score-info">
                     <div className="score-user">
                       <img 
-                        src={score.user.photoURL || '/default-avatar.png'} 
-                        alt="User" 
+                        src={score.user?.photoURL || '/default-avatar.png'} 
+                        alt={score.user?.displayName || 'User'} 
                         className="user-avatar"
                         onError={handleAvatarError}
                         loading="lazy"
                       />
-                      <span>{score.user.displayName}</span>
+                      <span>{score.user?.displayName || 'Unknown User'}</span>
                     </div>
                     <div className="lb-score-value">{score.score}</div>
                   </div>

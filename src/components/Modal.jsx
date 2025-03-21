@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, memo } from 'react';
 import './Modal.css';
 
 const Modal = ({ 
@@ -13,63 +13,55 @@ const Modal = ({
 }) => {
   const modalRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+  const handleClickOutside = useCallback((event) => {
+    if (modalRef.current && !modalRef.current.contains(event.target)) {
+      onClose();
     }
+  }, [onClose]);
+
+  const handleEscKey = useCallback((event) => {
+    if (event.key === 'Escape') {
+      onClose();
+    }
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscKey);
+    document.body.style.overflow = 'hidden';
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscKey);
-    }
-
-    return () => {
       document.removeEventListener('keydown', handleEscKey);
-    };
-  }, [isOpen, onClose]);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-
-    return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [isOpen]);
+  }, [isOpen, handleClickOutside, handleEscKey]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
+    <div 
+      className="modal-overlay" 
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
       <div 
         ref={modalRef}
         className={`modal-container ${className}`}
         style={{ width, height }}
       >
         <div className="modal-header">
-          <div className="modal-title">{title}</div>
+          <div className="modal-title" id="modal-title">{title}</div>
           {showCloseButton && (
-            <button className="modal-close" onClick={onClose}>
+            <button 
+              className="modal-close" 
+              onClick={onClose}
+              aria-label="Close modal"
+              type="button"
+            >
               ✕
             </button>
           )}
@@ -82,4 +74,4 @@ const Modal = ({
   );
 };
 
-export default Modal; 
+export default memo(Modal); 

@@ -1,43 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { useAuth } from '../firebase/AuthContext';
 import './Login.css';
 
 const Login = ({ onClose }) => {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, authError, clearAuthError } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = useCallback(async () => {
+    if (loading) return;
+    
     try {
       setLoading(true);
       setError(null);
+      clearAuthError?.();
+      
       await signInWithGoogle();
       if (onClose) onClose();
     } catch (err) {
       console.error('Login error:', err);
-      setError('Failed to sign in. Please try again.');
+      setError(err.message || 'Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, signInWithGoogle, onClose, clearAuthError]);
+
+  const errorMessage = authError || error;
 
   return (
     <div className="login-container">
-      
       <div className="login-content">
         <p className="login-message">
           Sign in to track your scores and compete on the leaderboards!
         </p>
         
-        {error && <div className="login-error">{error}</div>}
+        {errorMessage && <div className="login-error">{errorMessage}</div>}
         
         <button 
           className="google-login-button" 
           onClick={handleGoogleLogin}
           disabled={loading}
+          type="button"
+          aria-busy={loading}
         >
           <div className="google-icon">
-            <svg viewBox="0 0 24 24" width="18" height="18">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -69,4 +76,4 @@ const Login = ({ onClose }) => {
   );
 };
 
-export default Login; 
+export default memo(Login); 
