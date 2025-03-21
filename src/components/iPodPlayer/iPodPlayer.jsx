@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import './iPodPlayer.css';
 
-const IPodPlayer = ({ onClose }) => {
-  const [token, setToken] = useState('');
+const DEFAULT_ARTIST_IMAGE = 'https://via.placeholder.com/300x300?text=Artist';
+const DEFAULT_ALBUM_IMAGE = 'https://via.placeholder.com/300x300?text=Album';
+
+const IPodPlayer = memo(({ onClose }) => {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [playlist, setPlaylist] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,377 +16,389 @@ const IPodPlayer = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [audioError, setAudioError] = useState(null);
-  const [player, setPlayer] = useState(null);
-  const [deviceId, setDeviceId] = useState(null);
-  const [isPremium, setIsPremium] = useState(false);
   
   const audioRef = useRef(null);
   
-  const CLIENT_ID = import.meta.env.SPOTIFY_CLIENT_ID;
-  const REDIRECT_URI = import.meta.env.REDIRECT_URI;
-  const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
-  const RESPONSE_TYPE = "token";
-  const SCOPES = 'user-read-private user-read-email streaming user-library-read user-modify-playback-state';
-  
-  useEffect(() => {
-    if (!CLIENT_ID) {
-      setError("Spotify Client ID is missing");
-      return;
-    }
-    
-    const hash = window.location.hash;
-    let token = window.localStorage.getItem("token");
-    
-    if (!token && hash) {
-      try {
-        const hashParts = hash.substring(1).split("&");
-        const accessTokenPart = hashParts.find(elem => elem.startsWith("access_token"));
-        
-        if (accessTokenPart) {
-          token = accessTokenPart.split("=")[1];
-          window.location.hash = "";
-          window.localStorage.setItem("token", token);
-        }
-      } catch (error) {
-        setError("Authentication error");
-      }
-    }
-    
-    setToken(token || '');
-    
-    if (token) {
-      fetch('https://api.spotify.com/v1/me', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        const hasPremium = data.product === 'premium';
-        setIsPremium(hasPremium);
-        
-        if (hasPremium) {
-          initializeSpotifySDK(token);
-        }
-      })
-      .catch(() => setError('Account verification failed'));
-    }
-    
-    return () => {
-      audioRef.current?.pause();
-      player?.disconnect();
-    };
-  }, [CLIENT_ID]);
-
-  const initializeSpotifySDK = (token) => {
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
-    
-    script.onload = () => {
-      window.onSpotifyWebPlaybackSDKReady = () => {
-        const spotifyPlayer = new window.Spotify.Player({
-          name: 'iPod Player',
-          getOAuthToken: cb => { cb(token); },
-          volume: 0.5
-        });
-
-        spotifyPlayer.addListener('ready', ({ device_id }) => {
-          setDeviceId(device_id);
-          fetch('https://api.spotify.com/v1/me/player', {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              device_ids: [device_id],
-              play: false,
-            })
-          });
-        });
-
-        spotifyPlayer.addListener('not_ready', () => setError('Playback device offline'));
-        spotifyPlayer.addListener('initialization_error', () => setError('Player initialization failed'));
-        spotifyPlayer.addListener('authentication_error', () => { setError('Authentication failed'); logout(); });
-        spotifyPlayer.addListener('account_error', () => setError('Premium account required'));
-        spotifyPlayer.addListener('playback_error', () => setError('Playback failed'));
-        spotifyPlayer.addListener('player_state_changed', state => state && setIsPlaying(!state.paused));
-
-        spotifyPlayer.connect();
-        setPlayer(spotifyPlayer);
-      };
-    };
-
-    document.body.appendChild(script);
-  };
-
-  const searchDeezerPreview = async (trackName, artistName) => {
-    const CORS_PROXY = 'https://corsproxy.io/';
-    const searchQuery = encodeURIComponent(`${trackName} ${artistName}`);
-    const DEEZER_API = 'https://api.deezer.com/search';
-    
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
-      const response = await fetch(
-        `${CORS_PROXY}${encodeURIComponent(`${DEEZER_API}?q=${searchQuery}`)}`,
-        { signal: controller.signal }
-      );
-      
-      clearTimeout(timeoutId);
-      if (!response.ok) return null;
-      
-      const data = await response.json();
-      const track = data.data?.[0];
-      return track?.preview || null;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        return null;
-      }
-      return null;
-    }
-  };
-
-  const handleTrackSelect = async (track) => {
-    setCurrentTrack(track);
-    setActiveMenu('now-playing');
-    setAudioError(null);
-    setIsPlaying(false);
-    
-    if (isPremium && deviceId) {
-      fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          uris: [`spotify:track:${track.id}`]
-        })
-      })
-      .then(() => setIsPlaying(true))
-      .catch(() => setAudioError('Playback failed'));
-    } else {
-      try {
-        let previewUrl = track.previewUrl;
-        
-        if (!previewUrl) {
-          previewUrl = await searchDeezerPreview(track.title, track.artist);
-        }
-        
-        if (previewUrl) {
-          const updatedTrack = { ...track, previewUrl };
-          setCurrentTrack(updatedTrack);
-          
-          if (audioRef.current) {
-            audioRef.current.src = previewUrl;
-            await audioRef.current.load();
-            
-            setTimeout(() => {
-              audioRef.current.play()
-                .then(() => {
-                  setIsPlaying(true);
-                  setAudioError(null);
-                })
-                .catch(() => {
-                  setAudioError(null);
-                  setIsPlaying(false);
-                });
-            }, 100);
-          }
-        } else {
-          setAudioError('No preview available');
-          setIsPlaying(false);
-        }
-      } catch (error) {
-        setAudioError(null);
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  const handlePlay = async () => {
-    if (!currentTrack) return;
-    
-    if (isPremium) {
-      try {
-        if (!deviceId) {
-          setError('Playback device not ready');
-          return;
-        }
-
-        if (isPlaying) {
-          await fetch(`https://api.spotify.com/v1/me/player/pause`, {
-            method: 'PUT',
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setIsPlaying(false);
-        } else {
-          const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              uris: [`spotify:track:${currentTrack.id}`]
-            })
-          });
-
-          if (!response.ok) throw new Error();
-          setIsPlaying(true);
-        }
-        setAudioError(null);
-      } catch {
-        setAudioError('Playback failed');
-        setIsPlaying(false);
-      }
-    } else {
-      try {
-        if (!currentTrack.previewUrl) {
-          const deezerPreview = await searchDeezerPreview(currentTrack.title, currentTrack.artist);
-          if (deezerPreview) {
-            setCurrentTrack({ ...currentTrack, previewUrl: deezerPreview });
-            if (audioRef.current) {
-              audioRef.current.src = deezerPreview;
-              await audioRef.current.load();
-            }
-          } else {
-            setAudioError("No preview available");
-            return;
-          }
-        }
-
-        if (isPlaying) {
-          audioRef.current?.pause();
-          setIsPlaying(false);
-        } else if (audioRef.current) {
-          try {
-            audioRef.current.currentTime = 0;
-            await audioRef.current.load();
-            await audioRef.current.play();
-            setIsPlaying(true);
-            setAudioError(null);
-          } catch {
-            setAudioError('Preview playback failed');
-            setIsPlaying(false);
-          }
-        }
-      } catch {
-        setAudioError('Preview playback failed');
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  const searchSpotify = async () => {
-    if (!searchQuery.trim() || !token) return;
-    
+  const searchItunesAPI = useCallback(async (query, type = 'song') => {
     setIsLoading(true);
+    
     try {
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=${activeMenu === 'artists' ? 'artist' : 'track'}&limit=20`,
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
+      let searchUrl;
       
-      if (!response.ok) throw new Error();
+      if (type === 'artist') {
+        searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=musicArtist&attribute=artistTerm&limit=20`;
+      } else {
+        searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&attribute=songTerm&limit=20`;
+      }
+      
+      const response = await fetch(searchUrl);
+      
+      if (!response.ok) throw new Error("iTunes search failed");
       
       const data = await response.json();
       
-      if (activeMenu === 'artists') {
-        setArtists(data.artists.items.map(artist => ({
-          id: artist.id,
-          name: artist.name,
-          imageUrl: artist.images[0]?.url
+      if (type === 'artist') {
+        const uniqueArtists = Array.from(new Map(
+          data.results.map(artist => [artist.artistId, artist])
+        ).values());
+        
+        setArtists(uniqueArtists.map(artist => ({
+          id: artist.artistId,
+          name: artist.artistName,
+          imageUrl: artist.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ARTIST_IMAGE
         })));
       } else {
-        setPlaylist(data.tracks.items.map(track => ({
-          id: track.id,
-          title: track.name,
-          artist: track.artists[0].name,
-          duration: track.duration_ms / 1000,
-          imageUrl: track.album.images[0]?.url,
-          uri: track.uri,
-          previewUrl: track.preview_url,
+        const songResults = data.results.map(track => ({
+          id: track.trackId,
+          title: track.trackName,
+          artist: track.artistName,
+          duration: track.trackTimeMillis / 1000,
+          imageUrl: track.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ALBUM_IMAGE,
+          previewUrl: track.previewUrl,
           type: 'track'
-        })));
+        }));
+        
+        if (songResults.length === 0) {
+          const backupSearchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=20`;
+          const backupResponse = await fetch(backupSearchUrl);
+          
+          if (backupResponse.ok) {
+            const backupData = await backupResponse.json();
+            
+            const backupResults = backupData.results.map(track => ({
+              id: track.trackId,
+              title: track.trackName,
+              artist: track.artistName, 
+              duration: track.trackTimeMillis / 1000,
+              imageUrl: track.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ALBUM_IMAGE,
+              previewUrl: track.previewUrl,
+              type: 'track'
+            }));
+            
+            setPlaylist(backupResults);
+          } else {
+            setPlaylist(songResults);
+          }
+        } else {
+          setPlaylist(songResults);
+        }
       }
-    } catch {
+    } catch (error) {
+      console.error("iTunes API error:", error);
       setError('Search failed');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleNext = () => {
-    if (!playlist.length) return;
-    const currentIndex = currentTrack ? playlist.findIndex(track => track.id === currentTrack.id) : -1;
-    const nextIndex = (currentIndex + 1) % playlist.length;
-    handleTrackSelect(playlist[nextIndex]);
-  };
-
-  const handlePrev = () => {
-    if (!playlist.length) return;
-    const currentIndex = currentTrack ? playlist.findIndex(track => track.id === currentTrack.id) : -1;
-    const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-    handleTrackSelect(playlist[prevIndex]);
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-      setDuration(audioRef.current.duration);
-    }
-  };
-
-  const formatTime = (time) => {
-    if (isNaN(time)) return '0:00';
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-
-  const login = () => {
-    window.location = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPES}`;
-  };
-
-  const logout = () => {
-    setToken("");
-    window.localStorage.removeItem("token");
-  };
-
-  const handleMenuClick = (menu) => setActiveMenu(menu);
-
-  const handleArtistSelect = async (artist) => {
+  }, []);
+  
+  const getArtistTracks = useCallback(async (artistId, artistName) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://api.spotify.com/v1/artists/${artist.id}/top-tracks?market=US`,
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
+      // First try direct lookup with artist ID
+      const searchUrl = `https://itunes.apple.com/lookup?id=${artistId}&entity=song&limit=50`;
+      
+      const response = await fetch(searchUrl);
       
       if (!response.ok) throw new Error();
       
       const data = await response.json();
-      setPlaylist(data.tracks.map(track => ({
-        id: track.id,
-        title: track.name,
-        artist: track.artists[0].name,
-        duration: track.duration_ms / 1000,
-        imageUrl: track.album.images[0]?.url,
-        uri: track.uri,
-        previewUrl: track.preview_url,
-        type: 'track'
-      })));
+      
+      // Filter to include only songs by this artist (exact name match)
+      const exactArtistName = artistName.toLowerCase().trim();
+      let tracks = data.results
+        .filter(item => 
+          item.wrapperType === 'track' && 
+          item.artistName.toLowerCase().trim() === exactArtistName)
+        .map(track => ({
+          id: track.trackId,
+          title: track.trackName,
+          artist: track.artistName,
+          duration: track.trackTimeMillis / 1000,
+          imageUrl: track.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ALBUM_IMAGE,
+          previewUrl: track.previewUrl,
+          type: 'track'
+        }));
+      
+      // If no tracks found with lookup, try searching directly by artist name
+      if (tracks.length < 3) {
+        const backupUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&attribute=artistTerm&limit=50`;
+        
+        const backupResponse = await fetch(backupUrl);
+        
+        if (backupResponse.ok) {
+          const backupData = await backupResponse.json();
+          
+          // Filter to include only songs by this artist (exact name match)
+          const backupTracks = backupData.results
+            .filter(item => 
+              item.artistName.toLowerCase().trim() === exactArtistName)
+            .map(track => ({
+              id: track.trackId,
+              title: track.trackName,
+              artist: track.artistName,
+              duration: track.trackTimeMillis / 1000,
+              imageUrl: track.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ALBUM_IMAGE,
+              previewUrl: track.previewUrl,
+              type: 'track'
+            }));
+          
+          if (backupTracks.length > tracks.length) {
+            tracks = backupTracks;
+          }
+        }
+      }
+      
+      // If still no tracks found with exact match, use less strict matching
+      if (tracks.length === 0) {
+        const fallbackUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&limit=25`;
+        
+        const fallbackResponse = await fetch(fallbackUrl);
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          tracks = fallbackData.results
+            .filter(item => 
+              item.artistName.toLowerCase().includes(artistName.toLowerCase().trim().split(' ')[0]))
+            .map(track => ({
+              id: track.trackId,
+              title: track.trackName,
+              artist: track.artistName,
+              duration: track.trackTimeMillis / 1000,
+              imageUrl: track.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ALBUM_IMAGE,
+              previewUrl: track.previewUrl,
+              type: 'track'
+            }));
+        }
+      }
+      
+      setPlaylist(tracks);
       setActiveMenu('songs');
     } catch {
       setError('Failed to fetch artist tracks');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  const handleTrackSelect = useCallback(async (track) => {
+    setCurrentTrack(track);
+    setActiveMenu('now-playing');
+    setAudioError(null);
+    setIsPlaying(false);
+    setIsLoading(true);
+    
+    try {
+      if (track.previewUrl) {
+        const updatedTrack = { ...track };
+        setCurrentTrack(updatedTrack);
+        
+        if (audioRef.current) {
+          try {
+            audioRef.current.src = track.previewUrl;
+            await audioRef.current.load();
+            
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setIsPlaying(true);
+                  setAudioError(null);
+                })
+                .catch((error) => {
+                  console.error("Audio playback error:", error);
+                  // Handle autoplay restrictions
+                  if (error.name === "NotAllowedError") {
+                    setAudioError("Click play to start (autoplay restricted)");
+                  } else {
+                    setAudioError("Preview playback failed - try again");
+                  }
+                  setIsPlaying(false);
+                });
+            }
+          } catch (error) {
+            console.error("Audio setup error:", error);
+            setAudioError("Preview setup failed - try another track");
+            setIsPlaying(false);
+          }
+        }
+      } else {
+        setAudioError('No preview available for this track');
+        setIsPlaying(false);
+      }
+    } catch (error) {
+      console.error("Track selection error:", error);
+      setAudioError("Failed to play track - try another");
+      setIsPlaying(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handlePlay = useCallback(async () => {
+    if (!currentTrack) return;
+    
+    try {
+      if (isPlaying) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+      } else if (audioRef.current) {
+        try {
+          if (!audioRef.current.src || audioRef.current.src === window.location.href) {
+            setAudioError("No audio source available");
+            return;
+          }
+          
+          if (audioRef.current.currentTime >= audioRef.current.duration - 1) {
+            audioRef.current.currentTime = 0;
+          }
+          
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                setIsPlaying(true);
+                setAudioError(null);
+              })
+              .catch((error) => {
+                console.error("Play control error:", error);
+                if (error.name === "NotAllowedError") {
+                  setAudioError("Playback blocked by browser - try again");
+                } else {
+                  setAudioError("Preview playback failed - try another track");
+                }
+                setIsPlaying(false);
+              });
+          }
+        } catch (error) {
+          console.error("Audio play error:", error);
+          setAudioError('Preview playback failed - try another track');
+          setIsPlaying(false);
+        }
+      }
+    } catch (error) {
+      console.error("Play control error:", error);
+      setAudioError('Player error - try another track');
+      setIsPlaying(false);
+    }
+  }, [currentTrack, isPlaying]);
+
+  const handleSearch = useCallback(async () => {
+    if (!searchQuery.trim()) return;
+    
+    try {
+      await searchItunesAPI(searchQuery, activeMenu === 'artists' ? 'artist' : 'song');
+      
+      // Clear search query after search is performed
+      // This gives better feedback to the user that their search was processed
+      setSearchQuery('');
+    } catch (error) {
+      console.error("Search error:", error);
+      setError("Search failed");
+    }
+  }, [searchQuery, activeMenu, searchItunesAPI]);
+
+  const handleNext = useCallback(() => {
+    if (!playlist.length) return;
+    const currentIndex = currentTrack ? playlist.findIndex(track => track.id === currentTrack.id) : -1;
+    const nextIndex = (currentIndex + 1) % playlist.length;
+    handleTrackSelect(playlist[nextIndex]);
+  }, [playlist, currentTrack, handleTrackSelect]);
+
+  const handlePrev = useCallback(() => {
+    if (!playlist.length) return;
+    const currentIndex = currentTrack ? playlist.findIndex(track => track.id === currentTrack.id) : -1;
+    const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+    handleTrackSelect(playlist[prevIndex]);
+  }, [playlist, currentTrack, handleTrackSelect]);
+
+  const handleTimeUpdate = useCallback(() => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      setDuration(audioRef.current.duration);
+    }
+  }, []);
+
+  const formatTime = useCallback((time) => {
+    if (isNaN(time)) return '0:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }, []);
+
+  const handleMenuClick = useCallback((menu) => {
+    // Clear search query and results when changing pages
+    if (menu !== activeMenu) {
+      if ((activeMenu === 'songs' || activeMenu === 'artists') && 
+          (menu !== 'songs' && menu !== 'artists')) {
+        setSearchQuery('');
+        if (menu !== 'now-playing') {
+          setPlaylist([]);
+          setArtists([]);
+        }
+      }
+    }
+    
+    setActiveMenu(menu);
+  }, [activeMenu]);
+
+  const handleBackButton = useCallback(() => {
+    // When going back from search screens, clear search query and results
+    if (activeMenu === 'songs' || activeMenu === 'artists') {
+      setSearchQuery('');
+      setPlaylist([]);
+      setArtists([]);
+    }
+    setActiveMenu('main');
+  }, [activeMenu]);
+
+  const handleArtistSelect = useCallback(async (artist) => {
+    await getArtistTracks(artist.id, artist.name);
+  }, [getArtistTracks]);
+
+  // Clean up audio resources when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
+
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  }, [handleSearch]);
+
+  // Memoize song and artist items to improve rendering performance
+  const renderArtistItem = useCallback((artist) => (
+    <div 
+      key={artist.id} 
+      className="artist-item"
+      onClick={() => handleArtistSelect(artist)}
+    >
+      <div className="artist-name">{artist.name}</div>
+    </div>
+  ), [handleArtistSelect]);
+
+  const renderSongItem = useCallback((track) => (
+    <div 
+      key={track.id} 
+      className="song-item"
+      onClick={() => handleTrackSelect(track)}
+    >
+      {track.imageUrl && (
+        <div className="song-image">
+          <img src={track.imageUrl} alt={track.title} />
+        </div>
+      )}
+      <div className="song-info">
+        <div className="song-title">{track.title}</div>
+        <div className="song-artist">{track.artist}</div>
+      </div>
+    </div>
+  ), [handleTrackSelect]);
 
   return (
     <div className="ipod-container">
@@ -408,145 +422,103 @@ const IPodPlayer = ({ onClose }) => {
           </div>
         )}
         
-        {!token ? (
-          <div className="login-screen">
-            <div className="spotify-logo">
-              <img src="https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png" alt="Spotify Logo" />
+        <>
+          {activeMenu === 'main' && (
+            <div className="ipod-menu">
+              <div className="menu-item" onClick={() => handleMenuClick('songs')}>Songs</div>
+              <div className="menu-item" onClick={() => handleMenuClick('artists')}>Artists</div>
+              {currentTrack && (
+                <div className="menu-item" onClick={() => handleMenuClick('now-playing')}>Now Playing</div>
+              )}
             </div>
-            <p>Connect to Spotify</p>
-            <button className="spotify-login-button" onClick={login}>Connect</button>
-          </div>
-        ) : (
-          <>
-            {activeMenu === 'main' && (
-              <div className="ipod-menu">
-                <div className="menu-item" onClick={() => handleMenuClick('songs')}>Songs</div>
-                <div className="menu-item" onClick={() => handleMenuClick('artists')}>Artists</div>
-                {currentTrack && (
-                  <div className="menu-item" onClick={() => handleMenuClick('now-playing')}>Now Playing</div>
+          )}
+          
+          {activeMenu === 'artists' && (
+            <div className="ipod-artists">
+              <div className="menu-header">
+                <button onClick={handleBackButton}>Back</button>
+                <h3>Artists</h3>
+              </div>
+              <div className="search-bar">
+                <input 
+                  type="text" 
+                  placeholder="Search artists..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+                <button onClick={handleSearch}>Search</button>
+              </div>
+              <div className="artist-list">
+                {artists.map(renderArtistItem)}
+              </div>
+            </div>
+          )}
+          
+          {activeMenu === 'songs' && (
+            <div className="ipod-songs">
+              <div className="menu-header">
+                <button onClick={handleBackButton}>Back</button>
+                <h3>Songs</h3>
+              </div>
+              <div className="search-bar">
+                <input 
+                  type="text" 
+                  placeholder="Search songs..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+                <button onClick={handleSearch}>Search</button>
+              </div>
+              <div className="song-list">
+                {playlist.map(renderSongItem)}
+              </div>
+            </div>
+          )}
+          
+          {activeMenu === 'now-playing' && currentTrack && (
+            <div className="now-playing">
+              <div className="menu-header">
+                <button onClick={handleBackButton}>Back</button>
+                <h3>Now Playing</h3>
+              </div>
+              <div className="track-info">
+                {currentTrack.imageUrl && (
+                  <div className="album-art">
+                    <img src={currentTrack.imageUrl} alt="Album Art" />
+                  </div>
                 )}
-                <div className="menu-item" onClick={logout}>Disconnect</div>
-              </div>
-            )}
-            
-            {activeMenu === 'artists' && (
-              <div className="ipod-artists">
-                <div className="menu-header">
-                  <button onClick={() => handleMenuClick('main')}>Back</button>
-                  <h3>Artists</h3>
-                </div>
-                <div className="search-bar">
-                  <input 
-                    type="text" 
-                    placeholder="Search artists..." 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && searchSpotify()}
-                  />
-                  <button onClick={searchSpotify}>Search</button>
-                </div>
-                <div className="artist-list">
-                  {artists.map(artist => (
-                    <div 
-                      key={artist.id} 
-                      className="artist-item"
-                      onClick={() => handleArtistSelect(artist)}
-                    >
-                      {artist.imageUrl && (
-                        <div className="artist-image">
-                          <img src={artist.imageUrl} alt={artist.name} />
-                        </div>
-                      )}
-                      <div className="artist-name">{artist.name}</div>
+                <div className="track-title">{currentTrack.title}</div>
+                <div className="track-artist">{currentTrack.artist}</div>
+                
+                {audioError ? (
+                  <div className="audio-error">{audioError}</div>
+                ) : (
+                  <>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress" 
+                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                      ></div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {activeMenu === 'songs' && (
-              <div className="ipod-songs">
-                <div className="menu-header">
-                  <button onClick={() => handleMenuClick('main')}>Back</button>
-                  <h3>Songs</h3>
-                </div>
-                <div className="search-bar">
-                  <input 
-                    type="text" 
-                    placeholder="Search songs..." 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && searchSpotify()}
-                  />
-                  <button onClick={searchSpotify}>Search</button>
-                </div>
-                <div className="song-list">
-                  {playlist.map(track => (
-                    <div 
-                      key={track.id} 
-                      className="song-item"
-                      onClick={() => handleTrackSelect(track)}
-                    >
-                      {track.imageUrl && (
-                        <div className="song-image">
-                          <img src={track.imageUrl} alt={track.title} />
-                        </div>
-                      )}
-                      <div className="song-info">
-                        <div className="song-title">{track.title}</div>
-                        <div className="song-artist">{track.artist}</div>
-                      </div>
+                    <div className="time-display">
+                      {formatTime(currentTime)} / {formatTime(duration)}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
-            )}
-            
-            {activeMenu === 'now-playing' && currentTrack && (
-              <div className="now-playing">
-                <div className="menu-header">
-                  <button onClick={() => handleMenuClick('main')}>Back</button>
-                  <h3>Now Playing</h3>
-                </div>
-                <div className="track-info">
-                  {currentTrack.imageUrl && (
-                    <div className="album-art">
-                      <img src={currentTrack.imageUrl} alt="Album Art" />
-                    </div>
-                  )}
-                  <div className="track-title">{currentTrack.title}</div>
-                  <div className="track-artist">{currentTrack.artist}</div>
-                  
-                  {audioError ? (
-                    <div className="audio-error">{audioError}</div>
-                  ) : (
-                    <>
-                      <div className="progress-bar">
-                        <div 
-                          className="progress" 
-                          style={{ width: `${(currentTime / duration) * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="time-display">
-                        {formatTime(currentTime)} / {formatTime(duration)}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </>
-        )}
+            </div>
+          )}
+        </>
         
-        {!isPremium && (
-          <audio
-            ref={audioRef}
-            src={currentTrack?.previewUrl || ''}
-            onTimeUpdate={handleTimeUpdate}
-            onEnded={handleNext}
-            onError={() => setAudioError('Preview playback failed')}
-          />
-        )}
+        <audio
+          ref={audioRef}
+          src={currentTrack?.previewUrl || ''}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={handleNext}
+          onError={() => setAudioError('Preview playback failed')}
+        />
       </div>
       
       <div className="ipod-controls">
@@ -564,6 +536,8 @@ const IPodPlayer = ({ onClose }) => {
       </div>
     </div>
   );
-};
+});
+
+IPodPlayer.displayName = 'IPodPlayer';
 
 export default IPodPlayer; 
