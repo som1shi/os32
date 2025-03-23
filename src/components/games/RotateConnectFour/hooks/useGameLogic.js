@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const ROWS = 7;
 const COLS = 7;
@@ -12,6 +12,7 @@ export default function useGameLogic() {
     const [winner, setWinner] = useState(null);
     const [isRotating, setIsRotating] = useState(false);
     const [showRules, setShowRules] = useState(false);
+    const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const diceFaceRef = useRef(null);
     const [isDiceRolling, setIsDiceRolling] = useState(false);
 
@@ -19,8 +20,8 @@ export default function useGameLogic() {
         return Array(ROWS).fill().map(() => Array(COLS).fill(null));
     }
 
-    const dropPiece = (col) => {
-        if (gameOver || diceRoll !== null || isRotating || isDiceRolling) return;
+    const dropPiece = useCallback((col) => {
+        if (gameOver || !isPlayerTurn || isRotating || isDiceRolling) return;
         
         const newBoard = [...board.map(row => [...row])];
         
@@ -36,6 +37,7 @@ export default function useGameLogic() {
                 }
                 
                 setBoard(newBoard);
+                setIsPlayerTurn(false);
                 
                 setTimeout(() => {
                     rollDice();
@@ -43,7 +45,7 @@ export default function useGameLogic() {
                 return;
             }
         }
-    };
+    }, [board, currentPlayer, gameOver, isPlayerTurn, isRotating, isDiceRolling]);
 
     const rollDice = () => {
         setIsDiceRolling(true);
@@ -70,12 +72,13 @@ export default function useGameLogic() {
                 setTimeout(() => {
                     setDiceRoll(null);
                     setIsDiceRolling(false);
+                    setIsPlayerTurn(true);
                 }, 1500);
             }
         }, 800);
     };
 
-    const rotateBoard = (direction) => {
+    const rotateBoard = useCallback((direction) => {
         if (!canRotate || isRotating) return;
         
         setIsRotating(true);
@@ -105,6 +108,7 @@ export default function useGameLogic() {
                 setCurrentPlayer(currentPlayer === 'red' ? 'yellow' : 'red');
                 boardElement.classList.remove('rotating-left', 'rotating-right');
                 setIsRotating(false);
+                setIsPlayerTurn(true);
             }, 550);
         } else {
             setBoard(finalBoard);
@@ -112,8 +116,9 @@ export default function useGameLogic() {
             setCanRotate(false);
             setCurrentPlayer(currentPlayer === 'red' ? 'yellow' : 'red');
             setIsRotating(false);
+            setIsPlayerTurn(true);
         }
-    };
+    }, [board, canRotate, currentPlayer, isRotating]);
 
     const applyGravity = (inputBoard) => {
         const newBoard = createEmptyBoard();
@@ -183,7 +188,7 @@ export default function useGameLogic() {
         return false;
     };
 
-    const shareGame = () => {
+    const shareGame = useCallback(() => {
         const shareText = `I just won a game of Rotate Connect Four as ${winner.toUpperCase()}! Can you beat my strategy? Play now!`;
 
         if (navigator.share) {
@@ -196,7 +201,7 @@ export default function useGameLogic() {
         } else {
             copyToClipboard(shareText);
         }
-    };
+    }, [winner]);
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text)
@@ -209,7 +214,7 @@ export default function useGameLogic() {
             });
     };
 
-    const resetGame = () => {
+    const resetGame = useCallback(() => {
         setBoard(createEmptyBoard());
         setCurrentPlayer('red');
         setGameOver(false);
@@ -218,7 +223,8 @@ export default function useGameLogic() {
         setWinner(null);
         setIsRotating(false);
         setIsDiceRolling(false);
-    };
+        setIsPlayerTurn(true);
+    }, []);
 
     return {
         board,
@@ -232,6 +238,7 @@ export default function useGameLogic() {
         setShowRules,
         diceFaceRef,
         isDiceRolling,
+        isPlayerTurn,
         dropPiece,
         rotateBoard,
         shareGame,

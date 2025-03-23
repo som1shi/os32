@@ -179,7 +179,7 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
 
   const handleAvatarError = useCallback((e) => {
     e.target.onerror = null; 
-    e.target.src = '/default-avatar.png';
+    e.target.src = '/default-avatar.svg';
   }, []);
 
   const dropdownOptions = useMemo(() => {
@@ -203,7 +203,7 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
           <div className="score-info">
             <div className="score-user">
               <img 
-                src={currentUser.photoURL || '/default-avatar.png'} 
+                src={currentUser.photoURL || '/default-avatar.svg'} 
                 alt={currentUser.displayName || 'You'} 
                 className="user-avatar"
                 onError={handleAvatarError} 
@@ -313,7 +313,7 @@ const Leaderboard = ({ initialGame, initialTime, limitCount = 5 }) => {
                   <div className="score-info">
                     <div className="score-user">
                       <img 
-                        src={score.user?.photoURL || '/default-avatar.png'} 
+                        src={score.user?.photoURL || '/default-avatar.svg'} 
                         alt={score.user?.displayName || 'User'} 
                         className="user-avatar"
                         onError={handleAvatarError}

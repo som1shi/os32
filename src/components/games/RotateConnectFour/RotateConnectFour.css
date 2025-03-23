@@ -1,4 +1,4 @@
-.rotate-connect-four {
+.connect-game {
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -12,7 +12,7 @@
     box-sizing: border-box;
 }
 
-.rotate-connect-four .window-header {
+.connect-window-header {
     background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
     height: 32px;
     display: flex;
@@ -25,7 +25,7 @@
     user-select: none;
 }
 
-.rotate-connect-four .window-title {
+.connect-window-title {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -34,12 +34,12 @@
     font-family: 'Tahoma', sans-serif;
 }
 
-.rotate-connect-four .window-controls {
+.connect-window-controls {
     display: flex;
     gap: 2px;
 }
 
-.rotate-connect-four .window-button {
+.connect-window-button {
     width: 22px;
     height: 22px;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -52,30 +52,30 @@
     border-radius: 0;
 }
 
-.rotate-connect-four .window-button.minimize {
+.connect-window-button.minimize {
     font-size: 14px;
     line-height: 14px;
 }
 
-.rotate-connect-four .window-button.maximize {
+.connect-window-button.maximize {
     font-size: 12px;
     line-height: 12px;
 }
 
-.rotate-connect-four .window-button.close::after {
+.connect-window-button.close::after {
     content: "×";
     font-size: 16px;
 }
 
-.rotate-connect-four .window-button:hover {
+.connect-window-button:hover {
     background: linear-gradient(180deg, #5ca4ff 0%, #3d8fff 100%);
 }
 
-.rotate-connect-four .window-button.close:hover {
+.connect-window-button.close:hover {
     background: #E81123;
 }
 
-.rotate-connect-four .menu-bar {
+.connect-menu-bar {
     display: flex;
     background: #FFFFFF;
     border-bottom: 1px solid #a2a9b1;
@@ -86,23 +86,23 @@
     z-index: 20;
 }
 
-.rotate-connect-four .menu-item {
+.connect-menu-item {
     color: #000;
     position: relative;
     padding: 2px 10px;
     cursor: pointer;
 }
 
-.rotate-connect-four .menu-item:hover {
+.connect-menu-item:hover {
     background-color: #316AC5;
     color: white;
 }
 
-.rotate-connect-four .menu-item:hover .menu-dropdown {
+.connect-menu-item:hover .connect-menu-dropdown {
     display: block;
 }
 
-.rotate-connect-four .menu-dropdown {
+.connect-menu-item .connect-menu-dropdown {
     display: none;
     position: absolute;
     top: 100%;
@@ -114,18 +114,18 @@
     z-index: 30;
 }
 
-.rotate-connect-four .menu-option {
+.connect-menu-item .connect-menu-option {
     padding: 6px 20px;
     font-size: 13px;
     color: #000;
 }
 
-.rotate-connect-four .menu-option:hover {
+.connect-menu-item .connect-menu-option:hover {
     background-color: #316AC5;
     color: white;
 }
 
-.rotate-connect-four .rules-modal {
+.connect-rules-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -138,7 +138,7 @@
     z-index: 1000;
 }
 
-.rotate-connect-four .rules-content {
+.connect-rules-content {
     background: #ECE9D8;
     padding: 20px;
     border: 2px solid #919B9C;
@@ -148,18 +148,18 @@
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.rotate-connect-four .rules-content h2 {
+.connect-rules-content h2 {
     color: #0054E3;
     margin-top: 0;
     border-bottom: 1px solid #919B9C;
     padding-bottom: 10px;
 }
 
-.rotate-connect-four .rules-content ol {
+.connect-rules-content ol {
     margin-left: 20px;
 }
 
-.rotate-connect-four .rules-content button {
+.connect-rules-content button {
     margin-top: 15px;
     background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
     border: 2px solid;
@@ -173,11 +173,11 @@
     cursor: pointer;
 }
 
-.rotate-connect-four .rules-content button:hover {
+.connect-rules-content button:hover {
     background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
 }
 
-.rotate-connect-four .game-container {
+.connect-game-container {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -192,7 +192,7 @@
     color: #000;
 }
 
-.rotate-connect-four .board {
+.connect-board {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     aspect-ratio: 1;
@@ -207,11 +207,11 @@
     color: #000;
 }
 
-.rotate-connect-four .row {
+.connect-row {
     display: contents;
 }
 
-.rotate-connect-four .cell {
+.connect-cell {
     aspect-ratio: 1;
     width: 60px;
     height: 60px;
@@ -227,22 +227,22 @@
     transition: none;
 }
 
-.rotate-connect-four .cell:hover {
+.connect-cell:hover {
     background: #f0f0f0;
 }
 
-.rotate-connect-four .piece {
+.connect-piece {
     width: 90%;
     height: 90%;
     border-radius: 50%;
     position: relative;
-    animation: rotateCF-dropIn 0.4s ease-out forwards !important;
+    animation: connect-dropIn 0.4s ease-out forwards !important;
     transition: none !important;
     will-change: transform;
     backface-visibility: hidden;
 }
 
-.rotate-connect-four .piece.red {
+.connect-piece.red {
     background: radial-gradient(circle at 30% 30%, #FF5F57, #E0443E);
     box-shadow: 
         inset -2px -2px 6px rgba(0,0,0,0.4),
@@ -250,7 +250,7 @@
         0 3px 5px rgba(0,0,0,0.3);
 }
 
-.rotate-connect-four .piece.yellow {
+.connect-piece.yellow {
     background: radial-gradient(circle at 30% 30%, #FEBC2E, #F5A623);
     box-shadow: 
         inset -2px -2px 6px rgba(0,0,0,0.4),
@@ -258,7 +258,7 @@
         0 3px 5px rgba(0,0,0,0.3);
 }
 
-.rotate-connect-four .controls {
+.connect-controls {
     width: min(65vh, 65vw);
     margin: 0 auto;
     display: flex;
@@ -274,7 +274,7 @@
     color: #000;
 }
 
-.rotate-connect-four .controls-row {
+.connect-controls-row {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -282,7 +282,7 @@
     width: 100%;
 }
 
-.rotate-connect-four .turn-indicator {
+.connect-turn-indicator {
     padding: 8px 12px;
     background: white;
     border: 2px solid;
@@ -296,14 +296,14 @@
     font-weight: bold;
 }
 
-.rotate-connect-four .rotation-controls {
+.connect-rotation-controls {
     display: flex;
     gap: 12px;
     justify-content: center;
     width: 100%;
 }
 
-.rotate-connect-four .controls button {
+.connect-controls button {
     padding: 6px 15px;
     background: linear-gradient(180deg, #EEE 0%, #DDD 45%, #CCC 50%, #DDD 100%);
     border: 2px solid;
@@ -318,11 +318,11 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.rotate-connect-four .controls button:hover {
+.connect-controls button:hover {
     background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
 }
 
-.rotate-connect-four .controls button:active {
+.connect-controls button:active {
     background: linear-gradient(180deg, #DDD 0%, #EEE 45%, #f5f5f5 50%, #EEE 100%);
     border-color: #848484 #fff #fff #848484;
     padding-top: 7px;
@@ -330,16 +330,16 @@
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.rotate-connect-four .controls button:disabled {
+.connect-controls button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.rotate-connect-four .controls-top {
+.connect-controls-top {
     justify-content: space-between;
 }
 
-@keyframes rotateCF-dropIn {
+@keyframes connect-dropIn {
     0% { 
         transform: translateY(-30px) scale(0.8); 
         opacity: 0.8; 
@@ -356,34 +356,34 @@
     }
 }
 
-@keyframes rotateCF-rotateLeft {
+@keyframes connect-rotateLeft {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(-90deg); }
 }
 
-@keyframes rotateCF-rotateRight {
+@keyframes connect-rotateRight {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(90deg); }
 }
 
-.rotate-connect-four .board.rotating-left {
-    animation: rotateCF-rotateLeft 0.5s ease-in-out forwards;
+.connect-board.rotating-left {
+    animation: connect-rotateLeft 0.5s ease-in-out forwards;
 }
 
-.rotate-connect-four .board.rotating-right {
-    animation: rotateCF-rotateRight 0.5s ease-in-out forwards;
+.connect-board.rotating-right {
+    animation: connect-rotateRight 0.5s ease-in-out forwards;
 }
 
-.rotate-connect-four .board.rotating-left .cell, 
-.rotate-connect-four .board.rotating-right .cell {
+.connect-board.rotating-left .connect-cell, 
+.connect-board.rotating-right .connect-cell {
     pointer-events: none;
 }
 
-.rotate-connect-four .board.rotating {
+.connect-board.rotating {
     animation: none;
 }
 
-.rotate-connect-four .dice-container {
+.connect-dice-container {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -397,16 +397,16 @@
     border-radius: 3px;
 }
 
-.rotate-connect-four .dice {
-    width: 30px;
-    height: 30px;
+.connect-dice {
+    width: 40px;
+    height: 40px;
     position: relative;
     perspective: 500px;
     margin: 0;
     flex-shrink: 0;
 }
 
-.rotate-connect-four .dice-face {
+.connect-dice-face {
     width: 100%;
     height: 100%;
     position: relative;
@@ -428,7 +428,7 @@
     transition: transform 0.2s ease-out;
 }
 
-.rotate-connect-four .dice-message {
+.connect-dice-message {
     text-align: center;
     font-size: 12px;
     font-weight: bold;
@@ -439,7 +439,7 @@
     color: #333;
 }
 
-.rotate-connect-four .rules-panel {
+.connect-rules-panel {
     background: white;
     border: 2px solid;
     border-color: #848484 #fff #fff #848484;
@@ -453,7 +453,7 @@
     overflow-y: auto;
 }
 
-.rotate-connect-four .rules-panel h3 {
+.connect-rules-panel h3 {
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 13px;
@@ -461,105 +461,16 @@
     color: #0054E3;
 }
 
-.rotate-connect-four .rules-panel ol {
+.connect-rules-panel ol {
     margin: 0;
     padding-left: 25px;
 }
 
-.rotate-connect-four .rules-panel li {
+.connect-rules-panel li {
     margin-bottom: 6px;
 }
 
-@media (max-height: 700px) {
-    .rotate-connect-four .game-container {
-        padding: 5px;
-        gap: 8px;
-    }
-    
-    .rotate-connect-four .board {
-        width: min(300px, 90vw);
-    }
-    
-    .rotate-connect-four .controls {
-        width: min(300px, 90vw);
-        padding: 6px;
-    }
-    
-    .rotate-connect-four .turn-indicator {
-        padding: 4px 8px;
-    }
-    
-    .rotate-connect-four .controls button {
-        min-width: 60px;
-        padding: 4px 8px;
-    }
-    
-    .rotate-connect-four .controls-row {
-        gap: 6px;
-    }
-}
-
-@media (max-width: 480px) {
-    .rotate-connect-four .game-container {
-        padding: 8px 5px;
-        gap: 8px;
-    }
-    
-    .rotate-connect-four .board {
-        width: 95vw;
-    }
-    
-    .rotate-connect-four .controls {
-        width: 95vw;
-        padding: 6px;
-        gap: 6px;
-    }
-    
-    .rotate-connect-four .dice-container {
-        min-height: 40px;
-        padding: 4px 6px;
-    }
-    
-    .rotate-connect-four .dice {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .rotate-connect-four .controls button {
-        min-width: auto;
-        padding: 4px 6px;
-        font-size: 11px;
-    }
-    
-    .rotate-connect-four .rules-panel {
-        font-size: 10px;
-    }
-    
-    .rotate-connect-four .rules-panel h3 {
-        font-size: 11px;
-    }
-}
-
-@media (max-height: 600px) {
-    .rotate-connect-four .game-container {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .rotate-connect-four .controls {
-        order: 2;
-        width: min(350px, 45%);
-    }
-    
-    .rotate-connect-four .board {
-        order: 1;
-        width: min(320px, 45%);
-    }
-}
-
-.rotate-connect-four .dot {
+.connect-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -569,101 +480,101 @@
     box-shadow: inset 0 0 2px rgba(0,0,0,0.5);
 }
 
-.rotate-connect-four .dice-face .dot {
+.connect-dice-face .connect-dot {
     display: none;
 }
 
-.rotate-connect-four .face-1 .dot-5 { 
+.face-1 .connect-dot-5 { 
     display: block; 
     grid-area: g; 
 }
 
-.rotate-connect-four .face-2 .dot-1 { 
+.face-2 .connect-dot-1 { 
     display: block; 
     grid-area: a; 
 }
-.rotate-connect-four .face-2 .dot-6 { 
+.face-2 .connect-dot-6 { 
     display: block; 
     grid-area: b; 
 }
 
-.rotate-connect-four .face-3 .dot-1 { 
+.face-3 .connect-dot-1 { 
     display: block; 
     grid-area: a; 
 }
-.rotate-connect-four .face-3 .dot-5 { 
+.face-3 .connect-dot-5 { 
     display: block; 
     grid-area: g; 
 }
-.rotate-connect-four .face-3 .dot-6 { 
+.face-3 .connect-dot-6 { 
     display: block; 
     grid-area: b; 
 }
 
-.rotate-connect-four .face-4 .dot-1 { 
+.face-4 .connect-dot-1 { 
     display: block; 
     grid-area: a; 
 }
-.rotate-connect-four .face-4 .dot-3 { 
+.face-4 .connect-dot-3 { 
     display: block; 
     grid-area: c; 
 }
-.rotate-connect-four .face-4 .dot-4 { 
+.face-4 .connect-dot-4 { 
     display: block; 
     grid-area: d; 
 }
-.rotate-connect-four .face-4 .dot-6 { 
+.face-4 .connect-dot-6 { 
     display: block; 
     grid-area: b; 
 }
 
-.rotate-connect-four .face-5 .dot-1 { 
+.face-5 .connect-dot-1 { 
     display: block; 
     grid-area: a; 
 }
-.rotate-connect-four .face-5 .dot-3 { 
+.face-5 .connect-dot-3 { 
     display: block; 
     grid-area: c; 
 }
-.rotate-connect-four .face-5 .dot-5 { 
+.face-5 .connect-dot-5 { 
     display: block; 
     grid-area: g; 
 }
-.rotate-connect-four .face-5 .dot-4 { 
+.face-5 .connect-dot-4 { 
     display: block; 
     grid-area: d; 
 }
-.rotate-connect-four .face-5 .dot-6 { 
+.face-5 .connect-dot-6 { 
     display: block; 
     grid-area: b; 
 }
 
-.rotate-connect-four .face-6 .dot-1 { 
+.face-6 .connect-dot-1 { 
     display: block; 
     grid-area: a; 
 }
-.rotate-connect-four .face-6 .dot-3 { 
+.face-6 .connect-dot-3 { 
     display: block; 
     grid-area: c; 
 }
-.rotate-connect-four .face-6 .dot-4 { 
+.face-6 .connect-dot-4 { 
     display: block; 
     grid-area: d; 
 }
-.rotate-connect-four .face-6 .dot-6 { 
+.face-6 .connect-dot-6 { 
     display: block; 
     grid-area: b; 
 }
-.rotate-connect-four .face-6 .dot-2 { 
+.face-6 .connect-dot-2 { 
     display: block; 
     grid-area: e; 
 }
-.rotate-connect-four .face-6 .dot-5 { 
+.face-6 .connect-dot-5 { 
     display: block; 
     grid-area: f; 
 }
 
-@keyframes rotateCF-rollDice {
+@keyframes connect-rollDice {
     0% { 
         transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateZ(0px); 
     }
@@ -690,23 +601,23 @@
     }
 }
 
-.rotate-connect-four .dice-face.rolling {
-    animation: rotateCF-rollDice 1s ease-in-out;
+.connect-dice-face.rolling {
+    animation: connect-rollDice 1s ease-in-out;
     transform-origin: center center;
 }
 
-@keyframes rotateCF-diceLand {
+@keyframes connect-diceLand {
     0% { transform: translateZ(10px) scale(1.1); }
     40% { transform: translateZ(5px) scale(1.05); }
     70% { transform: translateZ(2px) scale(1.02); }
     100% { transform: translateZ(0) scale(1); }
 }
 
-.rotate-connect-four .dice-face:not(.rolling) {
-    animation: rotateCF-diceLand 0.3s ease-out;
+.connect-dice-face:not(.rolling) {
+    animation: connect-diceLand 0.3s ease-out;
 }
 
-.rotate-connect-four .dice::after {
+.connect-dice::after {
     content: '';
     position: absolute;
     width: 80%;
@@ -720,12 +631,12 @@
     transition: all 0.5s;
 }
 
-.rotate-connect-four .dice:has(.rolling)::after {
+.connect-dice:has(.rolling)::after {
     width: 60%;
     opacity: 0.7;
 }
 
-.rotate-connect-four .share-button {
+.connect-share-button {
     background: linear-gradient(180deg, #4B97FD 0%, #3281E8 100%) !important;
     color: white !important;
     border-color: #2E89FF #1a60c9 #1a60c9 #2E89FF !important;
@@ -738,16 +649,102 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.rotate-connect-four .share-button:hover {
+.connect-share-button:hover {
     background: linear-gradient(180deg, #5ca4ff 0%, #3d8fff 100%) !important;
 }
 
-.rotate-connect-four .share-button:active {
+.connect-share-button:active {
     background: linear-gradient(180deg, #2d79e5 0%, #3d8fff 100%) !important;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.3) !important;
 }
 
-.rotate-connect-four .share-button::before {
+.connect-share-button::before {
     content: "🏆 ";
     margin-right: 5px;
+}
+
+.connect-winner-controls {
+    width: 100%;
+}
+
+.connect-winner-message {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #0054E3;
+}
+
+/* Mobile compatibility styles */
+@media (max-width: 768px) {
+    
+    .connect-game-container {
+        flex-direction: column;
+        margin-top: 5%;
+    }
+    
+    .connect-board {
+        width: 100%;
+        height: 70%;
+        max-width: 350px;
+        margin: 0 auto;
+    }
+    
+    .connect-cell {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .connect-piece {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .connect-controls {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    
+    .connect-dice-container {
+        margin: 10px 0;
+    }
+    
+    .connect-dice {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .connect-rotation-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .connect-rotation-controls button {
+        padding: 8px 15px;
+    }
+    
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .connect-game-container {
+        flex-direction: row;
+    }
+    
+    .connect-controls {
+        width: 40%;
+    }
+    
+    .connect-board {
+        width: 60%;
+    }
+}
+
+/* Tap highlight removal for mobile */
+.connect-game button,
+.connect-menu-item,
+.connect-menu-option,
+.connect-cell {
+    -webkit-tap-highlight-color: transparent;
 }

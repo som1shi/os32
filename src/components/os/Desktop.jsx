@@ -358,7 +358,7 @@ const Desktop = ({ games }) => {
             <div className="start-user-info">
               <div className="start-user-avatar">
                 <img 
-                  src={currentUser.photoURL || '/default-avatar.png'} 
+                  src={currentUser.photoURL || '/default-avatar.svg'} 
                   alt={currentUser.displayName || 'User'} 
                 />
               </div>
@@ -367,7 +367,7 @@ const Desktop = ({ games }) => {
           ) : (
             <div className="start-user-info">
               <div className="start-user-avatar">
-                <img src="/default-avatar.png" alt="Guest" />
+                <img src="/default-avatar.svg" alt="Guest" />
               </div>
               <div className="start-user-name">Guest</div>
             </div>
@@ -512,9 +512,9 @@ const Desktop = ({ games }) => {
               title={currentUser.displayName || 'User Profile'}
             >
               <img 
-                src={currentUser.photoURL || '/default-avatar.png'} 
+                src={currentUser.photoURL || '/default-avatar.svg'} 
                 alt={currentUser.displayName || 'User'} 
-                onError={(e) => {e.target.src = '/default-avatar.png'}} 
+                onError={(e) => {e.target.src = '/default-avatar.svg'}} 
               />
             </div>
           )}

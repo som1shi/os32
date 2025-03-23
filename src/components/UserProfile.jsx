@@ -101,7 +101,7 @@ const UserProfile = ({ onLogout }) => {
     );
   }
 
-  const photoURL = currentUser.photoURL || '/default-avatar.png';
+  const photoURL = currentUser.photoURL || '/default-avatar.svg';
   const displayName = currentUser.displayName || 'User';
   
   return (
