@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { findSimilarWords, getRandomWord, hasWord } from '../../../../services/embeddings';
 import useScoreSubmission from '../../../../firebase/useScoreSubmission';
 
@@ -18,10 +18,12 @@ export default function useGameLogic() {
     const [showInfo, setShowInfo] = useState(false);
     const [shareText, setShareText] = useState('');
     const [showScoreSubmitted, setShowScoreSubmitted] = useState(false);
+    const [isFirstClick, setIsFirstClick] = useState(true);
+    const [currentSimilarWords, setCurrentSimilarWords] = useState(null);
     
     const { submitGameScore, submitting, error: submitError, success: submitSuccess } = useScoreSubmission();
 
-    const handleCustomWordSubmit = async () => {
+    const handleCustomWordSubmit = useCallback(async () => {
         try {
             if (!customWord.trim()) {
                 alert('Please enter a word');
@@ -40,15 +42,88 @@ export default function useGameLogic() {
                 return;
             }
 
-            startNewGame(customWord.toUpperCase());
+            startNewGame(customWord.toUpperCase(), similarWords);
             setShowCustomInput(false);
             setCustomWord('');
         } catch (error) {
             alert('Error processing word!');
         }
-    };
+    }, [customWord]);
 
-    const startNewGame = async (word = null) => {
+    const createEmptyBoard = useCallback(() => {
+        const newBoard = Array(BOARD_SIZE).fill().map(() => 
+            Array(BOARD_SIZE).fill().map(() => ({
+                isMine: false,
+                isRevealed: false,
+                isFlagged: false,
+                neighborMines: 0,
+                word: ''
+            }))
+        );
+        setBoard(newBoard);
+        setMinesLeft(MINES_COUNT);
+        setIsFirstClick(true);
+    }, []);
+
+    const placeMines = useCallback((clickX, clickY, targetWord, similarWords) => {
+        setBoard(prevBoard => {
+            const newBoard = [...prevBoard.map(row => [...row])];
+            
+            const safeZone = [];
+            for (let di = -1; di <= 1; di++) {
+                for (let dj = -1; dj <= 1; dj++) {
+                    const newX = clickX + di;
+                    const newY = clickY + dj;
+                    if (newX >= 0 && newX < BOARD_SIZE && newY >= 0 && newY < BOARD_SIZE) {
+                        safeZone.push({x: newX, y: newY});
+                    }
+                }
+            }
+            
+            let minesPlaced = 0;
+            while (minesPlaced < MINES_COUNT) {
+                const x = Math.floor(Math.random() * BOARD_SIZE);
+                const y = Math.floor(Math.random() * BOARD_SIZE);
+                
+                const isInSafeZone = safeZone.some(pos => pos.x === x && pos.y === y);
+                
+                if (!isInSafeZone && !newBoard[x][y].isMine) {
+                    newBoard[x][y].isMine = true;
+                    newBoard[x][y].word = targetWord;
+                    minesPlaced++;
+                }
+            }
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    if (!newBoard[i][j].isMine) {
+                        let count = 0;
+                        for (let di = -1; di <= 1; di++) {
+                            for (let dj = -1; dj <= 1; dj++) {
+                                if (i + di >= 0 && i + di < BOARD_SIZE && 
+                                    j + dj >= 0 && j + dj < BOARD_SIZE &&
+                                    newBoard[i + di][j + dj].isMine) {
+                                    count++;
+                                }
+                            }
+                        }
+                        newBoard[i][j].neighborMines = count;
+                        if (count > 0) {
+                            if (count === 1) newBoard[i][j].word = similarWords.level1[Math.floor(Math.random() * similarWords.level1.length)];
+                            else if (count === 2) newBoard[i][j].word = similarWords.level2[Math.floor(Math.random() * similarWords.level2.length)];
+                            else newBoard[i][j].word = similarWords.level3[Math.floor(Math.random() * similarWords.level3.length)];
+                        }
+                    }
+                }
+            }
+            
+            return newBoard;
+        });
+        
+        setIsFirstClick(false);
+    }, []);
+
+    const startNewGame = useCallback(async (word = null, providedSimilarWords = null) => {
         try {
             const newTargetWord = word || await getRandomWord();
             if (newTargetWord === 'ERROR') {
@@ -57,13 +132,20 @@ export default function useGameLogic() {
             }
 
             setTargetWord(newTargetWord);
-            const similarWords = await findSimilarWords(newTargetWord);
+            
+            let similarWords = providedSimilarWords;
             if (!similarWords) {
-                alert('Error finding similar words!');
-                return;
+                similarWords = await findSimilarWords(newTargetWord);
+                if (!similarWords) {
+                    alert('Error finding similar words!');
+                    return;
+                }
             }
-
-            createBoard(newTargetWord, similarWords);
+            
+            setCurrentSimilarWords(similarWords);
+            
+            createEmptyBoard();
+            
             setGameOver(false);
             setWin(false);
             setMinesLeft(MINES_COUNT);
@@ -74,138 +156,22 @@ export default function useGameLogic() {
         } catch (error) {
             alert('Error starting game!');
         }
-    };
-
-    const createBoard = (targetWord, similarWords) => {
-        const newBoard = Array(BOARD_SIZE).fill().map(() => 
-            Array(BOARD_SIZE).fill().map(() => ({
-                isMine: false,
-                isRevealed: false,
-                isFlagged: false,
-                neighborMines: 0,
-                word: ''
-            }))
-        );
-
-        let minesPlaced = 0;
-        while (minesPlaced < MINES_COUNT) {
-            const x = Math.floor(Math.random() * BOARD_SIZE);
-            const y = Math.floor(Math.random() * BOARD_SIZE);
-            if (!newBoard[x][y].isMine) {
-                newBoard[x][y].isMine = true;
-                newBoard[x][y].word = targetWord;
-                minesPlaced++;
-            }
-        }
-
-        for (let i = 0; i < BOARD_SIZE; i++) {
-            for (let j = 0; j < BOARD_SIZE; j++) {
-                if (!newBoard[i][j].isMine) {
-                    let count = 0;
-                    for (let di = -1; di <= 1; di++) {
-                        for (let dj = -1; dj <= 1; dj++) {
-                            if (i + di >= 0 && i + di < BOARD_SIZE && 
-                                j + dj >= 0 && j + dj < BOARD_SIZE &&
-                                newBoard[i + di][j + dj].isMine) {
-                                count++;
-                            }
-                        }
-                    }
-                    newBoard[i][j].neighborMines = count;
-                    if (count > 0) {
-                        if (count === 1) newBoard[i][j].word = similarWords.level1[Math.floor(Math.random() * similarWords.level1.length)];
-                        else if (count === 2) newBoard[i][j].word = similarWords.level2[Math.floor(Math.random() * similarWords.level2.length)];
-                        else newBoard[i][j].word = similarWords.level3[Math.floor(Math.random() * similarWords.level3.length)];
-                    }
-                }
-            }
-        }
-
-        setBoard(newBoard);
-        setMinesLeft(MINES_COUNT);
-    };
+    }, [createEmptyBoard, win]);
 
     useEffect(() => {
         startNewGame();
-    }, []);
+    }, [startNewGame]);
 
-    const revealCell = (x, y) => {
-        if (gameOver || win || board[x][y].isRevealed || board[x][y].isFlagged) return;
-
-        const newBoard = [...board];
-        if (board[x][y].isMine) {
-            setGameOver(true);
-            revealAllMines();
-            setScore(0);
-            return;
-        }
-
-        const revealEmpty = (i, j) => {
-            if (i < 0 || i >= BOARD_SIZE || j < 0 || j >= BOARD_SIZE || 
-                newBoard[i][j].isRevealed || newBoard[i][j].isFlagged) return;
-
-            newBoard[i][j].isRevealed = true;
-            setScore(prev => prev + 10);
-
-            if (newBoard[i][j].neighborMines === 0) {
-                for (let di = -1; di <= 1; di++) {
-                    for (let dj = -1; dj <= 1; dj++) {
-                        revealEmpty(i + di, j + dj);
-                    }
-                }
-            }
-        };
-
-        revealEmpty(x, y);
-        setBoard(newBoard);
-        checkWin(newBoard);
-    };
-
-    const toggleFlag = (x, y) => {
-        if (gameOver || win || board[x][y].isRevealed) return;
-
-        const newBoard = [...board];
-        newBoard[x][y].isFlagged = !newBoard[x][y].isFlagged;
-        setBoard(newBoard);
-        setMinesLeft(prev => newBoard[x][y].isFlagged ? prev - 1 : prev + 1);
-    };
-
-    const handleCellClick = (x, y, e) => {
-        e.preventDefault();
-        
-        if (e.button === 2 || flagMode) {
-            toggleFlag(x, y);
-        } else if (e.button === 0) {
-            revealCell(x, y);
-        }
-    };
-
-    const revealAllMines = () => {
-        const newBoard = board.map(row => 
+    const revealAllMines = useCallback(() => {
+        setBoard(prevBoard => prevBoard.map(row => 
             row.map(cell => ({
                 ...cell,
                 isRevealed: cell.isMine ? true : cell.isRevealed
             }))
-        );
-        setBoard(newBoard);
-    };
+        ));
+    }, []);
 
-    const checkWin = (currentBoard) => {
-        const win = currentBoard.every(row => 
-            row.every(cell => 
-                (cell.isMine && !cell.isRevealed) || (!cell.isMine && cell.isRevealed)
-            )
-        );
-        if (win) {
-            setWin(true);
-            const finalScore = score + 500;
-            setScore(finalScore);
-            
-            submitScore(finalScore);
-        }
-    };
-    
-    const submitScore = async (finalScore) => {
+    const submitScore = useCallback(async (finalScore) => {
         try {
             await submitGameScore('minesweeper', finalScore, {
                 targetWord,
@@ -220,9 +186,112 @@ export default function useGameLogic() {
             }, 3000);
         } catch (error) {
         }
-    };
+    }, [targetWord, submitGameScore]);
 
-    const generateShareText = () => {
+    const checkWin = useCallback((currentBoard) => {
+        const hasWon = currentBoard.every(row => 
+            row.every(cell => 
+                (cell.isMine && !cell.isRevealed) || (!cell.isMine && cell.isRevealed)
+            )
+        );
+        if (hasWon) {
+            setWin(true);
+            const finalScore = score + 500;
+            setScore(finalScore);
+            
+            submitScore(finalScore);
+        }
+    }, [score, submitScore]);
+
+    const revealCell = useCallback((x, y) => {
+        if (gameOver || win || board[x][y].isRevealed || board[x][y].isFlagged) return;
+
+        if (isFirstClick) {
+            placeMines(x, y, targetWord, currentSimilarWords);
+            
+            setBoard(prevBoard => {
+                const newBoard = [...prevBoard.map(row => [...row])];
+                
+                const revealEmpty = (i, j) => {
+                    if (i < 0 || i >= BOARD_SIZE || j < 0 || j >= BOARD_SIZE || 
+                        newBoard[i][j].isRevealed || newBoard[i][j].isFlagged) return;
+                    
+                    newBoard[i][j].isRevealed = true;
+                    setScore(prev => prev + 10);
+                    
+                    if (newBoard[i][j].neighborMines === 0) {
+                        for (let di = -1; di <= 1; di++) {
+                            for (let dj = -1; dj <= 1; dj++) {
+                                revealEmpty(i + di, j + dj);
+                            }
+                        }
+                    }
+                };
+                
+                revealEmpty(x, y);
+                checkWin(newBoard);
+                return newBoard;
+            });
+            
+            return;
+        }
+
+        if (board[x][y].isMine) {
+            setGameOver(true);
+            revealAllMines();
+            setScore(0);
+            return;
+        }
+
+        setBoard(prevBoard => {
+            const newBoard = [...prevBoard.map(row => [...row])];
+            
+            const revealEmpty = (i, j) => {
+                if (i < 0 || i >= BOARD_SIZE || j < 0 || j >= BOARD_SIZE || 
+                    newBoard[i][j].isRevealed || newBoard[i][j].isFlagged) return;
+
+                newBoard[i][j].isRevealed = true;
+                setScore(prev => prev + 10);
+
+                if (newBoard[i][j].neighborMines === 0) {
+                    for (let di = -1; di <= 1; di++) {
+                        for (let dj = -1; dj <= 1; dj++) {
+                            revealEmpty(i + di, j + dj);
+                        }
+                    }
+                }
+            };
+
+            revealEmpty(x, y);
+            checkWin(newBoard);
+            return newBoard;
+        });
+    }, [board, gameOver, win, isFirstClick, targetWord, currentSimilarWords, placeMines, revealAllMines, checkWin]);
+
+    const toggleFlag = useCallback((x, y) => {
+        if (gameOver || win || board[x][y].isRevealed) return;
+
+        if (isFirstClick) return;
+
+        setBoard(prevBoard => {
+            const newBoard = [...prevBoard.map(row => [...row])];
+            newBoard[x][y].isFlagged = !newBoard[x][y].isFlagged;
+            setMinesLeft(prev => newBoard[x][y].isFlagged ? prev - 1 : prev + 1);
+            return newBoard;
+        });
+    }, [board, gameOver, win, isFirstClick]);
+
+    const handleCellClick = useCallback((x, y, e) => {
+        e.preventDefault();
+        
+        if (e.button === 2 || flagMode) {
+            toggleFlag(x, y);
+        } else if (e.button === 0) {
+            revealCell(x, y);
+        }
+    }, [flagMode, toggleFlag, revealCell]);
+
+    const generateShareText = useCallback(() => {
         let text = `I scored ${score} in WordSweeper\n \n`;
         text += `🎯 Word: ${targetWord}\n`;
 
@@ -251,37 +320,44 @@ export default function useGameLogic() {
             text += '\n';
         }
         
-        text += `\nPlay at https://os32.vercel.app/fames/wordsweeper`;
+        text += '\nPlay now at: ...\n';
         return text;
-    };
+    }, [board, gameOver, score, targetWord]);
 
-    const handleShare = async () => {
+    const copyToClipboard = useCallback((text) => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            alert('Result copied to clipboard!');
+        } catch (err) {
+            alert('Failed to copy results.');
+        }
+        
+        document.body.removeChild(textArea);
+    }, []);
+
+    const handleShare = useCallback(() => {
         const text = generateShareText();
+        
         if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'WordSweeper',
-                    text: text
-                });
-            } catch (err) {
+            navigator.share({
+                title: 'My WordSweeper Score',
+                text: text
+            }).catch(() => {
                 copyToClipboard(text);
-            }
+            });
         } else {
             copyToClipboard(text);
         }
-    };
+        
+        setShareText(text);
+    }, [generateShareText, copyToClipboard]);
 
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                alert('Result copied to clipboard!');
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    };
-
-    return {
+    const gameState = useMemo(() => ({
         board,
         gameOver,
         win,
@@ -296,6 +372,27 @@ export default function useGameLogic() {
         submitting,
         submitError,
         submitSuccess,
+        isFirstClick
+    }), [
+        board, 
+        gameOver, 
+        win, 
+        flagMode, 
+        minesLeft, 
+        targetWord, 
+        customWord, 
+        showCustomInput, 
+        score, 
+        showInfo, 
+        showScoreSubmitted,
+        submitting,
+        submitError,
+        submitSuccess,
+        isFirstClick
+    ]);
+
+    return {
+        ...gameState,
         setFlagMode,
         setShowCustomInput,
         setCustomWord,
