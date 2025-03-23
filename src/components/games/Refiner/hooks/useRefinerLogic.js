@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import useScoreSubmission from '../../../../firebase/useScoreSubmission';
 
 export default function useRefinerLogic() {
@@ -350,7 +350,7 @@ export default function useRefinerLogic() {
         }, 1000);
     };
     
-    const handleMouseDown = (e) => {
+    const handleMouseDown = useCallback((e) => {
         if (!gameActive || animatingToTarget) return;
         
         e.preventDefault();
@@ -359,8 +359,10 @@ export default function useRefinerLogic() {
         setNumbers(prev => prev.map(n => ({...n, selected: false})));
         
         const gridRect = gridRef.current.getBoundingClientRect();
-        const startX = e.clientX - gridRect.left;
-        const startY = e.clientY - gridRect.top;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const startX = clientX - gridRect.left;
+        const startY = clientY - gridRect.top;
         
         setSelectionStart({ x: startX, y: startY });
         setSelectionBox({
@@ -370,16 +372,18 @@ export default function useRefinerLogic() {
             height: 1
         });
         setIsSelecting(true);
-    };
+    }, [gameActive, animatingToTarget]);
     
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (!isSelecting || !gameActive || animatingToTarget) return;
         
         e.preventDefault();
         
         const gridRect = gridRef.current.getBoundingClientRect();
-        const currentX = Math.max(0, Math.min(e.clientX - gridRect.left, gridRect.width));
-        const currentY = Math.max(0, Math.min(e.clientY - gridRect.top, gridRect.height));
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const currentX = Math.max(0, Math.min(clientX - gridRect.left, gridRect.width));
+        const currentY = Math.max(0, Math.min(clientY - gridRect.top, gridRect.height));
         
         const left = Math.min(selectionStart.x, currentX);
         const top = Math.min(selectionStart.y, currentY);
@@ -387,9 +391,9 @@ export default function useRefinerLogic() {
         const height = Math.abs(currentY - selectionStart.y);
         
         setSelectionBox({ left, top, width, height });
-    };
+    }, [isSelecting, gameActive, animatingToTarget, selectionStart]);
     
-    const handleMouseUp = (e) => {
+    const handleMouseUp = useCallback((e) => {
         if (!isSelecting || !gameActive) return;
         
         e.preventDefault();
@@ -429,14 +433,14 @@ export default function useRefinerLogic() {
                 selected: selectedIds.includes(n.id)
             })));
         }
-    };
+    }, [isSelecting, gameActive, selectionBox, numbers]);
     
-    const getCurrentSum = () => {
+    const getCurrentSum = useCallback(() => {
         return selectedNumbers.reduce((sum, id) => {
             const number = numbers.find(n => n.id === id);
             return sum + (number ? number.value : 0);
         }, 0);
-    };
+    }, [selectedNumbers, numbers]);
     
     const endGame = () => {
         clearInterval(timerRef.current);

@@ -490,7 +490,20 @@
     border: 1px solid rgba(255, 215, 0, 0.4);
 }
 
-@media (max-width: 768px) {
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .quantum-chess .board {
+        height: 100% !important;
+        aspect-ratio: 1/1 !important;
+    }
+    .quantum-chess .game-container {
+        height: 100% !important;
+        aspect-ratio: 1/1 !important;
+    }
+
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
     .quantum-chess .menu-bar {
         flex-wrap: wrap;
         height: auto;

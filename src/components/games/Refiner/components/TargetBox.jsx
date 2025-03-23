@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const TargetBox = ({ 
     targetSum, 
@@ -8,6 +8,14 @@ const TargetBox = ({
     currentSum, 
     targetBoxRef 
 }) => {
+    let sumClassName = 'current-sum';
+    
+    if (currentSum === targetSum && selectedNumbers.length > 0) {
+        sumClassName += ' correct';
+    } else if (currentSum > targetSum) {
+        sumClassName += ' over';
+    }
+    
     return (
         <div className="target-box-container">
             <div className="target-box" ref={targetBoxRef}>
@@ -33,4 +41,5 @@ const TargetBox = ({
     );
 };
 
-export default TargetBox; 
+
+export default memo(TargetBox); 

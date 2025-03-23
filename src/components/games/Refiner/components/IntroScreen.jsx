@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 
-const IntroScreen = ({ gameDuration, setGameDuration, startGame }) => {
+const IntroScreen = ({ 
+    gameDuration, 
+    setGameDuration, 
+    startGame 
+}) => {
     return (
         <div className="intro-screen">
             <div className="back-button" onClick={() => window.history.back()}>×</div>
@@ -44,4 +48,4 @@ const IntroScreen = ({ gameDuration, setGameDuration, startGame }) => {
     );
 };
 
-export default IntroScreen; 
+export default memo(IntroScreen); 

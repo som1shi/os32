@@ -118,7 +118,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #001;
     color: #7AF3D0;
     font-size: 16px;
     font-weight: bold;
@@ -133,6 +132,8 @@
     min-height: 0;
     min-width: 0;
     user-select: none;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
 }
 
 .grid-cell:hover {
@@ -352,7 +353,8 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 50%;
-    height: 50%;
+    height: auto;
+    min-height: 300px;
     background: rgba(0, 0, 0, 0.95);
     display: flex;
     flex-direction: column;
@@ -361,6 +363,8 @@
     z-index: 1000;
     padding: 20px;
     box-sizing: border-box;
+    border: 1px solid #7AF3D0;
+    box-shadow: 0 0 15px rgba(122, 243, 208, 0.3);
 }
 
 .game-over-content {
@@ -369,9 +373,11 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    height: auto;
     max-width: 600px;
     text-align: center;
     user-select: none;
+    gap: 10px;
 }
 
 .intro-screen h1, .game-over h2 {
@@ -435,7 +441,7 @@
     }
     
     .mdr-header {
-        padding: 0 8px;
+        padding: 0 10px;
     }
     
     .score-display {
@@ -444,9 +450,51 @@
 }
 
 @media (max-width: 480px) {
-    .mdr-header {
+    .refiner .game-over {
+        width: 95%;
+        max-height: 95%;
+        padding: 10px;
+    }
+    
+    .game-over-content {
+        padding: 10px;
+    }
+    
+    .game-over h2 {
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+    
+    .score-result {
+        margin-bottom: 5px;
+    }
+    
+    .score-value {
+        font-size: 24px;
+    }
+    
+    .play-again-button, .share-button {
+        padding: 8px 12px;
         font-size: 12px;
-        padding: 0 8px;
+        margin: 4px 0;
+    }
+    
+    .score-submission-status p {
+        padding: 3px 6px;
+        font-size: 12px;
+    }
+    
+    .back-button {
+        top: 3px;
+        right: 3px;
+        width: 24px;
+        height: 24px;
+        font-size: 16px;
+    }
+    
+    .mdr-header {
+        height: 30px;
+        padding: 0 5px;
     }
     
     .grid-cell {
@@ -458,8 +506,7 @@
     }
     
     .company-logo {
-        font-size: 10px;
-        padding: 3px 6px;
+        display: none;
     }
     
     .target-label {
@@ -467,8 +514,38 @@
     }
     
     .target-value {
-        font-size: 26px;
+        font-size: 18px;
     }
+    
+    .numbers-grid {
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(16, 1fr);
+    }
+    
+    .numbers-grid {
+        touch-action: none;
+    }
+    
+    .grid-cell {
+        touch-action: none;
+        -webkit-touch-callout: none;
+    }
+    
+    .selection-box {
+        background-color: rgba(122, 243, 208, 0.2);
+        border: 2px dashed rgba(122, 243, 208, 0.6);
+    }
+}
+
+.numbers-grid * {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.game-active {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
 }
 
 @keyframes target-hit {
@@ -489,6 +566,7 @@
 
 .grid-cell.scary {
     animation: scary-pulse 1s infinite ease-in-out;
+    background: transparent;
     z-index: 2;
     font-weight: bold;
     contain: layout paint;
@@ -580,195 +658,6 @@
 .duration-button.selected {
     background: #7AF3D0 !important; 
     color: #000 !important;
-    box-shadow: 0 0 15px rgba(122, 243, 208, 0.4);
-    font-weight: bold;
-}
-
-.share-button {
-    margin: 15px 0;
-    background: #000;
-    color: #7AF3D0;
-    border: 2px solid #7AF3D0;
-    padding: 10px 20px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    min-width: 180px;
-    border-radius: 0;
-}
-
-.share-button:hover {
-    background: rgba(122, 243, 208, 0.2);
-    box-shadow: 0 0 15px rgba(122, 243, 208, 0.5);
-}
-
-@keyframes clipboard-feedback {
-    0% { background: rgba(122, 243, 208, 0.1); }
-    50% { background: rgba(122, 243, 208, 0.3); }
-    100% { background: rgba(122, 243, 208, 0.1); }
-}
-
-.share-button:has(.clipboard-feedback) {
-    animation: clipboard-feedback 2s ease;
-}
-
-.refiner .intro-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    gap: 20px;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.mdr-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
-    background: #000;
-    border-bottom: 1px solid #7AF3D0;
-    padding: 0 50px 0 15px;
-    color: #7AF3D0;
-    font-weight: bold;
-    user-select: none;
-    position: relative;
-}
-.music-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: static;
-    margin: 0 10px;
-    z-index: 100;
-}
-
-.music-button {
-    background: none;
-    border: 1px solid #7AF3D0;
-    color: #7AF3D0;
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-    margin: 0;
-}
-
-.music-button:hover {
-    background: rgba(122, 243, 208, 0.2);
-    box-shadow: 0 0 10px rgba(122, 243, 208, 0.5);
-}
-
-.music-button.playing {
-    background: rgba(122, 243, 208, 0.2);
-    box-shadow: 0 0 8px rgba(122, 243, 208, 0.4);
-}
-.volume-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100px;
-    height: 10px;
-    background: #001;
-    outline: none;
-    border: 1px solid #7AF3D0;
-    border-radius: 0;
-}
-.volume-popup {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background: #000;
-    padding: 15px;
-    border: 1px solid #7AF3D0;
-    border-radius: 0;
-    z-index: 10;
-}
-.company-logo {
-    border: 1px solid #7AF3D0;
-    border-radius: 0;
-    padding: 4px 8px;
-    font-size: 12px;
-    margin-right: 0;
-    user-select: none;
-}
-.back-button {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    border: 1px solid #7AF3D0;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #7AF3D0;
-    font-size: 18px;
-    font-weight: bold;
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.8);
-    transition: all 0.2s ease;
-}
-
-.back-button:hover {
-    background: rgba(122, 243, 208, 0.2);
-    box-shadow: 0 0 10px rgba(122, 243, 208, 0.5);
-}
-
-.mute-button {
-    display: none;
-}
-
-.mute-button:hover, .mute-button.muted {
-    display: none;
-}
-
-.duration-options {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 15px 0;
-    width: 100%;
-    max-width: 600px;
-}
-
-.duration-button {
-    background: rgba(0, 0, 0, 0.7) !important;
-    color: #7AF3D0;
-    padding: 8px 12px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    border-radius: 0;
-}
-
-.duration-button:hover {
-    background: rgba(122, 243, 208, 0.2);
-    box-shadow: 0 0 10px rgba(122, 243, 208, 0.3);
-}
-
-.duration-button.selected {
-    background: rgba(122, 243, 208, 0.3);
     box-shadow: 0 0 15px rgba(122, 243, 208, 0.4);
     font-weight: bold;
 }
@@ -988,6 +877,7 @@
     margin: 10px 0;
     min-height: 24px;
     text-align: center;
+    width: 100%;
 }
 
 .score-submission-status p {
@@ -995,23 +885,25 @@
     padding: 5px 10px;
     border-radius: 4px;
     display: inline-block;
-    font-family: 'VT323', monospace;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .score-submission-status .submitting {
     background-color: rgba(255, 255, 255, 0.2);
     color: #ccc;
+    width: auto;
 }
 
 .score-submission-status .success {
     background-color: rgba(0, 255, 0, 0.2);
     color: #00ff00;
+    width: auto;
 }
 
 .score-submission-status .error {
     background-color: rgba(255, 0, 0, 0.2);
     color: #ff0000;
+    width: auto;
 }
 
 .score-submission-status .pending {
@@ -1022,4 +914,108 @@
 .score-submission-status .not-submitted {
     background-color: rgba(255, 165, 0, 0.2);
     color: #ffa500;
+}
+
+.mobile-grid {
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(16, 1fr);
+}
+
+.mobile-grid .selection-box {
+    background-color: rgba(122, 243, 208, 0.2);
+    border: 2px solid rgba(122, 243, 208, 0.6);
+}
+
+
+@media (max-width: 768px) and (orientation: landscape) {
+    .refiner .numbers-grid {
+        grid-template-columns: repeat(16, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+        
+    }
+
+
+    .refiner .grid-cell {
+        background-color: transparent;
+        font-size: 12px;
+
+        aspect-ratio: 1/1;
+    }
+}
+
+@media (max-width: 767px) {
+    .refiner .game-over {
+        width: 90%;
+        height: auto;
+        top: 45%;
+        max-height: 80%;
+        overflow-y: auto;
+    }
+    
+    .game-over-content {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+    }
+    
+    .game-over h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    
+    .score-value {
+        font-size: 28px;
+    }
+    
+    .score-label, .duration-label {
+        font-size: 12px;
+    }
+    
+    .duration-value {
+        font-size: 22px;
+    }
+    
+    .score-submission-status {
+        margin: 5px 0;
+    }
+    
+    .score-submission-status p {
+        font-size: 14px;
+        padding: 3px 8px;
+    }
+    
+    .play-again-button, .share-button {
+        padding: 8px 16px;
+        font-size: 14px;
+        margin: 5px 0;
+        width: 80%;
+        max-width: 200px;
+    }
+
+    .back-button {
+        height: 20px;
+        width: 20px;
+    }
+}
+
+.play-again-button, .share-button {
+    margin: 8px 0;
+    background: #000;
+    color: #7AF3D0;
+    border: 2px solid #7AF3D0;
+    padding: 10px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    border-radius: 0;
+    text-transform: uppercase;
+}
+
+.play-again-button:hover, .share-button:hover {
+    background: rgba(122, 243, 208, 0.2);
+    box-shadow: 0 0 15px rgba(122, 243, 208, 0.5);
 } 
