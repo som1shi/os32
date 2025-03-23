@@ -13,14 +13,16 @@ export default function useChessLogic() {
     function createInitialBoard() {
         const board = Array(8).fill().map(() => Array(8).fill(null));
         
-        const primaryTypes = ['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'];
+        const primaryTypes = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+        
+        const validPieceTypes = ['rook', 'knight', 'bishop', 'queen', 'pawn'];
         
         const secondaryPool = [
-            'rook', 'rook',
-            'knight', 'knight',
-            'bishop', 'bishop',
-            'queen',
-            'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'
+            'rook', 'rook', 
+            'knight', 'knight', 
+            'bishop', 'bishop', 
+            'queen', 
+            'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'  
         ];
         
         for (let i = secondaryPool.length - 1; i > 0; i--) {
@@ -32,32 +34,51 @@ export default function useChessLogic() {
             board[7][i] = {
                 currentType: primaryTypes[i] === 'king' ? 'king' : null,
                 type1: primaryTypes[i],
-                type2: primaryTypes[i] === 'king' ? 'king' : secondaryPool.pop(),
+                type2: primaryTypes[i] === 'king' ? 'king' : secondaryPool.pop() || validPieceTypes[Math.floor(Math.random() * validPieceTypes.length)],
                 color: 'white',
-                isChosen: primaryTypes[i] === 'king'
+                isChosen: primaryTypes[i] === 'king',
+                id: `white-back-${i}`
             };
+            
             board[6][i] = {
                 currentType: null,
                 type1: 'pawn',
-                type2: secondaryPool.pop(),
+                type2: i < 7 ? (secondaryPool.pop() || validPieceTypes[Math.floor(Math.random() * validPieceTypes.length)]) : 'pawn',
                 color: 'white',
-                isChosen: false
+                isChosen: false,
+                id: `white-pawn-${i}`
             };
 
-            board[0][i] = {
+            board[0][7-i] = {
                 currentType: primaryTypes[i] === 'king' ? 'king' : null,
                 type1: primaryTypes[i],
-                type2: primaryTypes[i] === 'king' ? 'king' : secondaryPool.pop(),
+                type2: primaryTypes[i] === 'king' ? 'king' : secondaryPool.pop() || validPieceTypes[Math.floor(Math.random() * validPieceTypes.length)],
                 color: 'black',
-                isChosen: primaryTypes[i] === 'king'
+                isChosen: primaryTypes[i] === 'king',
+                id: `black-back-${i}`
             };
-            board[1][i] = {
+            
+            board[1][7-i] = {
                 currentType: null,
                 type1: 'pawn',
-                type2: secondaryPool.pop(),
+                type2: i < 7 ? (secondaryPool.pop() || validPieceTypes[Math.floor(Math.random() * validPieceTypes.length)]) : 'pawn',
                 color: 'black',
-                isChosen: false
+                isChosen: false,
+                id: `black-pawn-${i}`
             };
+        }
+        
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                if (board[i][j]) {
+                    if (!validPieceTypes.includes(board[i][j].type1) && board[i][j].type1 !== 'king') {
+                        board[i][j].type1 = validPieceTypes[Math.floor(Math.random() * validPieceTypes.length)];
+                    }
+                    if (!validPieceTypes.includes(board[i][j].type2) && board[i][j].type2 !== 'king') {
+                        board[i][j].type2 = validPieceTypes[Math.floor(Math.random() * validPieceTypes.length)];
+                    }
+                }
+            }
         }
         
         return board;
@@ -130,10 +151,25 @@ export default function useChessLogic() {
         
         if (targetPiece) {
             setCapturedPieces(prev => {
-                const newCaptured = { ...prev };
-                newCaptured[currentPlayer].push(targetPiece);
+                const newCaptured = { 
+                    white: [...prev.white],
+                    black: [...prev.black]
+                };
+                const captureCollection = targetPiece.color === 'white' ? 'black' : 'white';
+                newCaptured[captureCollection].push({
+                    ...targetPiece,
+                    id: `${Date.now()}-${Math.random()}`
+                });
                 return newCaptured;
             });
+            
+            if (targetPiece.currentType === 'king') {
+                setGameOver(true);
+                setWinner(currentPlayer);
+                
+                setBoard(newBoard);
+                return;
+            }
         }
         
         newBoard[newRow][newCol] = {
@@ -142,22 +178,33 @@ export default function useChessLogic() {
         };
         newBoard[fromRow][fromCol] = null;
         
-        if (piece.currentType === 'pawn' && (
-            (piece.color === 'white' && newRow === 0) || 
-            (piece.color === 'black' && newRow === 7)
-        )) {
-            newBoard[newRow][newCol].currentType = 'queen';
+        if (piece.currentType === 'pawn') {
+            const promotionRow = piece.color === 'white' ? 0 : 7;
+            
+            if (newRow === promotionRow) {
+                newBoard[newRow][newCol].currentType = 'queen';
+                newBoard[newRow][newCol].type1 = 'queen';
+                newBoard[newRow][newCol].type2 = 'queen';
+                newBoard[newRow][newCol].isFullyCollapsed = true;
+            }
         }
         
-        if (targetPiece && targetPiece.currentType === 'king') {
-            setGameOver(true);
-            setWinner(currentPlayer);
+        const isDestinationDarkSquare = (newRow + newCol) % 2 !== 0;
+        if (isDestinationDarkSquare && !newBoard[newRow][newCol].isFullyCollapsed && 
+            newBoard[newRow][newCol].currentType !== 'king') {
+            
+            newBoard[newRow][newCol] = {
+                ...newBoard[newRow][newCol],
+                currentType: null,
+                isChosen: false
+            };
         }
         
         setBoard(newBoard);
+        
         setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
         
-        if (moveType) {
+        if (moveType && !isDestinationDarkSquare) {
             updatePieceType(newBoard[newRow][newCol], moveType);
         }
     };
@@ -168,8 +215,18 @@ export default function useChessLogic() {
         
         const newBoard = [...board.map(row => [...row])];
         
-        const randomChoice = Math.random() > 0.5 ? 'type1' : 'type2';
-        const chosenType = piece[randomChoice];
+        const validPieceTypes = ['rook', 'knight', 'bishop', 'queen', 'pawn', 'king'];
+        const type1 = validPieceTypes.includes(piece.type1) ? piece.type1 : 'pawn';
+        const type2 = validPieceTypes.includes(piece.type2) ? piece.type2 : 'knight';
+        
+        let probabilityType1 = 0.5;
+        
+        if (type1 === type2) {
+            probabilityType1 = 1.0;
+        }
+        
+        const randomChoice = Math.random() < probabilityType1 ? 'type1' : 'type2';
+        const chosenType = piece[randomChoice] || (randomChoice === 'type1' ? type1 : type2);
         
         newBoard[row][col] = {
             ...piece,
@@ -227,34 +284,62 @@ export default function useChessLogic() {
     const updatePieceType = (piece, moveType) => {
         if (!piece || piece.currentType === 'king' || !moveType) return;
         
-        const newPiece = { ...piece };
+        const newBoard = [...board.map(row => [...row])];
         
-        if (moveType === 'knight') {
-            if (newPiece.type1 === 'knight' && newPiece.type2 !== 'knight') {
-                newPiece.currentType = 'knight';
-            } else if (newPiece.type2 === 'knight' && newPiece.type1 !== 'knight') {
-                newPiece.currentType = 'knight';
+        let pieceRow = -1, pieceCol = -1;
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                if (newBoard[i][j] === piece) {
+                    pieceRow = i;
+                    pieceCol = j;
+                    break;
+                }
             }
-        } else if (moveType === 'bishop') {
-            if (newPiece.type1 === 'bishop' && newPiece.type2 !== 'bishop') {
-                newPiece.currentType = 'bishop';
-            } else if (newPiece.type2 === 'bishop' && newPiece.type1 !== 'bishop') {
-                newPiece.currentType = 'bishop';
-            }
-        } else if (moveType === 'rook') {
-            if (newPiece.type1 === 'rook' && newPiece.type2 !== 'rook') {
-                newPiece.currentType = 'rook';
-            } else if (newPiece.type2 === 'rook' && newPiece.type1 !== 'rook') {
-                newPiece.currentType = 'rook';
-            }
+            if (pieceRow !== -1) break;
         }
         
-        const [type1, type2] = [newPiece.type1, newPiece.type2];
-        if ((type1 === 'queen' || type2 === 'queen') && newPiece.currentType !== 'queen') {
+        if (pieceRow === -1) return;
+        
+        const pieceToUpdate = newBoard[pieceRow][pieceCol];
+        
+        const hasPotentialType = (type) => {
+            return pieceToUpdate.type1 === type || pieceToUpdate.type2 === type;
+        };
+        
+        let collapsed = false;
+        
+        if (moveType === 'knight' && hasPotentialType('knight')) {
+            pieceToUpdate.currentType = 'knight';
+            collapsed = true;
+            console.log('Piece collapsed to knight due to L-shaped movement');
+        }
+        else if (moveType === 'bishop' && hasPotentialType('bishop')) {
+            pieceToUpdate.currentType = 'bishop';
+            collapsed = true;
+            console.log('Piece collapsed to bishop due to diagonal movement');
+        }
+        else if (moveType === 'rook' && hasPotentialType('rook')) {
+            pieceToUpdate.currentType = 'rook';
+            collapsed = true;
+            console.log('Piece collapsed to rook due to straight movement');
+        }
+        
+        if (!collapsed && hasPotentialType('queen') && 
+            (moveType === 'rook' || moveType === 'bishop')) {
             if (Math.random() < 0.3) {
-                newPiece.currentType = 'queen';
+                pieceToUpdate.currentType = 'queen';
+                collapsed = true;
+                console.log('Piece collapsed to queen');
             }
         }
+        
+        if (collapsed) {
+            pieceToUpdate.isFullyCollapsed = true;
+            pieceToUpdate.type1 = pieceToUpdate.currentType;
+            pieceToUpdate.type2 = pieceToUpdate.currentType;
+        }
+        
+        setBoard(newBoard);
     };
 
     const isValidMoveForType = (type, fromRow, fromCol, toRow, toCol, board) => {

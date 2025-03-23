@@ -391,15 +391,6 @@
     text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
 }
 
-.piece:not(.observed) {
-    animation: quantum-fluctuation 2s infinite;
-}
-
-@keyframes quantum-fluctuation {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.95); }
-    100% { opacity: 1; transform: scale(1); }
-}
 
 .turn-indicator {
     margin-left: auto;
@@ -411,4 +402,153 @@
     display: flex;
     align-items: center;
     font-weight: bold;
+}
+
+.piece.unobserved {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px dashed rgba(255, 255, 255, 0.5);
+}
+
+.piece-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.piece-info .current-type {
+    font-size: 1.5em;
+    opacity: 0.8;
+}
+
+.piece-info .potential-types {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 2px;
+}
+
+.piece-info .type1, .piece-info .type2 {
+    font-size: 0.7em;
+    margin: 0 2px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    padding: 1px 3px;
+}
+
+.quantum-indicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 30%, rgba(0, 150, 255, 0.2) 70%);
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 5px rgba(0, 150, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(0, 150, 255, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(0, 150, 255, 0.5);
+    }
+}
+
+.captured-piece {
+    position: relative;
+    font-size: 1.2em;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px;
+    opacity: 0.8;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.white .captured-piece {
+    color: #cccccc;
+}
+
+.black .captured-piece {
+    color: #333333;
+}
+
+.piece.fully-collapsed {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .quantum-chess .menu-bar {
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 24px;
+    }
+    
+    .quantum-chess .menu-item {
+        position: static;
+        padding: 6px 10px;
+    }
+    
+    .quantum-chess .menu-item:hover .menu-dropdown {
+        display: none;
+    }
+    
+    .quantum-chess .menu-item.active .menu-dropdown {
+        display: block;
+        position: absolute;
+        top: auto;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 50;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+    
+    .quantum-chess .menu-option {
+        padding: 12px 20px;
+        border-bottom: 1px solid #ccc;
+    }
+    
+    .quantum-chess .board {
+        width: 95vw;
+        max-width: 95vw;
+    }
+    
+    .quantum-chess .captured-pieces {
+        width: 95vw;
+        max-width: 95vw;
+        flex-wrap: wrap;
+    }
+    
+    .quantum-chess .game-container {
+        padding: 10px 5px;
+    }
+}
+
+@keyframes dark-square-pulse {
+    0% {
+        box-shadow: 0 0 8px rgba(128, 0, 255, 0.5);
+        transform: scale(0.92);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(128, 0, 255, 0.7);
+        transform: scale(1);
+    }
+    100% {
+        box-shadow: 0 0 12px rgba(128, 0, 255, 0.5);
+        transform: scale(0.95);
+    }
 } 
