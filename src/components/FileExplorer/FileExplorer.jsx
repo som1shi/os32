@@ -385,6 +385,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
             aria-label="Sign in with Google"
             type="button"
           >
+            <span aria-hidden="true" style={{ marginRight: '8px' }}>🔑</span>
             Sign in with Google
           </button>
         </div>

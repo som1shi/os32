@@ -135,7 +135,6 @@
   min-width: 120px;
 }
 
-/* Windows XP style dropdown */
 .winxp-dropdown {
   border: 1px solid #7B9EBD !important;
   background: #FFFFFF !important;
@@ -188,7 +187,6 @@
   align-items: center;
 }
 
-/* Windows XP style button */
 .winxp-button {
   background: linear-gradient(to bottom, #EFF7FF 0%, #B9D6FB 50%, #92C3FE 51%, #BCDAFF 100%) !important;
   color: #000000;

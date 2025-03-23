@@ -124,6 +124,63 @@
   background: #FFFFFF;
 }
 
+.login-prompt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ECE9D8;
+  border: 1px solid #ACA899;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  width: 80%;
+  max-width: 300px;
+  z-index: 10;
+}
+
+.login-prompt p {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.login-button {
+  background: linear-gradient(180deg, #EFF7FF 0%, #C6E4FF 50%, #9DD5FF 51%, #C6E4FF 100%);
+  border: 1px solid #003C74;
+  border-radius: 3px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: background 0.2s;
+}
+
+.login-button:hover {
+  background: linear-gradient(180deg, #F2F9FF 0%, #D6EEFF 50%, #BDEAFF 51%, #D6EEFF 100%);
+}
+
+.login-button:active {
+  background: linear-gradient(180deg, #C6E4FF 0%, #9DD5FF 50%, #6BC3FF 51%, #9DD5FF 100%);
+}
+
+.empty-folder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  width: 80%;
+  max-width: 300px;
+}
+
 .file-item {
   position: relative;
   display: flex;
@@ -246,4 +303,51 @@
 .save-button:active,
 .cancel-button:active {
   background: linear-gradient(180deg, #C6E4FF 0%, #9DD5FF 50%, #6BC3FF 51%, #9DD5FF 100%);
+}
+
+@media screen and (max-width: 768px) {
+  .explorer-content {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 100px;
+    border-right: none;
+    border-bottom: 1px solid #ACA899;
+    overflow-y: auto;
+  }
+  
+  .address-bar {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .toolbar-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .files-container {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+  
+  .save-as-bar form {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .save-as-input {
+    width: 100%;
+  }
+  
+  .save-as-bar form button {
+    margin-top: 8px;
+  }
+  
+  .login-prompt, 
+  .empty-folder {
+    width: 90%;
+  }
 } 

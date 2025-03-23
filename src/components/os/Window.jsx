@@ -23,12 +23,31 @@ const Window = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [prevSize, setPrevSize] = useState(initialSize);
   const [prevPosition, setPrevPosition] = useState(initialPosition);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
   
   const windowRef = useRef(null);
   const navigate = useNavigate();
   
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.matchMedia('(max-width: 768px)').matches;
+      setIsMobileScreen(mobile);
+      
+      if (mobile && !isMaximized && onMaximize) {
+        onMaximize(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, [isMaximized, onMaximize]);
+  
   const handleMouseDown = useCallback((e) => {
-    if (isMaximized) return;
+    if (isMaximized || isMobileScreen) return;
     
     if (e.target.closest('.window-header') && !e.target.closest('.window-controls')) {
       setIsDragging(true);
@@ -39,10 +58,10 @@ const Window = ({
       });
       e.preventDefault();
     }
-  }, [isMaximized]);
+  }, [isMaximized, isMobileScreen]);
   
   const handleResizeMouseDown = useCallback((e, direction) => {
-    if (isMaximized) return;
+    if (isMaximized || isMobileScreen) return;
     
     e.stopPropagation();
     setIsResizing(true);
@@ -52,7 +71,7 @@ const Window = ({
       y: e.clientY
     });
     e.preventDefault();
-  }, [isMaximized]);
+  }, [isMaximized, isMobileScreen]);
   
   useEffect(() => {
     if (!isDragging && !isResizing) return;
@@ -118,6 +137,8 @@ const Window = ({
   }, [isDragging, isResizing, dragOffset, position, size, resizeDirection]);
   
   const handleMaximize = useCallback(() => {
+    if (isMobileScreen) return;
+    
     if (isMaximized) {
       setSize(prevSize);
       setPosition(prevPosition);
@@ -130,7 +151,7 @@ const Window = ({
       setPosition({ x: 0, y: 0 });
       if (onMaximize) onMaximize(true);
     }
-  }, [isMaximized, onMaximize, prevPosition, prevSize, position, size]);
+  }, [isMaximized, onMaximize, prevPosition, prevSize, position, size, isMobileScreen]);
   
   const handleClose = useCallback((e) => {
     e.stopPropagation();
@@ -149,10 +170,10 @@ const Window = ({
   }, [onMinimize]);
   
   const windowStyle = {
-    left: isMaximized ? 0 : position.x,
-    top: isMaximized ? 0 : position.y,
-    width: isMaximized ? '100%' : `${size.width}px`,
-    height: isMaximized ? `calc(100% - 30px)` : `${size.height}px`,
+    left: isMaximized || isMobileScreen ? 0 : position.x,
+    top: isMaximized || isMobileScreen ? 0 : position.y,
+    width: isMaximized || isMobileScreen ? '100%' : `${size.width}px`,
+    height: isMaximized || isMobileScreen ? `calc(100% - 30px)` : `${size.height}px`,
     zIndex
   };
   
@@ -169,12 +190,16 @@ const Window = ({
           <div className="window-title-text">{title}</div>
         </div>
         <div className="window-controls">
-          <button className="window-button minimize" onClick={handleMinimize} type="button" aria-label="Minimize">
-            <span>_</span>
-          </button>
-          <button className="window-button maximize" onClick={handleMaximize} type="button" aria-label="Maximize">
-            <span>{isMaximized ? '❐' : '□'}</span>
-          </button>
+          {!isMobileScreen && (
+            <button className="window-button minimize" onClick={handleMinimize} type="button" aria-label="Minimize">
+              <span>_</span>
+            </button>
+          )}
+          {!isMobileScreen && (
+            <button className="window-button maximize" onClick={handleMaximize} type="button" aria-label="Maximize">
+              <span>{isMaximized ? '❐' : '□'}</span>
+            </button>
+          )}
           <button className="window-button close" onClick={handleClose} type="button" aria-label="Close">
             <span>✕</span>
           </button>
@@ -185,7 +210,7 @@ const Window = ({
         {children}
       </div>
       
-      {!isMaximized && (
+      {!isMaximized && !isMobileScreen && (
         <>
           <div 
             className="resize-handle n" 

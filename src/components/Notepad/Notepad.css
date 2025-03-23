@@ -243,4 +243,93 @@
 .save-dialog .file-explorer button.primary:active {
   background: linear-gradient(180deg, #45a049 0%, #4CAF50 45%, #5cbd60 50%, #4CAF50 100%);
   border-color: #2d622e #45a049 #45a049 #2d622e;
+}
+
+@media screen and (max-width: 768px) {
+  .menu-bar {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 0;
+    height: auto;
+    min-height: 32px;
+  }
+  
+  .menu-item {
+    padding: 8px 12px;
+    white-space: nowrap;
+    font-size: 16px;
+  }
+  
+  .menu-dropdown {
+    min-width: 180px;
+    max-width: 90vw;
+    overflow-y: auto;
+    max-height: 80vh;
+    left: 0;
+    right: auto;
+  }
+  
+  .menu-dropdown button {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+  
+  .editor {
+    padding: 16px;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  
+  .status-bar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 32px;
+    padding: 8px;
+  }
+  
+  .status-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+  
+  .save-dialog {
+    width: 100vw;
+    height: 100vh;
+    max-height: unset;
+    border-width: 0;
+  }
+  
+  .save-dialog-title {
+    font-size: 18px;
+    height: 48px;
+    padding: 0 16px;
+  }
+  
+  .save-dialog .file-explorer {
+    height: calc(100% - 48px);
+  }
+  
+  .save-dialog .file-explorer button {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-width: 90px;
+  }
+}
+
+@media screen and (max-height: 450px) {
+  .editor-container {
+    max-height: 60vh;
+  }
+  
+  .menu-bar {
+    display: none;
+  }
+  
+  .status-bar {
+    display: none;
+  }
 } 
