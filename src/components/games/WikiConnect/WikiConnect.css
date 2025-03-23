@@ -466,6 +466,7 @@
 }
 
 .wiki-connect .rules-content {
+    color: #000;
     background: #ECE9D8;
     padding: 20px;
     border: 2px solid #919B9C;
@@ -504,7 +505,7 @@
     background: linear-gradient(180deg, #f5f5f5 0%, #e5e5e5 45%, #DDD 50%, #e5e5e5 100%);
 }
 
-.wiki-connect .menu-bar {
+.wiki-connect-menu-bar {
     display: flex;
     background: #FFFFFF;
     border-bottom: 1px solid #a2a9b1;
@@ -515,23 +516,23 @@
     z-index: 20;
 }
 
-.wiki-connect .menu-item {
+.wiki-connect-menu-item {
     color: #000;
     position: relative;
     padding: 2px 10px;
     cursor: pointer;
 }
 
-.wiki-connect .menu-item:hover {
+.wiki-connect-menu-item:hover {
     background-color: #316AC5;
     color: white;
 }
 
-.wiki-connect .menu-item:hover .menu-dropdown {
+.wiki-connect-menu-item:hover .wiki-connect-menu-dropdown {
     display: block;
 }
 
-.wiki-connect .menu-dropdown {
+.wiki-connect-menu-dropdown {
     display: none;
     position: absolute;
     top: 100%;
@@ -543,13 +544,13 @@
     z-index: 30;
 }
 
-.wiki-connect .menu-option {
+.wiki-connect-menu-option {
     padding: 6px 20px;
     font-size: 13px;
     color: #000;
 }
 
-.wiki-connect .menu-option:hover {
+.wiki-connect-menu-option:hover {
     background-color: #316AC5;
     color: white;
 }

@@ -66,22 +66,22 @@ const Minesweeper = memo(() => {
     ), [board, handleCellClick]);
 
     const MenuBar = useMemo(() => (
-        <div className="menu-bar">
-            <div className="menu-item">
+        <div className="minesweeper-menu-bar">
+            <div className="minesweeper-menu-item">
                 <span>File</span>
-                <div className="menu-dropdown">
-                    <div className="menu-option" onClick={() => startNewGame()}>New Game</div>
-                    <div className="menu-option" onClick={() => setShowCustomInput(true)}>Custom Word</div>
-                    <div className="menu-option" onClick={() => window.location.href = "/"}>Exit</div>
+                <div className="minesweeper-menu-dropdown">
+                    <div className="minesweeper-menu-option" onClick={() => startNewGame()}>New Game</div>
+                    <div className="minesweeper-menu-option" onClick={() => setShowCustomInput(true)}>Custom Word</div>
+                    <div className="minesweeper-menu-option" onClick={() => window.location.href = "/"}>Exit</div>
                 </div>
             </div>
-            <div className="menu-item">
+            <div className="minesweeper-menu-item">
                 <span>Help</span>
-                <div className="menu-dropdown">
-                    <div className="menu-option" onClick={() => setShowInfo(true)}>How to Play</div>
+                <div className="minesweeper-menu-dropdown">
+                    <div className="minesweeper-menu-option" onClick={() => setShowInfo(true)}>How to Play</div>
                 </div>
             </div>
-            <div className="menu-item" onClick={() => setFlagMode(!flagMode)}>
+            <div className="minesweeper-menu-item" onClick={() => setFlagMode(!flagMode)}>
                 <span>{flagMode ? 'Flags ON' : 'Flags OFF'}</span>
             </div>
         </div>

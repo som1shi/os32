@@ -76,19 +76,19 @@ const WikiConnect = () => {
                 </div>
             </div>
             
-            <div className="menu-bar">
-                <div className="menu-item">
+            <div className="wiki-connect-menu-bar">
+                <div className="wiki-connect-menu-item">
                     <span>File</span>
-                    <div className="menu-dropdown">
-                        <div className="menu-option" onClick={startGame}>New Game</div>
-                        <div className="menu-option" onClick={() => setShowCustomSetup(true)}>Custom Game</div>
-                        <div className="menu-option" onClick={() => window.location.href = "/"}>Exit</div>
+                    <div className="wiki-connect-menu-dropdown">
+                        <div className="wiki-connect-menu-option" onClick={startGame}>New Game</div>
+                        <div className="wiki-connect-menu-option" onClick={() => setShowCustomSetup(true)}>Custom Game</div>
+                        <div className="wiki-connect-menu-option" onClick={() => window.location.href = "/"}>Exit</div>
                     </div>
                 </div>
-                <div className="menu-item">
+                <div className="wiki-connect-menu-item">
                     <span>Help</span>
-                    <div className="menu-dropdown">
-                        <div className="menu-option" onClick={() => setShowRules(true)}>How to Play</div>
+                    <div className="wiki-connect-menu-dropdown">
+                        <div className="wiki-connect-menu-option" onClick={() => setShowRules(true)}>How to Play</div>
                     </div>
                 </div>
             </div>

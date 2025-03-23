@@ -172,7 +172,7 @@ const QuantumChess = memo(() => {
     ), [board, selectedPiece, possibleMoves, handlePieceClick, getPieceSymbol]);
 
     const GameStatus = useMemo(() => (
-        <div className="menu-item">
+        <div className="quantum-chess-menu-item">
             {gameOver ? (winner ? `${winner.toUpperCase()} wins!` : 'Game Over') : `${currentPlayer}'s turn`}
         </div>
     ), [gameOver, winner, currentPlayer]);
@@ -191,30 +191,30 @@ const QuantumChess = memo(() => {
                 </div>
             </div>
             
-            <div className="menu-bar">
+            <div className="quantum-chess-menu-bar">
                 <div 
-                    className={`menu-item ${activeMenu === 'file' ? 'active' : ''}`} 
+                    className={`quantum-chess-menu-item ${activeMenu === 'file' ? 'active' : ''}`} 
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleMenu('file');
                     }}
                 >
                     <span>File</span>
-                    <div className="menu-dropdown">
-                        <div className="menu-option" onClick={handleNewGame}>New Game</div>
-                        <div className="menu-option" onClick={handleExitGame}>Exit</div>
+                    <div className="quantum-chess-menu-dropdown">
+                        <div className="quantum-chess-menu-option" onClick={handleNewGame}>New Game</div>
+                        <div className="quantum-chess-menu-option" onClick={handleExitGame}>Exit</div>
                     </div>
                 </div>
                 <div 
-                    className={`menu-item ${activeMenu === 'help' ? 'active' : ''}`}
+                    className={`quantum-chess-menu-item ${activeMenu === 'help' ? 'active' : ''}`}
                     onClick={(e) => {
                         e.stopPropagation();
                         toggleMenu('help');
                     }}
                 >
                     <span>Help</span>
-                    <div className="menu-dropdown">
-                        <div className="menu-option" onClick={handleShowRules}>How to Play</div>
+                    <div className="quantum-chess-menu-dropdown">
+                        <div className="quantum-chess-menu-option" onClick={handleShowRules}>How to Play</div>
                     </div>
                 </div>
 

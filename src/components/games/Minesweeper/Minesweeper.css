@@ -74,7 +74,7 @@
     background: #E81123;
 }
 
-.minesweeper .menu-bar {
+.minesweeper-menu-bar {
     display: flex;
     background: #FFFFFF;
     border-bottom: 1px solid #a2a9b1;
@@ -85,23 +85,23 @@
     z-index: 20;
 }
 
-.minesweeper .menu-item {
+.minesweeper-menu-item {
     color: #000;
     position: relative;
     padding: 2px 10px;
     cursor: pointer;
 }
 
-.minesweeper .menu-item:hover {
+.minesweeper-menu-item:hover {
     background-color: #316AC5;
     color: white;
 }
 
-.minesweeper .menu-item:hover .menu-dropdown {
+.minesweeper-menu-item:hover .minesweeper-menu-dropdown {
     display: block;
 }
 
-.minesweeper .menu-dropdown {
+.minesweeper-menu-dropdown {
     display: none;
     position: absolute;
     top: 100%;
@@ -113,13 +113,13 @@
     z-index: 30;
 }
 
-.minesweeper .menu-option {
+.minesweeper-menu-option {
     padding: 6px 20px;
     font-size: 13px;
     color: #000;
 }
 
-.minesweeper .menu-option:hover {
+.minesweeper-menu-option:hover {
     background-color: #316AC5;
     color: white;
 }

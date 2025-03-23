@@ -73,7 +73,7 @@
     background: #E81123;
 }
 
-.quantum-chess .menu-bar {
+.quantum-chess-menu-bar {
     display: flex;
     background: #FFFFFF;
     border-bottom: 1px solid #a2a9b1;
@@ -84,23 +84,23 @@
     z-index: 20;
 }
 
-.quantum-chess .menu-item {
+.quantum-chess-menu-item {
     color: #000;
     position: relative;
     padding: 2px 10px;
     cursor: pointer;
 }
 
-.quantum-chess .menu-item:hover {
+.quantum-chess-menu-item:hover {
     background-color: #316AC5;
     color: white;
 }
 
-.quantum-chess .menu-item:hover .menu-dropdown {
+.quantum-chess-menu-item:hover .quantum-chess-menu-dropdown {
     display: block;
 }
 
-.quantum-chess .menu-dropdown {
+.quantum-chess-menu-dropdown {
     display: none;
     position: absolute;
     top: 100%;
@@ -112,13 +112,13 @@
     z-index: 30;
 }
 
-.quantum-chess .menu-option {
+.quantum-chess-menu-option {
     padding: 6px 20px;
     font-size: 13px;
     color: #000;
 }
 
-.quantum-chess .menu-option:hover {
+.quantum-chess-menu-option:hover {
     background-color: #316AC5;
     color: white;
 }
