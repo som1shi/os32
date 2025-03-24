@@ -1,7 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { PENALTY_TIME, GRID_WIDTH, GRID_HEIGHT } from '../constants';
 import useMatchFinder from '../hooks/useMatchFinder';
 import useAnimations from '../hooks/useAnimations';
+
+const Cell = memo(({ cell, onClick }) => {
+  return (
+    <div
+      key={cell.key}
+      className={cell.className}
+      data-row={cell.rowIndex}
+      data-col={cell.colIndex}
+      onClick={onClick}
+      style={cell.style}
+    />
+  );
+});
 
 const GameBoard = ({ 
   grid, 
@@ -14,54 +27,19 @@ const GameBoard = ({
   const { findMatchingDirections } = useMatchFinder();
   const { createFallingAnimation, createScorePopup } = useAnimations();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [flattenedCells, setFlattenedCells] = useState([]);
+  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
   
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      setIsLandscape(window.innerWidth > window.innerHeight);
     };
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  useEffect(() => {
-    const cells = [];
-    
-    if (isMobile) {
-      for (let colIndex = 0; colIndex < GRID_WIDTH; colIndex++) {
-        for (let rowIndex = 0; rowIndex < GRID_HEIGHT; rowIndex++) {
-          cells.push({
-            key: `cell-${rowIndex}-${colIndex}`,
-            className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
-            rowIndex,
-            colIndex,
-            color: grid[rowIndex][colIndex],
-            gridRow: colIndex + 1,
-            gridColumn: GRID_HEIGHT - rowIndex
-          });
-        }
-      }
-    } else {
-      for (let rowIndex = 0; rowIndex < GRID_HEIGHT; rowIndex++) {
-        for (let colIndex = 0; colIndex < GRID_WIDTH; colIndex++) {
-          cells.push({
-            key: `cell-${rowIndex}-${colIndex}`,
-            className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
-            rowIndex,
-            colIndex,
-            color: grid[rowIndex][colIndex],
-            gridRow: rowIndex + 1,
-            gridColumn: colIndex + 1
-          });
-        }
-      }
-    }
-    
-    setFlattenedCells(cells);
-  }, [grid, isMobile]);
-  
-  const handleCellClick = (rowIndex, colIndex) => {
+  const handleCellClick = useCallback((rowIndex, colIndex) => {
     if (gameOver || !gameStarted || grid[rowIndex][colIndex] !== null) return;
 
     const matchingDirections = findMatchingDirections(grid, rowIndex, colIndex);
@@ -83,25 +61,59 @@ const GameBoard = ({
     
     createFallingAnimation(matchingDirections.matchingTiles);
     createScorePopup(rowIndex, colIndex, pointsGained);
-  };
-
+  }, [gameOver, gameStarted, grid, findMatchingDirections, setTimeLeft, setScore, setGrid, createFallingAnimation, createScorePopup]);
+  
+  const flattenedCells = useMemo(() => {
+    const cells = [];
+    
+    if (isMobile && !isLandscape) {
+      for (let colIndex = 0; colIndex < GRID_WIDTH; colIndex++) {
+        for (let rowIndex = 0; rowIndex < GRID_HEIGHT; rowIndex++) {
+          cells.push({
+            key: `cell-${rowIndex}-${colIndex}`,
+            className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
+            rowIndex,
+            colIndex,
+            color: grid[rowIndex][colIndex],
+            style: { 
+              gridRow: colIndex + 1, 
+              gridColumn: GRID_HEIGHT - rowIndex
+            }
+          });
+        }
+      }
+    } else {
+      for (let rowIndex = 0; rowIndex < GRID_HEIGHT; rowIndex++) {
+        for (let colIndex = 0; colIndex < GRID_WIDTH; colIndex++) {
+          cells.push({
+            key: `cell-${rowIndex}-${colIndex}`,
+            className: `cm-cell ${grid[rowIndex][colIndex] || 'empty'}`,
+            rowIndex,
+            colIndex,
+            color: grid[rowIndex][colIndex],
+            style: {
+              gridRow: rowIndex + 1, 
+              gridColumn: colIndex + 1
+            }
+          });
+        }
+      }
+    }
+    
+    return cells;
+  }, [grid, isMobile, isLandscape]);
+  
   return (
-    <div className="cm-game-board">
+    <div className={`cm-game-board ${isMobile ? isLandscape ? 'landscape' : 'portrait' : ''}`}>
       {flattenedCells.map(cell => (
-        <div
+        <Cell
           key={cell.key}
-          className={cell.className}
-          data-row={cell.rowIndex}
-          data-col={cell.colIndex}
+          cell={cell}
           onClick={() => handleCellClick(cell.rowIndex, cell.colIndex)}
-          style={isMobile ? { 
-            gridRow: cell.gridRow, 
-            gridColumn: cell.gridColumn
-          } : undefined}
         />
       ))}
     </div>
   );
 };
 
-export default GameBoard; 
+export default memo(GameBoard); 

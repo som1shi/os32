@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const StartScreen = ({ onStart }) => {
   return (
@@ -12,4 +12,4 @@ const StartScreen = ({ onStart }) => {
   );
 };
 
-export default StartScreen; 
+export default memo(StartScreen); 

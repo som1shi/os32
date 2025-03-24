@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import TimeBar from './TimeBar';
 import ScoreDisplay from './ScoreDisplay';
 
@@ -13,4 +13,4 @@ const DisplayPanel = ({ timeLeft, score }) => {
   );
 };
 
-export default DisplayPanel; 
+export default memo(DisplayPanel); 

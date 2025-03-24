@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const InfoModal = ({ onClose }) => {
   return (
@@ -19,4 +19,4 @@ const InfoModal = ({ onClose }) => {
   );
 };
 
-export default InfoModal; 
+export default memo(InfoModal); 

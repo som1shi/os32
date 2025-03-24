@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const ScoreDisplay = ({ score }) => {
   return (
@@ -9,4 +9,4 @@ const ScoreDisplay = ({ score }) => {
   );
 };
 
-export default ScoreDisplay; 
+export default memo(ScoreDisplay); 

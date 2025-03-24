@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { GAME_TIME } from '../constants';
 
 const TimeBar = ({ timeLeft }) => {
   const timePercentage = (timeLeft / GAME_TIME) * 100;
   
-  const renderTimeBarSegments = () => {
+  const timeBarSegments = useMemo(() => {
     let colorClass = "normal";
     if (timePercentage <= 30) {
       colorClass = "low";
@@ -12,7 +12,7 @@ const TimeBar = ({ timeLeft }) => {
       colorClass = "medium";
     }
     
-    const totalSegments = 40;
+    const totalSegments = 12;
     const activeSegments = Math.ceil((timePercentage / 100) * totalSegments);
     
     const segments = [];
@@ -25,7 +25,7 @@ const TimeBar = ({ timeLeft }) => {
         {segments}
       </div>
     );
-  };
+  }, [timePercentage]);
   
   return (
     <div className="cm-time-section">
@@ -33,10 +33,10 @@ const TimeBar = ({ timeLeft }) => {
         <div className="cm-time-label">TIME REMAINING:</div>
       </div>
       <div className="cm-time-bar-container">
-        {renderTimeBarSegments()}
+        {timeBarSegments}
       </div>
     </div>
   );
 };
 
-export default TimeBar; 
+export default memo(TimeBar); 

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import useGameGrid from './hooks/useGameGrid';
@@ -31,6 +31,26 @@ const ColorMania = () => {
     submitError, 
     submitSuccess 
   } = useGameState();
+
+  useEffect(() => {
+    const updateViewport = () => {
+      let viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (!viewportMeta) {
+        viewportMeta = document.createElement('meta');
+        viewportMeta.name = 'viewport';
+        document.getElementsByTagName('head')[0].appendChild(viewportMeta);
+      }
+      viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    };
+    
+    updateViewport();
+    
+    document.body.classList.add('cm-game-active');
+    
+    return () => {
+      document.body.classList.remove('cm-game-active');
+    };
+  }, []);
 
   const handleNavigateHome = useCallback(() => navigate('/'), [navigate]);
   
@@ -91,4 +111,4 @@ const ColorMania = () => {
   );
 };
 
-export default ColorMania; 
+export default memo(ColorMania); 
