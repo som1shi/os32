@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 
 const CustomGameModal = ({
     customStart,
@@ -11,22 +11,28 @@ const CustomGameModal = ({
     startCustomGame,
     validateWikipediaTitle
 }) => {
-    const handleStartChange = (e) => {
+    const handleStartChange = useCallback((e) => {
         setCustomStart(e.target.value);
-    };
+    }, [setCustomStart]);
 
-    const handleTargetChange = (e) => {
+    const handleTargetChange = useCallback((e) => {
         setCustomTarget(e.target.value);
-    };
+    }, [setCustomTarget]);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
         try {
             await startCustomGame();
         } catch (error) {
             console.error("Error starting custom game:", error);
         }
-    };
+    }, [startCustomGame]);
+
+    const handleCancel = useCallback(() => {
+        setShowCustomSetup(false);
+    }, [setShowCustomSetup]);
+
+    const isSubmitDisabled = !customStart || !customTarget || customLoading;
 
     return (
         <div className="rules-modal">
@@ -44,6 +50,7 @@ const CustomGameModal = ({
                                 onChange={handleStartChange}
                                 placeholder="e.g. Albert Einstein"
                                 disabled={customLoading}
+                                autoComplete="off"
                             />
                         </div>
                         
@@ -55,6 +62,7 @@ const CustomGameModal = ({
                                 onChange={handleTargetChange}
                                 placeholder="e.g. Marie Curie"
                                 disabled={customLoading}
+                                autoComplete="off"
                             />
                         </div>
                     </div>
@@ -66,14 +74,14 @@ const CustomGameModal = ({
                     <div className="custom-game-buttons">
                         <button 
                             type="button" 
-                            onClick={() => setShowCustomSetup(false)}
+                            onClick={handleCancel}
                             disabled={customLoading}
                         >
                             Cancel
                         </button>
                         <button 
                             type="submit"
-                            disabled={!customStart || !customTarget || customLoading}
+                            disabled={isSubmitDisabled}
                         >
                             {customLoading ? "Loading..." : "Start Game"}
                         </button>
@@ -84,4 +92,4 @@ const CustomGameModal = ({
     );
 };
 
-export default CustomGameModal; 
+export default memo(CustomGameModal); 

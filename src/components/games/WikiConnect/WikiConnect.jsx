@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import './WikiConnect.css';
 import PersonCard from './components/PersonCard';
 import ConnectionChain from './components/ConnectionChain';
@@ -16,6 +16,7 @@ const WikiConnect = () => {
         currentPerson,
         personChain,
         loading,
+        submittingPerson,
         gameActive,
         gameComplete,
         userInput,
@@ -61,6 +62,48 @@ const WikiConnect = () => {
     const {
         debounce,
     } = useWikipediaSearch();
+
+    const startPersonCard = useMemo(() => (
+        <PersonCard
+            label="Start"
+            person={startPerson}
+            getWikipediaUrl={getWikipediaUrl}
+        />
+    ), [startPerson, getWikipediaUrl]);
+
+    const targetPersonCard = useMemo(() => (
+        <PersonCard
+            label="Target"
+            person={targetPerson}
+            getWikipediaUrl={getWikipediaUrl}
+        />
+    ), [targetPerson, getWikipediaUrl]);
+
+    const currentPersonCard = useMemo(() => (
+        <PersonCard
+            label="Current"
+            person={currentPerson}
+            startPerson={startPerson}
+            getWikipediaUrl={getWikipediaUrl}
+        />
+    ), [currentPerson, startPerson, getWikipediaUrl]);
+    
+    const connectionChainComponent = useMemo(() => (
+        <ConnectionChain
+            personChain={personChain}
+        />
+    ), [personChain]);
+    
+    const gameCompleteComponent = useMemo(() => (
+        <GameComplete
+            key="game-complete"
+            personChain={personChain}
+            seconds={seconds}
+            startGame={startGame}
+            shareScore={shareScore}
+            formatTime={formatTime}
+        />
+    ), [personChain, seconds, startGame, shareScore, formatTime]);
 
     return (
         <div className="wiki-connect">
@@ -118,59 +161,41 @@ const WikiConnect = () => {
                 ) : (
                     <div className="game-content">
                         <div className="person-connection-path">
-                            <PersonCard
-                                label="Start"
-                                person={startPerson}
-                                getWikipediaUrl={getWikipediaUrl}
-                            />
+                            {startPersonCard}
                             
                             <div className="connection-arrow">→</div>
                             
-                            <PersonCard
-                                label="Current"
-                                person={currentPerson}
-                                startPerson={startPerson}
-                                getWikipediaUrl={getWikipediaUrl}
-                            />
+                            {currentPersonCard}
                             
                             <div className="connection-arrow">→</div>
                             
-                            <PersonCard
-                                label="Target"
-                                person={targetPerson}
-                                getWikipediaUrl={getWikipediaUrl}
-                            />
+                            {targetPersonCard}
                         </div>
                         
                         {gameComplete ? (
-                            <GameComplete
-                                personChain={personChain}
-                                seconds={seconds}
-                                startGame={startGame}
-                                shareScore={shareScore}
-                                formatTime={formatTime}
-                            />
+                            gameCompleteComponent
                         ) : (
                             <div className="word-chain-container">
-                                <ConnectionChain
-                                    personChain={personChain}
-                                />
+                                {connectionChainComponent}
                                 
-                                <GameInput
-                                    currentPerson={currentPerson}
-                                    userInput={userInput}
-                                    suggestions={suggestions}
-                                    errorMessage={errorMessage}
-                                    loading={loading}
-                                    gameComplete={gameComplete}
-                                    personChain={personChain}
-                                    inputRef={inputRef}
-                                    handleInputChange={handleInputChange}
-                                    handleKeyDown={handleKeyDown}
-                                    handleSelectSuggestion={handleSelectSuggestion}
-                                    handleFormSubmit={handleFormSubmit}
-                                    goBack={goBack}
-                                />
+                                {currentPerson && (
+                                    <GameInput
+                                        currentPerson={currentPerson}
+                                        userInput={userInput}
+                                        suggestions={suggestions}
+                                        errorMessage={errorMessage}
+                                        loading={loading}
+                                        submittingPerson={submittingPerson}
+                                        gameComplete={gameComplete}
+                                        personChain={personChain}
+                                        inputRef={inputRef}
+                                        handleInputChange={handleInputChange}
+                                        handleKeyDown={handleKeyDown}
+                                        handleSelectSuggestion={handleSelectSuggestion}
+                                        handleFormSubmit={handleFormSubmit}
+                                        goBack={goBack}
+                                    />
+                                )}
                             </div>
                         )}
                     </div>
@@ -200,4 +225,4 @@ const WikiConnect = () => {
     );
 };
 
-export default WikiConnect; 
+export default memo(WikiConnect); 

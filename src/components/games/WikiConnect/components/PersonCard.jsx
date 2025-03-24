@@ -1,6 +1,22 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const PersonCard = ({ label, person, startPerson, getWikipediaUrl }) => {
+    if (!person) {
+        return (
+            <div className="person-card">
+                <div className="card-label">{label}</div>
+                <div className="card-content">
+                    <div className="default-image">
+                        <span>?</span>
+                    </div>
+                    <div className="person-info">
+                        <div className="person-title">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (label === "Current" && person?.title === startPerson?.title) {
         return (
             <div className="person-card current-card">
@@ -43,4 +59,4 @@ const PersonCard = ({ label, person, startPerson, getWikipediaUrl }) => {
     );
 };
 
-export default PersonCard; 
+export default memo(PersonCard); 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const GameComplete = ({ personChain, seconds, startGame, shareScore, formatTime }) => {
     return (
@@ -6,7 +6,7 @@ const GameComplete = ({ personChain, seconds, startGame, shareScore, formatTime 
             <h2>Success! Connection Complete</h2>
             <div className="word-chain-display">
                 {personChain.map((person, index) => (
-                    <span key={index}>
+                    <span key={`complete-${person.title}-${index}`}>
                         {person.title}
                         {index < personChain.length - 1 && <span className="chain-arrow">→</span>}
                     </span>
@@ -22,4 +22,4 @@ const GameComplete = ({ personChain, seconds, startGame, shareScore, formatTime 
     );
 };
 
-export default GameComplete; 
+export default memo(GameComplete); 

@@ -22,6 +22,7 @@ const useGameState = () => {
     const [customTarget, setCustomTarget] = useState('');
     const [customError, setCustomError] = useState('');
     const [customLoading, setCustomLoading] = useState(false);
+    const [submittingPerson, setSubmittingPerson] = useState(false);
     
     const timerRef = useRef(null);
     const inputRef = useRef(null);
@@ -49,98 +50,157 @@ const useGameState = () => {
                 
                 if (personName.includes(normalizedTerm)) return true;
                 
-                const searchWords = normalizedTerm.split(/\s+/).filter(word => word.length > 0);
-                if (searchWords.length > 1) {
-                    return searchWords.every(word => personName.includes(word));
-                }
-                
                 return false;
             });
             
-            const sortedResults = filtered
-                .sort((a, b) => {
-                    const aLower = a.toLowerCase();
-                    const bLower = b.toLowerCase();
-                    
-                    if (aLower === normalizedTerm) return -1;
-                    if (bLower === normalizedTerm) return 1;
-                    if (aLower.startsWith(normalizedTerm)) return -1;
-                    if (bLower.startsWith(normalizedTerm)) return 1;
-                    return aLower.indexOf(normalizedTerm) - bLower.indexOf(normalizedTerm);
-                })
-                .slice(0, 5);
+            filtered.sort((a, b) => {
+                const aLower = a.toLowerCase();
+                const bLower = b.toLowerCase();
+                const aExact = aLower === normalizedTerm;
+                const bExact = bLower === normalizedTerm;
                 
-            setSuggestions(sortedResults);
-        }, 150), 
-        [linkedPeople]
-    );
+                if (aExact && !bExact) return -1;
+                if (!aExact && bExact) return 1;
+                
+                const aStarts = aLower.startsWith(normalizedTerm);
+                const bStarts = bLower.startsWith(normalizedTerm);
+                
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+                
+                return 0;
+            });
+            
+            setSuggestions(filtered.slice(0, 5));
+        }, 300), 
+    [linkedPeople]);
     
-    const fetchPersonDetailsWithCache = async (title) => {
-        if (peopleCache[title]) return peopleCache[title];
+    const fetchPersonDetailsWithCache = useCallback(async (title) => {
+        if (!title) return null;
+        
+        if (peopleCache[title]?.details) {
+            return peopleCache[title].details;
+        }
         
         const details = await fetchPersonDetailsWithImage(title);
-        setPeopleCache(prev => ({ ...prev, [title]: details }));
+        
+        setPeopleCache(prev => ({
+            ...prev,
+            [title]: {
+                ...prev[title],
+                details
+            }
+        }));
+        
         return details;
-    };
+    }, [fetchPersonDetailsWithImage, peopleCache]);
     
-    const fetchLinkedPeopleWithCache = async (title) => {
-        const cacheKey = `links_${title}`;
-        if (peopleCache[cacheKey]) return peopleCache[cacheKey];
+    const fetchLinkedPeopleWithCache = useCallback(async (title) => {
+        if (!title) return [];
+        
+        if (peopleCache[title]?.links) {
+            return peopleCache[title].links;
+        }
         
         const links = await fetchWikiLinks(title);
-        setPeopleCache(prev => ({ ...prev, [cacheKey]: links }));
+        
+        setPeopleCache(prev => ({
+            ...prev,
+            [title]: {
+                ...prev[title],
+                links
+            }
+        }));
+        
         return links;
-    };
+    }, [fetchWikiLinks, peopleCache]);
     
-    const handleInputChange = (e) => {
-        setUserInput(e.target.value);
+    const handleInputChange = useCallback((e) => {
+        const value = e.target.value;
+        setUserInput(value);
+        setErrorMessage('');
         setSelectedIndex(-1);
-        searchPeople(e.target.value);
-    };
+        
+        if (value && value.length >= 2 && linkedPeople.length > 0) {
+            searchPeople(value);
+        } else {
+            setSuggestions([]);
+        }
+    }, [linkedPeople, searchPeople]);
     
-    const handleSubmitPerson = useCallback(async () => {
-        if (!userInput) return;
+    const handleSubmitPerson = useCallback(async (personName) => {
+        if (!personName || submittingPerson) return;
+        
+        setErrorMessage('');
         
         try {
-            setErrorMessage('');
-            const normalizedInput = userInput.trim();
-            
-            if (normalizedInput.toLowerCase() === targetPerson.title.toLowerCase()) {
-                handleSuccess(targetPerson);
+            if (!currentPerson) {
+                setErrorMessage("Game is still initializing. Please try again.");
                 return;
             }
             
+            const normalizedInput = personName.trim();
+            
             const directMatch = linkedPeople.find(
-                person => person.toLowerCase() === normalizedInput.toLowerCase()
+                person => person && person.toLowerCase() === normalizedInput.toLowerCase()
             );
             
             if (directMatch) {
-                const [details, links] = await Promise.all([
-                    fetchPersonDetailsWithCache(directMatch),
-                    fetchLinkedPeopleWithCache(directMatch)
-                ]);
+                setSubmittingPerson(true);
                 
-                const nextPerson = {
-                    title: directMatch,
-                    description: details.description,
-                    imageUrl: details.imageUrl
-                };
-                
-                setPersonChain(prev => [...prev, nextPerson]);
-                setCurrentPerson(nextPerson);
-                setLinkedPeople(links);
-                setUserInput('');
-                setSuggestions([]);
-                
-                if (nextPerson.title.toLowerCase() === targetPerson.title.toLowerCase()) {
-                    handleSuccess(nextPerson);
+                try {
+                    const details = await fetchPersonDetailsWithCache(directMatch);
+                    
+                    if (!details) {
+                        setErrorMessage(`Could not find information about ${directMatch}`);
+                        setSubmittingPerson(false);
+                        return;
+                    }
+                    
+                    const nextPerson = {
+                        title: directMatch,
+                        description: details.description,
+                        imageUrl: details.imageUrl
+                    };
+                    
+                    const isTargetReached = nextPerson.title.toLowerCase() === targetPerson?.title?.toLowerCase();
+                    
+                    if (isTargetReached) {
+                        setPersonChain(prev => [...prev, nextPerson]);
+                        setCurrentPerson(nextPerson);
+                        setGameComplete(true);
+                        setGameActive(false);
+                        
+                        if (timerRef.current) {
+                            clearInterval(timerRef.current);
+                            timerRef.current = null;
+                        }
+                        
+                        setUserInput('');
+                        setSubmittingPerson(false);
+                        return;
+                    }
+                    
+                    const linksPromise = fetchLinkedPeopleWithCache(directMatch);
+                    
+                    setPersonChain(prev => [...prev, nextPerson]);
+                    setCurrentPerson(nextPerson);
+                    setUserInput('');
+                    setSuggestions([]);
+                    
+                    const links = await linksPromise;
+                    setLinkedPeople(links);
+                    
+                    if (inputRef.current) inputRef.current.focus();
+                } catch (error) {
+                    console.error("Error processing person:", error);
+                    setErrorMessage("An error occurred. Please try again.");
+                } finally {
+                    setSubmittingPerson(false);
                 }
-                
-                if (inputRef.current) inputRef.current.focus();
             } else {
                 const matches = linkedPeople.filter(person => 
-                    person.toLowerCase().includes(normalizedInput.toLowerCase()) ||
-                    normalizedInput.toLowerCase().includes(person.toLowerCase())
+                    person && person.toLowerCase().includes(normalizedInput.toLowerCase())
                 );
                 
                 if (matches.length > 0) {
@@ -152,8 +212,9 @@ const useGameState = () => {
         } catch (error) {
             console.error("Error submitting person:", error);
             setErrorMessage("An error occurred. Please try again.");
+            setSubmittingPerson(false);
         }
-    }, [userInput, linkedPeople, targetPerson, currentPerson, fetchPersonDetailsWithCache, fetchLinkedPeopleWithCache]);
+    }, [currentPerson, fetchLinkedPeopleWithCache, fetchPersonDetailsWithCache, linkedPeople, targetPerson, submittingPerson]);
     
     const fetchRandomPerson = async () => {
         try {
@@ -370,41 +431,36 @@ const useGameState = () => {
         }
     };
     
-    const handleKeyDown = (e) => {
+    const handleKeyDown = useCallback((e) => {
         if (suggestions.length === 0) return;
         
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setSelectedIndex(prev => {
-                const newIndex = prev < suggestions.length - 1 ? prev + 1 : prev;
-                if (newIndex >= 0) {
-                    setUserInput(suggestions[newIndex]);
-                }
-                return newIndex;
-            });
+            setSelectedIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+            setUserInput(suggestions[(selectedIndex < suggestions.length - 1 ? selectedIndex + 1 : 0)]);
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            setSelectedIndex(prev => {
-                const newIndex = prev > 0 ? prev - 1 : 0;
-                setUserInput(suggestions[newIndex]);
-                return newIndex;
-            });
+            setSelectedIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+            setUserInput(suggestions[(selectedIndex > 0 ? selectedIndex - 1 : suggestions.length - 1)]);
         } else if (e.key === 'Enter' && selectedIndex >= 0) {
             e.preventDefault();
             handleSelectSuggestion(suggestions[selectedIndex]);
+        } else if (e.key === 'Escape') {
+            setSuggestions([]);
+            setSelectedIndex(-1);
         }
-    };
+    }, [selectedIndex, suggestions]);
     
-    const handleSelectSuggestion = (suggestion) => {
+    const handleSelectSuggestion = useCallback((suggestion) => {
         setUserInput(suggestion);
         setSuggestions([]);
-        if (inputRef.current) inputRef.current.focus();
-    };
+        setSelectedIndex(-1);
+    }, []);
     
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = useCallback((e) => {
         e.preventDefault();
-        handleSubmitPerson();
-    };
+        handleSubmitPerson(userInput);
+    }, [userInput]);
     
     const handleSuccess = (person) => {
         clearInterval(timerRef.current);
@@ -413,20 +469,32 @@ const useGameState = () => {
         setGameActive(false);
     };
     
-    const goBack = () => {
-        if (personChain.length <= 1) return;
+    const goBack = useCallback(() => {
+        if (personChain.length <= 1 || loading) return;
         
         const newChain = [...personChain];
         newChain.pop();
+        
         const previousPerson = newChain[newChain.length - 1];
-        
-        setPersonChain(newChain);
         setCurrentPerson(previousPerson);
+        setPersonChain(newChain);
         
-        fetchLinkedPeopleWithCache(previousPerson.title)
-            .then(links => setLinkedPeople(links))
-            .catch(error => console.error("Error fetching links for previous person:", error));
-    };
+        setUserInput('');
+        setErrorMessage('');
+        
+        (async () => {
+            setLoading(true);
+            try {
+                const links = await fetchLinkedPeopleWithCache(previousPerson.title);
+                setLinkedPeople(links);
+            } catch (error) {
+                console.error("Error fetching linked people:", error);
+                setErrorMessage("Failed to load connections.");
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [fetchLinkedPeopleWithCache, loading, personChain]);
     
     const shareScore = () => {
         const message = `I connected ${startPerson?.title} to ${targetPerson?.title} in ${personChain.length - 1} steps and ${formatTime(seconds)}! Play WikiConnect!`;
@@ -455,11 +523,11 @@ const useGameState = () => {
             });
     };
     
-    const formatTime = (totalSeconds) => {
+    const formatTime = useCallback((totalSeconds) => {
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, []);
     
     useEffect(() => {
         if (gameActive && !gameComplete) {
@@ -514,7 +582,7 @@ const useGameState = () => {
         timerRef,
         inputRef,
         searchPeople,
-        fetchLinkedPeople: fetchWikiLinks,
+        fetchLinkedPeople: fetchLinkedPeopleWithCache,
         fetchPersonDetailsWithImage,
         fetchPersonDetailsWithCache,
         fetchLinkedPeopleWithCache,

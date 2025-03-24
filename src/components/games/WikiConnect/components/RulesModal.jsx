@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const RulesModal = ({ setShowRules }) => {
     return (
@@ -19,4 +19,4 @@ const RulesModal = ({ setShowRules }) => {
     );
 };
 
-export default RulesModal; 
+export default memo(RulesModal); 

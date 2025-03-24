@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const ConnectionChain = ({ personChain }) => {
+    if (!personChain || personChain.length === 0) {
+        return (
+            <div className="word-chain-section">
+                <h3>Your Connection Chain</h3>
+                <div className="word-chain">
+                    <div className="chain-word">Start a connection</div>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div className="word-chain-section">
             <h3>Your Connection Chain</h3>
             <div className="word-chain">
                 {personChain.map((person, index) => (
-                    <React.Fragment key={index}>
+                    <React.Fragment key={`${person.title}-${index}`}>
                         <div className="chain-word">
                             {person.title}
                         </div>
@@ -20,4 +31,4 @@ const ConnectionChain = ({ personChain }) => {
     );
 };
 
-export default ConnectionChain; 
+export default memo(ConnectionChain); 

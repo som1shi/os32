@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 
 const GameInput = ({
     currentPerson,
@@ -6,6 +6,7 @@ const GameInput = ({
     suggestions,
     errorMessage,
     loading,
+    submittingPerson,
     gameComplete,
     personChain,
     inputRef,
@@ -15,9 +16,25 @@ const GameInput = ({
     handleFormSubmit,
     goBack
 }) => {
+    const onSuggestionClick = useCallback((suggestion) => {
+        handleSelectSuggestion(suggestion);
+    }, [handleSelectSuggestion]);
+
+    const showSuggestions = suggestions.length > 0 && userInput.trim().length > 0;
+    
+    if (!currentPerson) {
+        return (
+            <div className="input-section">
+                <div className="loading">
+                    <p>Loading game data...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="input-section">
-            <label>Enter a person connected to {currentPerson?.title}</label>
+            <label>Enter a person connected to {currentPerson.title}</label>
             
             <form onSubmit={handleFormSubmit}>
                 <div className="input-field">
@@ -28,16 +45,17 @@ const GameInput = ({
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder="Type a connected person's name..."
-                        disabled={loading || gameComplete}
+                        disabled={submittingPerson || gameComplete}
+                        autoComplete="off"
                     />
                     
-                    {suggestions.length > 0 && (
+                    {showSuggestions && (
                         <div className="suggestions">
                             {suggestions.map((suggestion, index) => (
                                 <div 
-                                    key={index}
+                                    key={`suggestion-${index}-${suggestion}`}
                                     className={`suggestion ${userInput === suggestion ? 'selected' : ''}`}
-                                    onClick={() => handleSelectSuggestion(suggestion)}
+                                    onClick={() => onSuggestionClick(suggestion)}
                                 >
                                     <span className="suggestion-text">{suggestion}</span>
                                 </div>
@@ -49,16 +67,16 @@ const GameInput = ({
                 <div className="button-container">
                     <button 
                         type="submit"
-                        className="submit-button"
-                        disabled={!userInput || loading}
+                        className={`submit-button ${submittingPerson ? 'submitting' : ''}`}
+                        disabled={!userInput || submittingPerson}
                     >
-                        Submit Person
+                        {submittingPerson ? 'Submitting...' : 'Submit Person'}
                     </button>
                     <button 
                         type="button"
                         className="del-button"
                         onClick={goBack}
-                        disabled={personChain.length <= 1 || loading}
+                        disabled={personChain.length <= 1 || submittingPerson}
                     >
                         ← Back
                     </button>
@@ -72,4 +90,4 @@ const GameInput = ({
     );
 };
 
-export default GameInput; 
+export default memo(GameInput); 
