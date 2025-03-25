@@ -302,4 +302,112 @@
   font-size: 13px;
   font-weight: bold;
   border-bottom: 1px solid #919B9C;
+}
+
+
+.riscv-instruction {
+  color: #d73a49;
+  font-weight: bold;
+}
+
+.riscv-register {
+  color: #6f42c1;
+}
+
+.riscv-directive {
+  color: #005cc5;
+  font-weight: bold;
+}
+
+.riscv-label {
+  color: #22863a;
+  font-weight: bold;
+}
+
+.riscv-number {
+  color: #e36209;
+}
+
+.riscv-comment {
+  color: #6a737d;
+  font-style: italic;
+}
+
+
+.code-editor-view-tabs {
+  display: none;
+}
+
+
+.compile-button {
+  background-color: #5c2d91;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin-left: 10px;
+  font-size: 0.9em;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s;
+}
+
+.compile-button:hover {
+  background-color: #492273;
+}
+
+.compile-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+
+.xp-toggle {
+  display: flex;
+  height: 22px;
+  margin-left: 10px;
+  border: 1px solid #2F4F81;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.xp-toggle button {
+  padding: 2px 10px;
+  background: linear-gradient(to bottom, #F1F3F7, #C6CBDE);
+  border: none;
+  color: #000;
+  font-size: 12px;
+  font-family: 'Tahoma', sans-serif;
+  cursor: pointer;
+  border-right: 1px solid #BFC4D5;
+  min-width: 60px;
+}
+
+.xp-toggle button:last-child {
+  border-right: none;
+}
+
+.xp-toggle button.xp-toggle-active {
+  background: linear-gradient(to bottom, #2964B5, #174886);
+  color: white;
+  font-weight: bold;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.xp-toggle button:hover:not(.xp-toggle-active) {
+  background: linear-gradient(to bottom, #E3E9FF, #B9BFD8);
+}
+
+
+.risc-run-button {
+  background-color: #ECE9D8;
+  border-color: #5A4200;
+  color: #5A4200;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.risc-run-button:hover {
+  background-color: #FCF8E8;
 } 

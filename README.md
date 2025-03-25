@@ -1,51 +1,45 @@
-# OS32 - A Desktop in React.js!
+# os32 - A Desktop in React.js!
 
 A nostalgic Desktop experience with a collection of fun browser-based games and applications.
 
 ## Live Demo
 
-Visit [os32.vercel.app](https://os32.vercel.app) to experience the OS32 desktop interface, use the applications and play the games online. 
+Visit [os32.vercel.app](https://os32.vercel.app) to experience the os32 desktop interface, use the applications and play the games online. 
 
 ## Screenshots
 
 
 ## Features
 - **Collection of games:**
+  - **Refiner** (Severance-inspired sorting game)
+    - Data refinement game inspired by the famous Apple TV show "Severance"
+    - Sort numbers according to mysterious criteria
+    - Multiple time-based challenges
+  
+  - **WikiConnect**
+    - Navigate through Wikipedia to connect two random articles
+    - History tracking of visited pages
+    - Customizable games
+  
+  - **ColorMania**
+    - Match colors in a fast-paced puzzle game
+    - Fast moving animations
+    - Dynamic responsiveness
+
   - **WordSweeper** (Minesweeper with a twist)
     - Classic Minesweeper gameplay with word puzzles
-    - Multiple difficulty levels
     - Timer and score tracking
-    - Customizable grid sizes
+    - Custom words suppport
   
   - **Schrödinger's Chess** (Quantum Chess)
     - Chess with quantum mechanics principles
     - Pieces exist in superposition until observed
     - Strategic gameplay with quantum uncertainty
-    - Tutorial mode for beginners
   
   - **Rotate Connect Four**
     - Classic Connect Four with a rotating board mechanic
     - Play against AI or another player
-    - Multiple difficulty levels
-    - Special power-ups and game modes
-  
-  - **Refiner** (Severance-inspired sorting game)
-    - Data refinement game inspired by the TV show "Severance"
-    - Sort numbers according to mysterious criteria
-    - Multiple time-based challenges
-    - Progressive difficulty levels
-  
-  - **WikiConnect**
-    - Navigate through Wikipedia to connect two random articles
-    - Challenge mode with time limits
-    - History tracking of visited pages
-    - Customizable difficulty settings
-  
-  - **ColorMania**
-    - Match colors in a fast-paced puzzle game
-    - Multiple game modes
-    - Special power-ups and challenges
-    - Leaderboards for each mode
+
    
 
 - **Windows XP-inspired desktop interface**
@@ -57,25 +51,36 @@ Visit [os32.vercel.app](https://os32.vercel.app) to experience the OS32 desktop 
   - System tray with clock and indicators
 
 - **Multiple built-in applications:**
+
+  - **Terminal**
+    - Full command-line interface
+    - File system navigation and management
+    - Launch applications from command line
+    - Classic terminal appearance with dynamic 
+    - Command history
+
+  - **Code Editor** 
+    - Code editor with Python and PyG support
+    - Syntax highlighting for Python, PyG, and RISC-V assembly
+    - Compile Python/PyG to RISC-V assembly
+    - View and edit generated RISC-V code
+    - Save and run compiled RISC-V programs
+    - Integrated terminal interface via the Terminal app
+    - Command support: `compile`, `asm`, and `run-riscv`
+    - Basic simulator for RISC-V execution
+    - Full RV32I base instruction set support
+
   - **File Explorer**
     - Browse and manage your documents
     - Create, rename, and delete files
     - Context menu with right-click options
     - Directory navigation
-    - Integration with Notepad for text files
+    - Integration with Notepad for text files and Code Editor for code files
   
   - **Notepad**
     - Create and edit text documents
     - Save and open functionality
-    - Auto-save feature
     - Familiar text editing experience
-  
-  - **Terminal**
-    - Full command-line interface
-    - File system navigation and management
-    - Launch applications from command line
-    - Classic terminal appearance with green text on black background
-    - Command history
   
   - **Internet Explorer**
     - Web browsing simulation
@@ -86,14 +91,13 @@ Visit [os32.vercel.app](https://os32.vercel.app) to experience the OS32 desktop 
   - **Music Player**
     - iPod-inspired interface
     - Play, pause, and skip controls
-    - Playlist management
+    - Utilizing Apple Music Preview API
     - Volume control
     - Background playback while using other applications
 
 - **User Management System**
   - User profiles with avatars
   - Score history and statistics
-  - Achievements and badges
   - Authentication with multiple providers
 
 - **File System**
@@ -128,6 +132,9 @@ The terminal app provides a powerful command-line interface with several useful 
 - `pyg [file.pyg]` - Run PYG file (e.g., `pyg code.pyg`)
 - `py2pyg [file.py]` - Convert Python to PYG (e.g., `py2pyg script.py`)
 - `pyg2py [file.pyg]` - Convert PYG to Python (e.g., `pyg2py code.pyg`)
+- `compile [file.py|file.pyg] [output.s]` - Compile Python/PyG to RISC-V (e.g., `compile hello.py hello.s`)
+- `asm [file.s]` - Display assembly file content (e.g., `asm hello.s`)
+- `run-riscv [file.s]` - Run RISC-V assembly code in simulator (e.g., `run-riscv hello.s`)
 
 
 

@@ -4,6 +4,8 @@ import { useAuth } from '../../firebase/AuthContext';
 import { getFiles, createFile, deleteFile, updateFile } from '../../firebase/fileService';
 import { runPython } from '../../utils/python/pythonRuntime';
 import { pythonToPYG, PYGToPython } from '../../utils/pyg/translator';
+import { compileToRISCV } from '../../utils/riscv/compiler';
+import { runRISCV } from '../../utils/riscv/simulator';
 import './Terminal.css';
 
 
@@ -63,7 +65,10 @@ const HELP_TEXT = `Available commands:
   python [file.py] - Run Python file
   pyg [file.pyg] - Run PYG file
   py2pyg [file.py] - Convert Python to PYG
-  pyg2py [file.pyg] - Convert PYG to Python`;
+  pyg2py [file.pyg] - Convert PYG to Python
+  compile [file.py|file.pyg] [output.s] - Compile Python/PyG to RISC-V
+  asm [file.s] - Display assembly file content
+  run-riscv [file.s] - Run RISC-V assembly code in simulator`;
 
 const Terminal = memo(({ onLaunchApp }) => {
   const [history, setHistory] = useState(() => [{ text: 'Welcome to os32 Terminal v1.0', type: 'system' }]);
@@ -470,6 +475,130 @@ const Terminal = memo(({ onLaunchApp }) => {
           addToHistory(`Converted ${args[0]} to ${pyFileName}`, 'output');
         } catch (error) {
           addToHistory(`pyg2py: error converting file: ${error.message}`, 'error');
+        }
+        break;
+
+      case 'compile':
+        if (args.length < 1) {
+          addToHistory('compile: missing file operand', 'error');
+          break;
+        }
+
+        if (currentDir !== 'Documents') {
+          addToHistory('compile: can only compile files from Documents directory', 'error');
+          break;
+        }
+
+        if (!currentUser) {
+          addToHistory('compile: not logged in, cannot access files', 'error');
+          break;
+        }
+
+        const sourceFile = args[0];
+        const outputFile = args[1] || sourceFile.replace(/\.(py|pyg)$/, '.s');
+        
+        if (!sourceFile.endsWith('.py') && !sourceFile.endsWith('.pyg')) {
+          addToHistory(`compile: ${sourceFile}: Not a Python or PyG file`, 'error');
+          break;
+        }
+
+        const fileToCompile = files.find(f => f.name === sourceFile);
+        if (!fileToCompile) {
+          addToHistory(`compile: ${sourceFile}: No such file`, 'error');
+          break;
+        }
+
+        try {
+          addToHistory(`Compiling ${sourceFile} to RISC-V assembly...`, 'output');
+          
+          const language = sourceFile.endsWith('.py') ? 'python' : 'pyg';
+          
+          const riscvCode = compileToRISCV(fileToCompile.content, language);
+          
+          await createFile(currentUser.uid, {
+            name: outputFile,
+            content: riscvCode,
+            type: 'riscv',
+            createdAt: new Date().toISOString(),
+            modifiedAt: new Date().toISOString()
+          });
+          
+          addToHistory(`Compilation successful. Saved as ${outputFile}`, 'output');
+        } catch (error) {
+          addToHistory(`compile: error: ${error.message}`, 'error');
+        }
+        break;
+
+      case 'asm':
+        if (!args[0]) {
+          addToHistory('asm: missing file operand', 'error');
+          break;
+        }
+
+        if (currentDir !== 'Documents') {
+          addToHistory('asm: can only view files in Documents directory', 'error');
+          break;
+        }
+
+        if (!currentUser) {
+          addToHistory('asm: not logged in, cannot access files', 'error');
+          break;
+        }
+
+        const asmFile = files.find(f => f.name === args[0]);
+        if (!asmFile) {
+          addToHistory(`asm: ${args[0]}: No such file`, 'error');
+          break;
+        }
+
+        if (!args[0].endsWith('.s') && !args[0].endsWith('.asm')) {
+          addToHistory(`asm: ${args[0]}: Not an assembly file`, 'warning');
+        }
+
+        addToHistory(`Assembly listing of ${args[0]}:`, 'output');
+        addToHistory(asmFile.content || '(Empty file)', 'output');
+        break;
+
+      case 'run-riscv':
+        if (!args[0]) {
+          addToHistory('run-riscv: missing file operand', 'error');
+          break;
+        }
+
+        if (currentDir !== 'Documents') {
+          addToHistory('run-riscv: can only run files from Documents directory', 'error');
+          break;
+        }
+
+        if (!currentUser) {
+          addToHistory('run-riscv: not logged in, cannot access files', 'error');
+          break;
+        }
+
+        const riscvFile = files.find(f => f.name === args[0]);
+        if (!riscvFile) {
+          addToHistory(`run-riscv: ${args[0]}: No such file`, 'error');
+          break;
+        }
+
+        if (!args[0].endsWith('.s') && !args[0].endsWith('.asm')) {
+          addToHistory(`run-riscv: ${args[0]}: Not an assembly file (using anyway)`, 'warning');
+        }
+
+        try {
+          addToHistory(`Running RISC-V simulator for ${args[0]}...`, 'output');
+          
+          const output = runRISCV(
+            riscvFile.content, 
+            text => addToHistory(text, 'output')
+          );
+          
+          if (!output) {
+            addToHistory('Program executed with no output.', 'output');
+          }
+          addToHistory('Simulation completed.', 'output');
+        } catch (error) {
+          addToHistory(`run-riscv: error: ${error.message}`, 'error');
         }
         break;
 
