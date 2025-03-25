@@ -11,6 +11,7 @@ import Leaderboard from '../Leaderboard';
 import StickyNote from './StickyNote';
 import UserProfile from '../UserProfile';
 import IPodPlayer from '../iPodPlayer';
+import Terminal from '../Terminal/Terminal';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
@@ -251,16 +252,66 @@ const Desktop = ({ games }) => {
     setStartMenuOpen(false);
   }, [addWindow, closeWindow]);
 
+  const toggleTerminal = useCallback(() => {
+    addWindow(
+      'terminal',
+      'Terminal',
+      '🖥️',
+      <Terminal onLaunchApp={(appId) => {
+        // Handle app launching based on ID
+        switch (appId) {
+          case 'explorer':
+            toggleFileExplorer();
+            break;
+          case 'notepad':
+            handleNewNotepad();
+            break;
+          case 'terminal':
+            // Don't launch another terminal if already in terminal
+            break;
+          case 'internet':
+            toggleInternetExplorer();
+            break;
+          case 'ipod-player':
+            toggleIPodPlayer();
+            break;
+          case 'minesweeper':
+          case 'quantumchess':
+          case 'rotateconnectfour':
+          case 'refiner':
+          case 'wikiconnect':
+          case 'colormania':
+            const GameComponent = GAME_COMPONENTS[appId];
+            if (GameComponent) {
+              addWindow(appId, games.find(g => g.id === appId)?.title || appId, 
+                        games.find(g => g.id === appId)?.icon || '🎮', 
+                        <GameComponent />);
+            }
+            break;
+          default:
+            // Unknown app
+            break;
+        }
+      }} />
+    );
+    setStartMenuOpen(false);
+  }, [addWindow, toggleFileExplorer, handleNewNotepad, toggleInternetExplorer, toggleIPodPlayer, games, GAME_COMPONENTS]);
+
   const desktopIcons = useMemo(() => (
     <div className="desktop-icons">
       <div className="desktop-icon" onClick={toggleFileExplorer}>
         <div className="icon">📁</div>
-        <div className="icon-text">My Documents</div>
+        <div className="icon-text">Documents</div>
       </div>
 
       <div className="desktop-icon" onClick={handleNewNotepad}>
         <div className="icon">📝</div>
         <div className="icon-text">Notepad</div>
+      </div>
+
+      <div className="desktop-icon" onClick={toggleTerminal}>
+        <div className="icon">🖥️</div>
+        <div className="icon-text">Terminal</div>
       </div>
 
       {games.map(game => (
@@ -299,7 +350,8 @@ const Desktop = ({ games }) => {
     toggleFileExplorer, 
     toggleInternetExplorer, 
     toggleIPodPlayer, 
-    toggleUserProfile
+    toggleUserProfile,
+    toggleTerminal
   ]);
 
   const renderWindows = useMemo(() => (
@@ -378,12 +430,17 @@ const Desktop = ({ games }) => {
           <div className="start-menu-left">
             <div className="start-menu-item" onClick={toggleFileExplorer}>
               <div className="start-menu-icon">📁</div>
-              <div className="start-menu-text">My Documents</div>
+              <div className="start-menu-text">Documents</div>
             </div>
             
             <div className="start-menu-item" onClick={handleNewNotepad}>
               <div className="start-menu-icon">📝</div>
               <div className="start-menu-text">Notepad</div>
+            </div>
+            
+            <div className="start-menu-item" onClick={toggleTerminal}>
+              <div className="start-menu-icon">🖥️</div>
+              <div className="start-menu-text">Terminal</div>
             </div>
             
             <div className="start-menu-separator" />
@@ -460,7 +517,8 @@ const Desktop = ({ games }) => {
     toggleStickyNotes,
     toggleUserProfile,
     showStickyNotes,
-    addWindow
+    addWindow,
+    toggleTerminal
   ]);
 
   return (
@@ -498,6 +556,9 @@ const Desktop = ({ games }) => {
           </div>
           <div className="quick-launch-item" onClick={toggleIPodPlayer}>
             <div className="quick-icon">🎵</div>
+          </div>
+          <div className="quick-launch-item" onClick={toggleTerminal}>
+            <div className="quick-icon">🖥️</div>
           </div>
           <div className="separator"></div>
         </div>

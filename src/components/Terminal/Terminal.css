@@ -1,0 +1,79 @@
+.terminal {
+  background-color: #000;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+div[class*="window-content"]:has(.terminal) {
+  background-color: #000 !important;
+}
+
+
+.terminal-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-line {
+  margin: 2px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.terminal-system {
+  color: #33ccff;
+}
+
+.terminal-error {
+  color: #ff3333;
+}
+
+.terminal-output {
+  color: #cccccc;
+}
+
+.terminal-prompt {
+  color: #ffcc00;
+  margin-right: 5px;
+}
+
+.terminal-input-line {
+  display: flex;
+  align-items: center;
+}
+
+.terminal-input {
+  background-color: transparent;
+  border: none;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: inherit;
+  flex: 1;
+  outline: none;
+  caret-color: #00ff00;
+}
+
+.terminal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal::-webkit-scrollbar-track {
+  background: #111;
+}
+
+.terminal::-webkit-scrollbar-thumb {
+  background: #444;
+}
+
+.terminal::-webkit-scrollbar-thumb:hover {
+  background: #666;
+} 

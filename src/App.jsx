@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import './App.css'
-import GameLoader from './components/GameLoader'
 import Desktop from './components/os/Desktop'
 import { AuthProvider } from './firebase/AuthContext'
+import { Analytics } from "@vercel/analytics/react"
 
 import Minesweeper from './components/games/Minesweeper/Minesweeper';
 import QuantumChess from './components/games/QuantumChess/QuantumChess';
@@ -63,6 +63,7 @@ function App() {
         <Route path="/game/wikiconnect" element={<WikiConnect />} />
         <Route path="/game/colormania" element={<ColorMania />} />
       </Routes>
+      <Analytics />
     </AuthProvider>
   );
 }

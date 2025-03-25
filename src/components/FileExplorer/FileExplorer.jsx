@@ -331,7 +331,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
       </div>
       <div className="address-bar">
         <span className="address-icon" aria-hidden="true">📁</span>
-        <span className="address-text">My Documents</span>
+        <span className="address-text">Documents</span>
       </div>
     </div>
   ), [mode, handleCreateFile]);
@@ -474,7 +474,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         <div className="sidebar">
           <div className="folder-tree" role="tree">
             <div className="tree-item active" role="treeitem" aria-selected="true" tabIndex={0}>
-              <span aria-hidden="true">📁</span>My Documents
+              <span aria-hidden="true">📁</span>Documents
             </div>
           </div>
         </div>
