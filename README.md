@@ -1,17 +1,54 @@
 # OS32 - A Desktop in React.js!
 
-A nostalgic Windows XP-style desktop experience with a collection of fun browser-based games. Relive the classic desktop feel while enjoying modern games in this faithful recreation of the iconic Windows XP interface.
+A nostalgic Desktop experience with a collection of fun browser-based games and applications.
 
 ## Live Demo
 
-Visit [os32.vercel.app](https://os32.vercel.app) to experience the OS32 desktop interface and play games online. 
+Visit [os32.vercel.app](https://os32.vercel.app) to experience the OS32 desktop interface, use the applications and play the games online. 
 
 ## Screenshots
 
 
 ## Features
+- **Collection of games:**
+  - **WordSweeper** (Minesweeper with a twist)
+    - Classic Minesweeper gameplay with word puzzles
+    - Multiple difficulty levels
+    - Timer and score tracking
+    - Customizable grid sizes
+  
+  - **Schrödinger's Chess** (Quantum Chess)
+    - Chess with quantum mechanics principles
+    - Pieces exist in superposition until observed
+    - Strategic gameplay with quantum uncertainty
+    - Tutorial mode for beginners
+  
+  - **Rotate Connect Four**
+    - Classic Connect Four with a rotating board mechanic
+    - Play against AI or another player
+    - Multiple difficulty levels
+    - Special power-ups and game modes
+  
+  - **Refiner** (Severance-inspired sorting game)
+    - Data refinement game inspired by the TV show "Severance"
+    - Sort numbers according to mysterious criteria
+    - Multiple time-based challenges
+    - Progressive difficulty levels
+  
+  - **WikiConnect**
+    - Navigate through Wikipedia to connect two random articles
+    - Challenge mode with time limits
+    - History tracking of visited pages
+    - Customizable difficulty settings
+  
+  - **ColorMania**
+    - Match colors in a fast-paced puzzle game
+    - Multiple game modes
+    - Special power-ups and challenges
+    - Leaderboards for each mode
+   
 
-- **Authentic Windows XP-style desktop interface**
+- **Windows XP-inspired desktop interface**
   - Start menu with program shortcuts
   - Desktop icons for quick access
   - Taskbar with running applications
@@ -52,43 +89,6 @@ Visit [os32.vercel.app](https://os32.vercel.app) to experience the OS32 desktop 
     - Playlist management
     - Volume control
     - Background playback while using other applications
-
-- **Collection of games:**
-  - **WordSweeper** (Minesweeper with a twist)
-    - Classic Minesweeper gameplay with word puzzles
-    - Multiple difficulty levels
-    - Timer and score tracking
-    - Customizable grid sizes
-  
-  - **Schrödinger's Chess** (Quantum Chess)
-    - Chess with quantum mechanics principles
-    - Pieces exist in superposition until observed
-    - Strategic gameplay with quantum uncertainty
-    - Tutorial mode for beginners
-  
-  - **Rotate Connect Four**
-    - Classic Connect Four with a rotating board mechanic
-    - Play against AI or another player
-    - Multiple difficulty levels
-    - Special power-ups and game modes
-  
-  - **Refiner** (Severance-inspired sorting game)
-    - Data refinement game inspired by the TV show "Severance"
-    - Sort numbers according to mysterious criteria
-    - Multiple time-based challenges
-    - Progressive difficulty levels
-  
-  - **WikiConnect**
-    - Navigate through Wikipedia to connect two random articles
-    - Challenge mode with time limits
-    - History tracking of visited pages
-    - Customizable difficulty settings
-  
-  - **ColorMania**
-    - Match colors in a fast-paced puzzle game
-    - Multiple game modes
-    - Special power-ups and challenges
-    - Leaderboards for each mode
 
 - **User Management System**
   - User profiles with avatars
@@ -211,6 +211,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Inspired by Microsoft Windows XP
 - [Miracode](https://github.com/IdreesInc/Miracode) font by IdreesInc used in the Terminal application
-- PYG language inspired by [PyGyat](https://github.com/shamith09/pygyat)
+- PYG language: [PyGyat](https://github.com/shamith09/pygyat)
 - Thanks to all contributors who have helped shape this project
 - Special thanks to the open-source community for the tools and libraries used
