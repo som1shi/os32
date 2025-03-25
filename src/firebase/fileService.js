@@ -10,7 +10,8 @@ import {
   orderBy, 
   where,
   serverTimestamp,
-  limit
+  limit,
+  getDocs
 } from 'firebase/firestore';
 
 /**
@@ -141,5 +142,40 @@ export const deleteFile = async (userId, fileId) => {
   } catch (error) {
     console.error('Error deleting file:', error);
     throw new Error(`Failed to delete file: ${error.message}`);
+  }
+};
+
+/**
+ * Get files by filename
+ * @param {string} userId - User ID
+ * @param {string} fileName - File name to search for (case insensitive)
+ * @returns {Promise<Array>} Array of matching files
+ */
+export const getFilesByName = async (userId, fileName) => {
+  if (!userId || !fileName) {
+    throw new Error('User ID and file name are required');
+  }
+  
+  try {
+    const filesRef = collection(db, 'users', userId, 'files');
+    const q = query(
+      filesRef,
+      where('name', '==', fileName)
+    );
+    
+    const snapshot = await getDocs(q);
+    const files = [];
+    
+    snapshot.forEach((doc) => {
+      files.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return files;
+  } catch (error) {
+    console.error('Error getting files by name:', error);
+    throw new Error(`Failed to get files by name: ${error.message}`);
   }
 }; 

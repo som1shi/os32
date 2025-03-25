@@ -89,6 +89,34 @@
   position: relative;
 }
 
+.window-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.window-content::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+.window-content::-webkit-scrollbar-thumb {
+  background-color: #a0a0a0;
+  border-radius: 2px;
+  border: 2px solid #e0e0e0;
+}
+
+.window-content::-webkit-scrollbar-thumb:hover {
+  background-color: #808080;
+}
+
+.window-content::-webkit-scrollbar-corner {
+  background: #e0e0e0;
+}
+
+.window-content {
+  scrollbar-width: thin;
+  scrollbar-color: #a0a0a0 #e0e0e0;
+}
+
 .resize-handle {
   position: absolute;
   background-color: transparent;

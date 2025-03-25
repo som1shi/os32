@@ -23,9 +23,12 @@ const AboutWindow = ({ onClose }) => {
           <li><strong>Rotate Connect Four</strong> - Strategic Connect Four with dynamic board rotation and dice mechanics.</li>
           <li><strong>Refiner</strong> - A terminal-based number sorting game inspired by corporate dystopias.</li>
           <li><strong>WikiConnect</strong> - Test your knowledge by finding paths between Wikipedia articles.</li>
+          <li><strong>Terminal</strong> - A command-line interface featuring the Miracode font for file management and app launching.</li>
+          <li><strong>Code Editor</strong> - A versatile editor for Python programming and PYG, a quirky Python variant with internet slang syntax.</li>
           <li><strong>Internet Explorer</strong> - A nostalgic recreation of the classic web browser.</li>
           <li><strong>File Explorer</strong> - Manage your documents with this familiar interface.</li>
           <li><strong>Notepad</strong> - A simple yet effective text editor for your writing needs.</li>
+          <li><strong>Music Player</strong> - An iPod-inspired music player for your listening enjoyment.</li>
         </ul>
       </div>
       

@@ -15,7 +15,7 @@ const ERROR_MESSAGES = {
   SAVE_FAILED: 'Error saving file. Please try again later.'
 };
 
-const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initialFileName = '', currentContent = '' }) => {
+const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initialFileName = '', currentContent = '', fileType = 'text', fileExtension = '.txt' }) => {
   const [files, setFiles] = useState([]);
   const [contextMenu, setContextMenu] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -31,17 +31,29 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
   const fileListRef = useRef(null);
 
   const getNextFileName = useCallback(() => {
-    const existingNames = files.map(file => file.name);
-    let counter = 0;
-    let newFileName = `${BASE_FILE_NAME}${FILE_EXTENSION}`;
-
-    while (existingNames.includes(newFileName)) {
-      counter++;
-      newFileName = `${BASE_FILE_NAME} (${counter})${FILE_EXTENSION}`;
+    let baseName = 'New Text Document';
+    let extension = '.txt';
+    
+    if (fileType === 'code') {
+      baseName = 'New Python File';
+      extension = mode === 'pyg' ? '.pyg' : '.py';
     }
-
-    return newFileName;
-  }, [files]);
+    
+    let count = 0;
+    const regex = new RegExp(`^${baseName}\\s*(\\d*)\\${extension}$`);
+    
+    files.forEach(file => {
+      const match = file.name.match(regex);
+      if (match) {
+        const num = match[1] ? parseInt(match[1], 10) : 0;
+        if (num >= count) {
+          count = num + 1;
+        }
+      }
+    });
+    
+    return count === 0 ? `${baseName}${extension}` : `${baseName} ${count}${extension}`;
+  }, [files, fileType, mode]);
 
   const validateFileName = useCallback((name) => {
     const trimmedName = name?.trim();
@@ -51,12 +63,12 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     return sanitized.endsWith(FILE_EXTENSION) ? sanitized : `${sanitized}${FILE_EXTENSION}`;
   }, []);
 
-  const handleCreateFile = useCallback(async () => {
+  const handleCreateFile = useCallback(async (fileExt = null) => {
     if (!currentUser) {
       try {
-        const shouldLogin = window.confirm(ERROR_MESSAGES.SIGN_IN_PROMPT);
-        if (shouldLogin) {
-          await signInWithGoogle();
+        await signInWithGoogle();
+        if (!isMountedRef.current) {
+          return;
         }
       } catch (error) {
         console.error('Error during sign in:', error);
@@ -65,18 +77,30 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     }
 
     try {
-      const newFileName = getNextFileName();
+      const isCodeFile = fileExt === '.py' || fileExt === '.pyg';
+      const extension = fileExt || (fileType === 'code' ? (mode === 'pyg' ? '.pyg' : '.py') : '.txt');
+      let baseName = isCodeFile ? 'New Python File' : 'New Text Document';
+      let newFileName = `${baseName}${extension}`;
+      
+      let counter = 0;
+      const existingNames = files.map(file => file.name.toLowerCase());
+      
+      while (existingNames.includes(newFileName.toLowerCase())) {
+        counter++;
+        newFileName = `${baseName} ${counter}${extension}`;
+      }
+      
       await createFile(currentUser.uid, {
         name: newFileName,
         content: '',
-        type: 'text',
+        type: isCodeFile ? 'code' : 'text',
         createdAt: new Date().toISOString(),
         modifiedAt: new Date().toISOString()
       });
     } catch (error) {
       console.error('Error creating file:', error);
     }
-  }, [currentUser, getNextFileName, signInWithGoogle]);
+  }, [currentUser, getNextFileName, signInWithGoogle, files, fileType, mode]);
 
   const handleRenameSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -182,7 +206,9 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
       { icon: '✏️', label: 'Rename', onClick: () => handleRenameFile(file) },
       { icon: '🗑️', label: 'Delete', onClick: () => handleDeleteFile(file.id) }
     ] : [
-      { icon: '📄', label: 'New Text Document', onClick: handleCreateFile }
+      { icon: '📝', label: 'New Document', onClick: () => handleCreateFile() },
+      { icon: '🐍', label: 'Python File', onClick: () => handleCreateFile('.py') },
+      { icon: '🔥', label: 'PYG File', onClick: () => handleCreateFile('.pyg') }
     ];
 
     setContextMenu({
@@ -318,15 +344,35 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         </button>
         <div className="toolbar-separator" />
         {mode === 'browse' && (
-          <button 
-            className="toolbar-button" 
-            onClick={handleCreateFile}
-            aria-label="Create new text document"
-            type="button"
-          >
-            <span className="button-icon" aria-hidden="true">📄</span>
-            New Text Document
-          </button>
+          <>
+            <button 
+              className="toolbar-button" 
+              onClick={() => handleCreateFile()}
+              aria-label="Create new text document"
+              type="button"
+            >
+              <span className="button-icon" aria-hidden="true">📝</span>
+              New Document
+            </button>
+            <button 
+              className="toolbar-button" 
+              onClick={() => handleCreateFile('.py')}
+              aria-label="Create new Python file"
+              type="button"
+            >
+              <span className="button-icon" aria-hidden="true">🐍</span>
+              Python File
+            </button>
+            <button 
+              className="toolbar-button" 
+              onClick={() => handleCreateFile('.pyg')}
+              aria-label="Create new PYG file"
+              type="button"
+            >
+              <span className="button-icon" aria-hidden="true">🔥</span>
+              PYG File
+            </button>
+          </>
         )}
       </div>
       <div className="address-bar">
@@ -425,7 +471,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
                 <input
                   ref={renameInputRef}
                   className="rename-input"
-                  defaultValue={file.name.replace(/\.txt$/, '')}
+                  defaultValue={file.name.replace(/\.(txt|py|pyg)$/, '')}
                   onClick={(e) => e.stopPropagation()}
                   onBlur={handleRenameSubmit}
                   onKeyDown={(e) => {
@@ -438,7 +484,10 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
               </form>
             ) : (
               <>
-                <div className="file-icon" aria-hidden="true">📝</div>
+                <div className="file-icon" aria-hidden="true">
+                  {file.name.toLowerCase().endsWith('.py') ? '🐍' : 
+                   file.name.toLowerCase().endsWith('.pyg') ? '🔥' : '📝'}
+                </div>
                 <span className="file-name">{file.name}</span>
               </>
             )}

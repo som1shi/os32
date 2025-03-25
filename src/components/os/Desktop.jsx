@@ -12,6 +12,7 @@ import StickyNote from './StickyNote';
 import UserProfile from '../UserProfile';
 import IPodPlayer from '../iPodPlayer';
 import Terminal from '../Terminal/Terminal';
+import CodeEditor from '../CodeEditor/CodeEditor';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
@@ -169,9 +170,34 @@ const Desktop = ({ games }) => {
     );
   }, [addWindow, closeWindow]);
 
+  const toggleCodeEditor = useCallback((file = null) => {
+    const windowId = `codeeditor-${file ? file.id : Date.now()}`;
+    const initialTitle = file ? `${file.name} - Code Editor` : 'Untitled.py - Code Editor';
+    
+    addWindow(
+      windowId,
+      initialTitle,
+      '👨‍💻',
+      <CodeEditor 
+        file={file}
+        onClose={() => closeWindow(windowId)} 
+        setWindowTitle={(title) => {
+          setWindows(prev => prev.map(w => 
+            w.id === windowId ? { ...w, title } : w
+          ));
+        }}
+      />
+    );
+    setStartMenuOpen(false);
+  }, [addWindow, closeWindow, setWindows]);
+
   const handleOpenFile = useCallback((file) => {
     if (!file || !file.id) return;
     
+    if (file.name.toLowerCase().endsWith('.py') || file.name.toLowerCase().endsWith('.pyg')) {
+      toggleCodeEditor(file);
+      return;
+    }
     const notepadId = `notepad-${file.id}`;
     addWindow(
       notepadId,
@@ -182,7 +208,7 @@ const Desktop = ({ games }) => {
         onClose={() => closeWindow(notepadId)} 
       />
     );
-  }, [addWindow, closeWindow]);
+  }, [addWindow, closeWindow, toggleCodeEditor]);
 
   const toggleFileExplorer = useCallback(() => {
     addWindow(
@@ -258,7 +284,6 @@ const Desktop = ({ games }) => {
       'Terminal',
       '🖥️',
       <Terminal onLaunchApp={(appId) => {
-        // Handle app launching based on ID
         switch (appId) {
           case 'explorer':
             toggleFileExplorer();
@@ -267,7 +292,6 @@ const Desktop = ({ games }) => {
             handleNewNotepad();
             break;
           case 'terminal':
-            // Don't launch another terminal if already in terminal
             break;
           case 'internet':
             toggleInternetExplorer();
@@ -275,27 +299,16 @@ const Desktop = ({ games }) => {
           case 'ipod-player':
             toggleIPodPlayer();
             break;
-          case 'minesweeper':
-          case 'quantumchess':
-          case 'rotateconnectfour':
-          case 'refiner':
-          case 'wikiconnect':
-          case 'colormania':
-            const GameComponent = GAME_COMPONENTS[appId];
-            if (GameComponent) {
-              addWindow(appId, games.find(g => g.id === appId)?.title || appId, 
-                        games.find(g => g.id === appId)?.icon || '🎮', 
-                        <GameComponent />);
-            }
+          case 'codeeditor':
+            toggleCodeEditor();
             break;
           default:
-            // Unknown app
             break;
         }
       }} />
     );
     setStartMenuOpen(false);
-  }, [addWindow, toggleFileExplorer, handleNewNotepad, toggleInternetExplorer, toggleIPodPlayer, games, GAME_COMPONENTS]);
+  }, [addWindow, toggleFileExplorer, handleNewNotepad, toggleInternetExplorer, toggleIPodPlayer, toggleCodeEditor]);
 
   const desktopIcons = useMemo(() => (
     <div className="desktop-icons">
@@ -312,6 +325,11 @@ const Desktop = ({ games }) => {
       <div className="desktop-icon" onClick={toggleTerminal}>
         <div className="icon">🖥️</div>
         <div className="icon-text">Terminal</div>
+      </div>
+
+      <div className="desktop-icon" onClick={toggleCodeEditor}>
+        <div className="icon">👨‍💻</div>
+        <div className="icon-text">Code Editor</div>
       </div>
 
       {games.map(game => (
@@ -351,7 +369,8 @@ const Desktop = ({ games }) => {
     toggleInternetExplorer, 
     toggleIPodPlayer, 
     toggleUserProfile,
-    toggleTerminal
+    toggleTerminal,
+    toggleCodeEditor
   ]);
 
   const renderWindows = useMemo(() => (
@@ -443,6 +462,11 @@ const Desktop = ({ games }) => {
               <div className="start-menu-text">Terminal</div>
             </div>
             
+            <div className="start-menu-item" onClick={toggleCodeEditor}>
+              <div className="start-menu-icon">👨‍💻</div>
+              <div className="start-menu-text">Code Editor</div>
+            </div>
+            
             <div className="start-menu-separator" />
             
             <div className="start-menu-item" onClick={toggleStickyNotes}>
@@ -518,7 +542,8 @@ const Desktop = ({ games }) => {
     toggleUserProfile,
     showStickyNotes,
     addWindow,
-    toggleTerminal
+    toggleTerminal,
+    toggleCodeEditor
   ]);
 
   return (

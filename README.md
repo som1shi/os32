@@ -204,4 +204,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Inspired by Microsoft, Apple and Google UI/UX
+- Inspired by Microsoft Windows XP
+- [Miracode](https://github.com/IdreesInc/Miracode) font by IdreesInc used in the Terminal application
+- Thanks to all contributors who have helped shape this project
+- Special thanks to the open-source community for the tools and libraries used
