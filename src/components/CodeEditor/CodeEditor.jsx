@@ -106,58 +106,6 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
     return textNodes;
   };
 
-  const highlightPython = (text) => {
-    const keywords = ['import', 'from', 'def', 'class', 'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'return', 'yield', 'break', 'continue', 'pass', 'in', 'is', 'not', 'and', 'or', 'True', 'False', 'None'];
-    const keywordRegex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
-    
-    let processed = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    
-    
-    processed = processed
-      
-      .replace(keywordRegex, '<span class="python-keyword">$1</span>')
-      
-      .replace(/(["'])(.*?)\1/g, '<span class="python-string">$1$2$1</span>')
-      
-      .replace(/\b(\d+)\b/g, '<span class="python-number">$1</span>')
-      
-      .replace(/\bdef\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, '<span class="python-keyword">def</span> <span class="python-function">$1</span>')
-      
-      .replace(/(#.*)$/gm, '<span class="python-comment">$1</span>');
-    
-    return processed;
-  };
-
-  
-  const highlightPYG = (text) => {
-    
-    const keywords = ['yo', 'fam', 'bop', 'squad', 'lit', 'nope', 'yeet', 'flex', 'sus', 'btw', 'rn', 'srsly', 'legit', 'omg', 'jk', 'af', 'tbh', 'yolo', 'vibin', 'rizz'];
-    const keywordRegex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
-    
-    
-    let processed = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    
-    
-    processed = processed
-      
-      .replace(keywordRegex, '<span class="pyg-keyword">$1</span>')
-      
-      .replace(/(["'])(.*?)\1/g, '<span class="pyg-string">$1$2$1</span>')
-      
-      .replace(/\b(\d+)\b/g, '<span class="pyg-number">$1</span>')
-      
-      .replace(/\bbop\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, '<span class="pyg-keyword">bop</span> <span class="pyg-function">$1</span>')
-      
-      .replace(/(#.*)$/gm, '<span class="pyg-comment">$1</span>');
-    
-    return processed;
-  };
 
   
   const handleContentChange = (e) => {
