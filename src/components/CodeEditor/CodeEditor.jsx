@@ -31,6 +31,12 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
   }, [fileName, setWindowTitle]);
 
   useEffect(() => {
+    if (editorRef.current && code) {
+      updateEditorContent(code, mode);
+    }
+  }, []);
+
+  useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
@@ -106,8 +112,23 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
     return textNodes;
   };
 
-
   
+  const updateEditorContent = (content, contentMode) => {
+    if (!editorRef.current) return;
+    
+    editorRef.current.innerText = content;
+    
+    setTimeout(() => {
+      if (editorRef.current) {
+        if (contentMode === 'python') {
+          editorRef.current.innerHTML = highlightPython(content);
+        } else if (contentMode === 'pyg') {
+          editorRef.current.innerHTML = highlightPYG(content);
+        }
+      }
+    }, 10);
+  };
+
   const handleContentChange = (e) => {
     const content = e.target.innerText;
     setCode(content);
@@ -139,6 +160,9 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
         if (fileName.endsWith('.py')) {
           setFileName(fileName.replace('.py', '.pyg'));
         }
+        
+        
+        updateEditorContent(pygCode, 'pyg');
       } catch (error) {
         setOutput(`Error converting to PYG: ${error.message}`);
         setHasErrors(true);
@@ -151,6 +175,8 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
         if (fileName.endsWith('.pyg')) {
           setFileName(fileName.replace('.pyg', '.py'));
         }
+        
+        updateEditorContent(pythonCode, 'python');
       } catch (error) {
         setOutput(`Error converting to Python: ${error.message}`);
         setHasErrors(true);
@@ -176,7 +202,7 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
       let outputText = '';
       const appendOutput = (text) => {
         outputText += text + '\n';
-        setOutput(outputText);
+        setOutput(outputText.trim());
       };
 
       await runPython(
@@ -188,7 +214,7 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
         }
       );
 
-      if (!outputText) {
+      if (!outputText.trim()) {
         setOutput('Code executed successfully with no output.');
       }
     } catch (error) {
@@ -341,7 +367,7 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
                 </button>
               </div>
             </div>
-            <div className="code-editor-controls">
+            
               <button 
                 className="run-button" 
                 onClick={runCode}
@@ -349,7 +375,6 @@ const CodeEditor = ({ file, onClose, setWindowTitle }) => {
               >
                 {isRunning ? 'Running...' : '▶ Run'}
               </button>
-            </div>
           </div>
           <div className="code-editor-body">
             <div

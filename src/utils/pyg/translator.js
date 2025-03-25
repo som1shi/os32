@@ -113,7 +113,6 @@ const tokenize = (code) => {
       continue;
     }
     
-    // Handle multi-character operators like >=, <=, ==
     if (/[=<>]/.test(char) && i + 1 < code.length && code[i + 1] === '=') {
       tokens.push({ type: 'operator', value: char + '=' });
       i += 2;
@@ -230,7 +229,6 @@ export const PYGToPython = (pygCode) => {
  * @returns {string} HTML with syntax highlighting
  */
 export const highlightPython = (code) => {
-  // First escape HTML special characters to prevent XSS and display issues
   code = code.replace(/&/g, '&amp;')
              .replace(/</g, '&lt;')
              .replace(/>/g, '&gt;');
@@ -277,7 +275,6 @@ export const highlightPython = (code) => {
  * @returns {string} HTML with syntax highlighting
  */
 export const highlightPYG = (code) => {
-  // First escape HTML special characters to prevent XSS and display issues
   code = code.replace(/&/g, '&amp;')
              .replace(/</g, '&lt;')
              .replace(/>/g, '&gt;');
