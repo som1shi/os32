@@ -65,6 +65,7 @@
 .code-editor-menu-option:hover {
   background-color: #316AC5;
   color: white;
+  border-radius: 0;
 }
 
 .code-editor-controls {

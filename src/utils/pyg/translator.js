@@ -9,10 +9,11 @@ const PYTHON_KEYWORDS = [
 ];
 
 const PYG_KEYWORDS = [
-  'bop', 'class', 'from', 'import', 'return', 'if', 'else', 'elif', 'mewing', 'while',
-  'break', 'continue', 'try', 'except', 'finally', 'raise', 'with', 'as', 'in',
-  'is', 'not', 'and', 'or', 'True', 'False', 'None', 'lambda', 'global', 'nonlocal',
-  'del', 'pass', 'yield', 'assert'
+  'bop', 'skibidi', 'lock in', 'glaze', 'its giving', 'chat is this real', 'only in ohio', 'yo chat', 'mewing', 'let him cook',
+  'just put the fries in the bag bro', 'edge', 'hawk', 'tuah', 'spit on that thang', 'crashout', 'pookie', 'ahh', 'diddy',
+  'is', 'not', 'and', 'or', 'Aura', 'Cooked', 'NPC', 'lambda', 'GOAT', 'motion',
+  'delulu', 'pluh', 'pause', 'sus', 'rizz', 'fanum tax', 'sigma', 'beta', 'twin', 'sigma twin', 'beta twin', 'unc', 'huzz',
+  'mog', 'demure', 'yap'
 ];
 
 /**
@@ -21,15 +22,40 @@ const PYG_KEYWORDS = [
  * @returns {Array} Array of tokens
  */
 const tokenize = (code) => {
-  
   code = code.replace(/(\r\n|\n|\r)/g, '\n');
   
   const tokens = [];
   let i = 0;
   
-  while (i < code.length) {
-    const char = code[i];
+  const multiWordCheck = (startIndex) => {
+    const remainingCode = code.slice(startIndex);
     
+    for (const pygKeyword of PYG_KEYWORDS) {
+      if (pygKeyword.includes(' ')) {
+        if (remainingCode.startsWith(pygKeyword) && 
+            (startIndex + pygKeyword.length === code.length || 
+             /\s|[+\-*/%=<>!&|^~:;,.()[\]{}]/.test(code[startIndex + pygKeyword.length]))) {
+          return {
+            type: 'word',
+            value: pygKeyword,
+            length: pygKeyword.length
+          };
+        }
+      }
+    }
+    
+    return null;
+  };
+  
+  while (i < code.length) {
+    const multiWordToken = multiWordCheck(i);
+    if (multiWordToken) {
+      tokens.push(multiWordToken);
+      i += multiWordToken.length;
+      continue;
+    }
+    
+    const char = code[i];
     
     if (/\s/.test(char)) {
       let whitespace = '';
@@ -56,7 +82,6 @@ const tokenize = (code) => {
       continue;
     }
     
-    
     if (char === '"' || char === "'") {
       const quote = char;
       let string = quote;
@@ -76,7 +101,6 @@ const tokenize = (code) => {
       continue;
     }
     
-    
     if (char === '#') {
       let comment = '';
       
@@ -89,13 +113,17 @@ const tokenize = (code) => {
       continue;
     }
     
+    if (/[=<>]/.test(char) && i + 1 < code.length && code[i + 1] === '=') {
+      tokens.push({ type: 'operator', value: char + '=' });
+      i += 2;
+      continue;
+    }
     
     if (/[+\-*/%=<>!&|^~:;,.()[\]{}]/.test(char)) {
       tokens.push({ type: 'operator', value: char });
       i++;
       continue;
     }
-    
     
     if (/[a-zA-Z0-9_]/.test(char)) {
       let word = '';
@@ -108,7 +136,6 @@ const tokenize = (code) => {
       tokens.push({ type: 'word', value: word });
       continue;
     }
-    
     
     tokens.push({ type: 'other', value: char });
     i++;

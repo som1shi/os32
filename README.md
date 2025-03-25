@@ -124,6 +124,11 @@ The terminal app provides a powerful command-line interface with several useful 
 - `date` - Display current date and time
 - `whoami` - Display current user information
 - `exec [app]` - Launch an application (e.g., `exec Notepad.app`, `exec MusicPlayer.app`)
+- `python [file.py]` - Run Python file (e.g., `python script.py`)
+- `pyg [file.pyg]` - Run PYG file (e.g., `pyg code.pyg`)
+- `py2pyg [file.py]` - Convert Python to PYG (e.g., `py2pyg script.py`)
+- `pyg2py [file.pyg]` - Convert PYG to Python (e.g., `pyg2py code.pyg`)
+
 
 
 ## System Requirements
@@ -206,5 +211,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Inspired by Microsoft Windows XP
 - [Miracode](https://github.com/IdreesInc/Miracode) font by IdreesInc used in the Terminal application
+- PYG language inspired by [PyGyat](https://github.com/shamith09/pygyat)
 - Thanks to all contributors who have helped shape this project
 - Special thanks to the open-source community for the tools and libraries used
