@@ -22,8 +22,7 @@ let connectionStateListeners = [];
 
 const userCache = new Map();
 const leaderboardCache = new Map();
-const CACHE_EXPIRATION = 120000;
-const FETCH_TIMEOUT = 10000;
+const CACHE_EXPIRATION = 300000;
 
 const VALID_COLLECTIONS = [
   'refiner-30',
@@ -149,9 +148,9 @@ const batchFetchUserData = async (userIds) => {
   }
   
   try {
-    await withTimeout(Promise.all(fetchPromises), FETCH_TIMEOUT);
+    await Promise.all(fetchPromises);
   } catch (err) {
-    console.error('User fetch timeout:', err);
+    console.error('Error fetching users:', err);
     uncachedUserIds.forEach(userId => {
       if (!userCache.has(userId)) {
         userCache.set(userId, { displayName: 'Unknown Player' });
@@ -173,20 +172,8 @@ const getCachedLeaderboard = (cacheKey, limitCount) => {
   return null;
 };
 
-const withTimeout = (promise, timeoutMs) => {
-  let timeoutHandle;
-  const timeoutPromise = new Promise((_, reject) => {
-    timeoutHandle = setTimeout(() => {
-      reject(new Error('Operation timed out'));
-    }, timeoutMs);
-  });
-
-  return Promise.race([
-    promise,
-    timeoutPromise
-  ]).finally(() => {
-    clearTimeout(timeoutHandle);
-  });
+const withTimeout = (promise) => {
+  return promise;
 };
 
 export const submitScore = async (userId, collectionName, score, gameDetails = {}) => {
@@ -267,10 +254,10 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
     
     if (!forceRefresh && cachedData) {
       if ((Date.now() - cachedData.timestamp) >= CACHE_EXPIRATION) {
-        setTimeout(() => {
+        Promise.resolve().then(() => {
           getTopScores(collectionName, limitCount, true)
             .catch(err => console.error('Background refresh failed:', err));
-        }, 100);
+        });
       }
       return cachedData.scores;
     }
@@ -281,7 +268,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       limit(limitCount * 2)
     );
     
-    const querySnapshot = await withTimeout(getDocs(scoresQuery), FETCH_TIMEOUT);
+    const querySnapshot = await getDocs(scoresQuery);
     
     const userIds = [];
     const scoresData = [];
@@ -298,7 +285,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       });
     });
     
-    await withTimeout(batchFetchUserData(userIds), FETCH_TIMEOUT);
+    await batchFetchUserData(userIds);
     
     const scores = scoresData.map(scoreData => {
       const userData = scoreData.userId ? 
@@ -415,32 +402,18 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
     const cachedData = getCachedLeaderboard(cacheKey, limitCount);
     
     if (cachedData) {
-      setTimeout(() => {
+      Promise.resolve().then(() => {
         callback(cachedData.scores);
-      }, 0);
-    } else {
-      setTimeout(() => {
-        callback([]);
-      }, 0);
+      });
     }
     
     const scoresQuery = query(
       collection(db, validatedCollection),
       orderBy('score', 'desc'),
-      limit(limitCount)
+      limit(limitCount * 2)
     );
     
-    const timeoutId = setTimeout(() => {
-      if (cachedData) {
-        callback(cachedData.scores);
-      } else {
-        callback([]);
-      }
-    }, 5000);
-    
     return onSnapshot(scoresQuery, async (snapshot) => {
-      clearTimeout(timeoutId);
-      
       if (snapshot.empty) {
         if (cachedData) {
           callback(cachedData.scores);
@@ -466,7 +439,7 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
       });
       
       try {
-        await withTimeout(batchFetchUserData(userIds), FETCH_TIMEOUT);
+        await batchFetchUserData(userIds);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -499,9 +472,8 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
         timestamp: Date.now()
       });
       
-      callback(scores);
+      callback(scores.slice(0, limitCount));
     }, (error) => {
-      clearTimeout(timeoutId);
       console.error('Snapshot error:', error);
       
       const cachedData = getCachedLeaderboard(cacheKey, limitCount);
