@@ -1,22 +1,22 @@
+/**
+ * Python to PYG keyword and operator mappings
+ */
 export const PYTHON_TO_PYG = {
+  
   'def': 'bop',
   'return': 'its giving',
   'if': 'chat is this real',
   'elif': 'yo chat',
   'else': 'only in ohio',
   'while': 'let him cook',
-  '+': 'rizz',
-  '-': 'fanum tax',
-  'print': 'yap',
-  'True': 'Aura',
-  'False': 'Cooked',
-  'import': 'glaze',
-  '==': 'twin',
-  '>': 'sigma',
-  '<': 'beta',
   'for': 'mewing',
   'in': 'diddy',
   'range': 'huzz',
+  'True': 'Aura',
+  'False': 'Cooked',
+  'None': 'NPC',
+  'import': 'glaze',
+  'from': 'lock in',
   'try': 'hawk',
   'except': 'tuah',
   'finally': 'spit on that thang',
@@ -31,36 +31,58 @@ export const PYTHON_TO_PYG = {
   'nonlocal': 'motion',
   'del': 'delulu',
   'yield': 'pause',
-  'yield from': 'pause no diddy',
-  'None': 'NPC',
   'pass': 'pluh',
   'self': 'unc',
-  '>=': 'sigma twin',
-  '<=': 'beta twin',
-  'from': 'lock in',
   'open': 'mog',
-  'close': 'demure'
+  'close': 'demure',
+  'print': 'yap',
+  
+  
+  '+': 'rizz',
+  '-': 'fanum tax',
+  '==': 'twin',
+  '>': 'sigma',
+  '<': 'beta',
+  '>=': 'sigma twin',
+  '<=': 'beta twin'
 };
 
-
-export const PYG_TO_PYTHON = Object.entries(PYTHON_TO_PYG).reduce(
-  (acc, [key, value]) => ({
-    ...acc,
-    [value]: key
-  }),
-  {}
+/**
+ * PYG to Python keyword and operator mappings (generated from PYTHON_TO_PYG)
+ */
+export const PYG_TO_PYTHON = Object.freeze(
+  Object.entries(PYTHON_TO_PYG).reduce(
+    (acc, [key, value]) => {
+      acc[value] = key;
+      return acc;
+    },
+    {}
+  )
 );
 
+/**
+ * Complete list of Python keywords for syntax highlighting
+ */
+export const PYTHON_KEYWORDS = Object.freeze([
+  'def', 'class', 'from', 'import', 'return', 'if', 'else', 'elif', 'for', 'while',
+  'break', 'continue', 'try', 'except', 'finally', 'raise', 'with', 'as', 'in',
+  'is', 'not', 'and', 'or', 'True', 'False', 'None', 'lambda', 'global', 'nonlocal',
+  'del', 'pass', 'yield', 'assert', 'self', 'range', 'open', 'close'
+]);
 
-export const PYTHON_KEYWORDS = [
-  'def', 'return', 'if', 'elif', 'else', 'while', 'for', 'in', 'range',
-  'import', 'from', 'as', 'True', 'False', 'None', 'and', 'or', 'not',
-  'class', 'try', 'except', 'finally', 'with', 'global', 'lambda',
-  'break', 'continue', 'assert', 'raise', 'nonlocal', 'del', 'yield',
-  'yield from', 'pass', 'self', 'open', 'close'
-];
-
-
-export const PYG_KEYWORDS = Object.values(PYTHON_TO_PYG).concat([
-  'and', 'or', 'not', 'lambda'
+/**
+ * Complete list of PYG keywords for syntax highlighting
+ */
+export const PYG_KEYWORDS = Object.freeze([
+  
+  ...Object.values(PYTHON_TO_PYG),
+  
+  'and', 'or', 'not', 'lambda',
+  
+  'bop', 'skibidi', 'lock in', 'glaze', 'its giving', 'chat is this real', 'only in ohio', 
+  'yo chat', 'mewing', 'let him cook', 'just put the fries in the bag bro', 'edge', 
+  'hawk', 'tuah', 'spit on that thang', 'crashout', 'pookie', 'ahh', 'diddy',
+  'Aura', 'Cooked', 'NPC', 'GOAT', 'motion', 'delulu', 'pluh', 'pause', 'sus', 
+  'rizz', 'fanum tax', 'sigma', 'beta', 'twin', 'sigma twin', 'beta twin', 'unc', 
+  'huzz', 'mog', 'demure', 'yap'
 ]); 
