@@ -44,7 +44,8 @@
 }
 
 .user-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-info h2 {
@@ -77,10 +78,10 @@
 }
 
 .logout-button {
+  margin-left: 50%;
   background: linear-gradient(to bottom, #F0F0F0 0%, #E1E1E1 100%);
   color: #000;
   border: 1px solid #999;
-  padding: 4px 10px;
   border-radius: 3px;
   cursor: pointer;
   font-weight: bold;

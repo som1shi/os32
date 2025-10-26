@@ -118,7 +118,9 @@ const UserProfile = ({ onLogout }) => {
             <h2>{displayName}</h2>
             <p className="user-email">{currentUser.email}</p>
             <div className="user-actions">
-              <button 
+            </div>
+          </div>
+          <button 
                 className="winxp-button logout-button" 
                 onClick={handleLogout}
                 type="button"
@@ -126,8 +128,6 @@ const UserProfile = ({ onLogout }) => {
               >
                 <span className="button-icon">🚪</span> Sign Out
               </button>
-            </div>
-          </div>
         </div>
         
         <div className="winxp-tabs">
