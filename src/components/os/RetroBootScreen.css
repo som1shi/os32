@@ -1,0 +1,223 @@
+/* ── Font ─────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Miracode';
+  src: url('../../assets/Miracode.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ── Overlay ──────────────────────────────────────────── */
+.crt-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  font-family: 'Miracode', 'Consolas', 'Courier New', monospace;
+  color: #33ff33;
+  overflow: hidden;
+}
+
+/* ── Skip button ──────────────────────────────────────── */
+.crt-boot__skip {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  padding: 4px 10px;
+  border: 1px solid #33ff3355;
+  border-radius: 2px;
+  background: transparent;
+  color: #33ff33;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 180ms;
+}
+
+.crt-boot__skip:hover {
+  opacity: 1;
+  background: #33ff3312;
+}
+
+.crt-boot__skip:focus-visible {
+  outline: 1px solid #33ff33;
+  outline-offset: 2px;
+}
+
+/* ── CRT screen area ─────────────────────────────────── */
+.crt-boot__screen {
+  position: relative;
+  width: min(780px, 94vw);
+  min-height: min(460px, 80vh);
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* ── Power-on flash ──────────────────────────────────── */
+.crt-boot__flash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  animation: crt-flash 300ms ease-out forwards;
+}
+
+@keyframes crt-flash {
+  0% {
+    opacity: 0.85;
+  }
+  40% {
+    opacity: 0.6;
+    transform: scaleY(0.005);
+    background: #aaffaa;
+  }
+  70% {
+    opacity: 0;
+    transform: scaleY(0.005);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+/* ── POST text ───────────────────────────────────────── */
+.crt-boot__post {
+  white-space: pre;
+}
+
+.crt-boot__line {
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  text-shadow: 0 0 6px #33ff3366;
+}
+
+.crt-boot__memory {
+  color: #55ff55;
+  font-variant-numeric: tabular-nums;
+}
+
+.crt-boot__cursor {
+  display: inline-block;
+  color: #33ff33;
+  animation: cursor-blink 1s steps(2, end) infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ── Loader / splash ─────────────────────────────────── */
+.crt-boot__loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+}
+
+.crt-boot__logo {
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(8px, 1.8vw, 15px);
+  line-height: 1.2;
+  color: #33ff33;
+  text-shadow: 0 0 10px #33ff3355, 0 0 20px #33ff3322;
+  white-space: pre;
+}
+
+.crt-boot__loader-text {
+  margin: 22px 0 14px;
+  font-size: 15px;
+  color: #33ff33;
+  text-shadow: 0 0 6px #33ff3355;
+  letter-spacing: 1px;
+}
+
+.crt-boot__progress-bar {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: #33ff33;
+  text-shadow: 0 0 4px #33ff3344;
+}
+
+/* ── Power-off effect ────────────────────────────────── */
+.crt-boot--poweroff {
+  animation: crt-poweroff 450ms ease-in forwards;
+}
+
+.crt-boot__poweroff {
+  position: fixed;
+  inset: 0;
+  background: #000;
+}
+
+@keyframes crt-poweroff {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    transform: scale(1, 1);
+  }
+  40% {
+    opacity: 1;
+    filter: brightness(1.6);
+    transform: scale(1, 0.006);
+  }
+  70% {
+    opacity: 0.8;
+    filter: brightness(2);
+    transform: scale(0.02, 0.006);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(0);
+    transform: scale(0, 0);
+  }
+}
+
+/* ── Scanlines ───────────────────────────────────────── */
+.crt-boot__scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 1px,
+    rgba(0, 0, 0, 0.3) 1px,
+    rgba(0, 0, 0, 0.3) 2px
+  );
+}
+
+/* ── Vignette (CRT edge darkening) ───────────────────── */
+.crt-boot__vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+
+/* ── Reduced motion ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .crt-boot__flash,
+  .crt-boot--poweroff,
+  .crt-boot__cursor {
+    animation: none;
+  }
+}

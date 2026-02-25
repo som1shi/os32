@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import Window from './Window';
 import AboutWindow from './AboutWindow';
 import InternetExplorer from './InternetExplorer';
@@ -8,17 +6,19 @@ import FileExplorer from '../FileExplorer/FileExplorer';
 import Modal from '../Modal';
 import Login from '../Login';
 import Leaderboard from '../Leaderboard';
-import StickyNote from './StickyNote';
 import UserProfile from '../UserProfile';
 import IPodPlayer from '../iPodPlayer';
 import Terminal from '../Terminal/Terminal';
 import CodeEditor from '../CodeEditor/CodeEditor';
+import AppIcon from '../ui/AppIcon';
+import { ICON_KEYS } from '../../config/iconRegistry';
 
 import Minesweeper from '../games/Minesweeper/Minesweeper';
 import QuantumChess from '../games/QuantumChess/QuantumChess';
 import RotateConnectFour from '../games/RotateConnectFour/RotateConnectFour';
 import Refiner from '../games/Refiner/Refiner';
 import WikiConnect from '../games/WikiConnect/WikiConnect';
+import ColorMania from '../games/ColorMania/ColorMania';
 import Notepad from '../Notepad/Notepad';
 
 import { useAuth } from '../../firebase/AuthContext';
@@ -36,11 +36,11 @@ const GAME_COMPONENTS = {
   'quantumchess': QuantumChess,
   'rotateconnectfour': RotateConnectFour,
   'refiner': Refiner,
-  'wikiconnect': WikiConnect
+  'wikiconnect': WikiConnect,
+  'colormania': ColorMania
 };
 
 const Desktop = ({ games }) => {
-  const navigate = useNavigate();
   const { currentUser, logOut } = useAuth();
 
   const [windows, setWindows] = useState([]);
@@ -50,7 +50,6 @@ const Desktop = ({ games }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showStickyNotes, setShowStickyNotes] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
   const [windowSize, setWindowSize] = useState(INITIAL_WINDOW_SIZE);
 
@@ -74,7 +73,7 @@ const Desktop = ({ games }) => {
     };
   }, []);
 
-  const addWindow = useCallback((id, title, icon, component) => {
+  const addWindow = useCallback((id, title, iconKey, component, options = {}) => {
     setWindows(prev => {
       const existingWindowIndex = prev.findIndex(w => w.id === id);
       
@@ -89,11 +88,11 @@ const Desktop = ({ games }) => {
       const newWindow = {
         id,
         title,
-        icon,
+        iconKey,
         component,
         isMaximized: false,
-        position: { x: 50 + (prev.length * 30), y: 50 + (prev.length * 30) },
-        size: { width: 800, height: 600 },
+        position: options.position || { x: 50 + (prev.length * 30), y: 50 + (prev.length * 30) },
+        size: options.size || { width: 800, height: 600 },
         zIndex: prev.length + 1
       };
       
@@ -162,7 +161,7 @@ const Desktop = ({ games }) => {
     addWindow(
       `notepad-${Date.now()}`,
       'Untitled.txt - Notepad',
-      '📝',
+      ICON_KEYS.app.notepad,
       <Notepad 
         file={newFile} 
         onClose={() => closeWindow(`notepad-${Date.now()}`)} 
@@ -177,7 +176,7 @@ const Desktop = ({ games }) => {
     addWindow(
       windowId,
       initialTitle,
-      '👨‍💻',
+      ICON_KEYS.app.codeEditor,
       <CodeEditor 
         file={file}
         onClose={() => closeWindow(windowId)} 
@@ -202,7 +201,7 @@ const Desktop = ({ games }) => {
     addWindow(
       notepadId,
       `${file.name} - Notepad`,
-      '📝',
+      ICON_KEYS.app.notepad,
       <Notepad 
         file={file} 
         onClose={() => closeWindow(notepadId)} 
@@ -214,7 +213,7 @@ const Desktop = ({ games }) => {
     addWindow(
       'explorer',
       'File Explorer',
-      '📁',
+      ICON_KEYS.app.documents,
       <FileExplorer onOpenFile={handleOpenFile} />
     );
   }, [addWindow, handleOpenFile]);
@@ -223,19 +222,19 @@ const Desktop = ({ games }) => {
     addWindow(
       'about',
       'About OS32.exe',
-      'ℹ️',
+      ICON_KEYS.app.about,
       <AboutWindow onClose={() => closeWindow('about')} />
     );
     setStartMenuOpen(false);
   }, [addWindow, closeWindow]);
 
   const toggleInternetExplorer = useCallback(() => {
-    addWindow('internet', 'Internet Explorer', '🌐', <InternetExplorer />);
+    addWindow('internet', 'Internet Explorer', ICON_KEYS.app.internet, <InternetExplorer />);
     setStartMenuOpen(false);
   }, [addWindow]);
 
   const toggleUserProfile = useCallback(() => {
-    addWindow('profile', 'User Profile', '👤', <UserProfile onLogout={logOut} />);
+    addWindow('profile', 'User Profile', ICON_KEYS.app.profile, <UserProfile onLogout={logOut} />);
     setStartMenuOpen(false);
   }, [addWindow, logOut]);
 
@@ -253,16 +252,42 @@ const Desktop = ({ games }) => {
     }
   }, [logOut]);
 
-  const toggleStickyNotes = useCallback(() => {
-    setShowStickyNotes(prev => !prev);
+  const toggleLeaderboard = useCallback(() => {
+    const exists = windows.find(w => w.id === 'leaderboard');
+    if (exists) {
+      closeWindow('leaderboard');
+    } else {
+      addWindow(
+        'leaderboard',
+        'Leaderboard',
+        ICON_KEYS.app.leaderboard,
+        <Leaderboard initialGame="wordsweeper" limitCount={5} />,
+        { size: { width: 340, height: 440 } }
+      );
+    }
     setStartMenuOpen(false);
-  }, []);
+  }, [windows, addWindow, closeWindow]);
 
   const handleDesktopClick = useCallback((e) => {
     if (startMenuOpen && !e.target.closest('.start-menu') && !e.target.closest('.win-start-button')) {
       setStartMenuOpen(false);
     }
   }, [startMenuOpen]);
+
+  const handleKeyActivate = useCallback((event, action) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  }, []);
+
+  const asButtonProps = useCallback((action, label) => ({
+    role: 'button',
+    tabIndex: 0,
+    onClick: action,
+    onKeyDown: (event) => handleKeyActivate(event, action),
+    'aria-label': label,
+  }), [handleKeyActivate]);
 
   const formatDate = useCallback((date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -272,7 +297,7 @@ const Desktop = ({ games }) => {
     addWindow(
       'ipod-player',
       'Music Player',
-      '🎵',
+      ICON_KEYS.app.music,
       <IPodPlayer onClose={() => closeWindow('ipod-player')} />
     );
     setStartMenuOpen(false);
@@ -282,7 +307,7 @@ const Desktop = ({ games }) => {
     addWindow(
       'terminal',
       'Terminal',
-      '🖥️',
+      ICON_KEYS.app.terminal,
       <Terminal onLaunchApp={(appId) => {
         switch (appId) {
           case 'explorer':
@@ -312,23 +337,23 @@ const Desktop = ({ games }) => {
 
   const desktopIcons = useMemo(() => (
     <div className="desktop-icons">
-      <div className="desktop-icon" onClick={toggleFileExplorer}>
-        <div className="icon">📁</div>
+      <div className="desktop-icon" {...asButtonProps(toggleFileExplorer, 'Open Documents')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.documents} size={44} /></div>
         <div className="icon-text">Documents</div>
       </div>
 
-      <div className="desktop-icon" onClick={handleNewNotepad}>
-        <div className="icon">📝</div>
+      <div className="desktop-icon" {...asButtonProps(handleNewNotepad, 'Open Notepad')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.notepad} size={44} /></div>
         <div className="icon-text">Notepad</div>
       </div>
 
-      <div className="desktop-icon" onClick={toggleTerminal}>
-        <div className="icon">🖥️</div>
+      <div className="desktop-icon" {...asButtonProps(toggleTerminal, 'Open Terminal')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.terminal} size={44} /></div>
         <div className="icon-text">Terminal</div>
       </div>
 
-      <div className="desktop-icon" onClick={toggleCodeEditor}>
-        <div className="icon">👨‍💻</div>
+      <div className="desktop-icon" {...asButtonProps(toggleCodeEditor, 'Open Code Editor')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.codeEditor} size={44} /></div>
         <div className="icon-text">Code Editor</div>
       </div>
 
@@ -336,26 +361,31 @@ const Desktop = ({ games }) => {
         <div 
           key={game.id} 
           className="desktop-icon" 
-          onClick={() => navigate(`/game/${game.id}`)}
+          {...asButtonProps(() => {
+            const GameComponent = GAME_COMPONENTS[game.id];
+            if (GameComponent) {
+              addWindow(game.id, game.title, game.iconKey, <GameComponent />);
+            }
+          }, `Launch ${game.title}`)}
         >
-          <div className="icon">{game.icon}</div>
+          <div className="icon"><AppIcon name={game.iconKey} size={44} /></div>
           <div className="icon-text">{game.title}</div>
         </div>
       ))}
       
-      <div className="desktop-icon" onClick={toggleInternetExplorer}>
-        <div className="icon">🌐</div>
+      <div className="desktop-icon" {...asButtonProps(toggleInternetExplorer, 'Open Internet Explorer')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.internet} size={44} /></div>
         <div className="icon-text">Internet Explorer</div>
       </div>
 
-      <div className="desktop-icon" onClick={toggleIPodPlayer}>
-        <div className="icon">🎵</div>
+      <div className="desktop-icon" {...asButtonProps(toggleIPodPlayer, 'Open Music Player')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.music} size={44} /></div>
         <div className="icon-text">Music Player</div>
       </div>
 
       {currentUser && (
-        <div className="desktop-icon" onClick={toggleUserProfile}>
-          <div className="icon">👤</div>
+        <div className="desktop-icon" {...asButtonProps(toggleUserProfile, 'Open My Profile')}>
+          <div className="icon"><AppIcon name={ICON_KEYS.app.profile} size={44} /></div>
           <div className="icon-text">My Profile</div>
         </div>
       )}
@@ -364,7 +394,7 @@ const Desktop = ({ games }) => {
     currentUser, 
     games, 
     handleNewNotepad, 
-    navigate, 
+    addWindow, 
     toggleFileExplorer, 
     toggleInternetExplorer, 
     toggleIPodPlayer, 
@@ -382,7 +412,7 @@ const Desktop = ({ games }) => {
         <Window
           key={window.id}
           title={window.title}
-          icon={window.icon}
+          icon={<AppIcon name={window.iconKey} size={14} />}
           isActive={activeWindow === window.id}
           initialPosition={window.position}
           initialSize={window.size}
@@ -411,9 +441,12 @@ const Desktop = ({ games }) => {
           <div 
             key={window.id}
             className={`taskbar-window ${activeWindow === window.id && !isMinimized ? 'active' : ''}`}
-            onClick={() => isMinimized ? restoreWindow(window.id) : activateWindow(window.id)}
+            {...asButtonProps(
+              () => (isMinimized ? restoreWindow(window.id) : activateWindow(window.id)),
+              `${isMinimized ? 'Restore' : 'Activate'} ${window.title}`
+            )}
           >
-            <div className="taskbar-icon">{window.icon}</div>
+            <div className="taskbar-icon"><AppIcon name={window.iconKey} size={14} /></div>
             <div className="taskbar-text">{window.title}</div>
           </div>
         );
@@ -447,79 +480,77 @@ const Desktop = ({ games }) => {
         
         <div className="start-menu-items">
           <div className="start-menu-left">
-            <div className="start-menu-item" onClick={toggleFileExplorer}>
-              <div className="start-menu-icon">📁</div>
+            <div className="start-menu-item" {...asButtonProps(toggleFileExplorer, 'Open Documents')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.documents} size={18} /></div>
               <div className="start-menu-text">Documents</div>
             </div>
             
-            <div className="start-menu-item" onClick={handleNewNotepad}>
-              <div className="start-menu-icon">📝</div>
+            <div className="start-menu-item" {...asButtonProps(handleNewNotepad, 'Open Notepad')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.notepad} size={18} /></div>
               <div className="start-menu-text">Notepad</div>
             </div>
             
-            <div className="start-menu-item" onClick={toggleTerminal}>
-              <div className="start-menu-icon">🖥️</div>
+            <div className="start-menu-item" {...asButtonProps(toggleTerminal, 'Open Terminal')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.terminal} size={18} /></div>
               <div className="start-menu-text">Terminal</div>
             </div>
             
-            <div className="start-menu-item" onClick={toggleCodeEditor}>
-              <div className="start-menu-icon">👨‍💻</div>
+            <div className="start-menu-item" {...asButtonProps(toggleCodeEditor, 'Open Code Editor')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.codeEditor} size={18} /></div>
               <div className="start-menu-text">Code Editor</div>
             </div>
             
             <div className="start-menu-separator" />
             
-            <div className="start-menu-item" onClick={toggleStickyNotes}>
-              <div className="start-menu-icon">🏆</div>
-              <div className="start-menu-text">
-                {showStickyNotes ? "Hide Leaderboards" : "Show Leaderboards"}
-              </div>
+            <div className="start-menu-item" {...asButtonProps(toggleLeaderboard, 'Toggle Leaderboards')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.leaderboard} size={18} /></div>
+              <div className="start-menu-text">Leaderboard</div>
             </div>
             <div className="start-menu-separator" />
-            <div className="start-menu-item" onClick={toggleInternetExplorer}>
-              <div className="start-menu-icon">🌐</div>
+            <div className="start-menu-item" {...asButtonProps(toggleInternetExplorer, 'Open Internet Explorer')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.internet} size={18} /></div>
               <div className="start-menu-text">Internet Explorer</div>
             </div>
-            <div className="start-menu-item" onClick={toggleIPodPlayer}>
-              <div className="start-menu-icon">🎵</div>
+            <div className="start-menu-item" {...asButtonProps(toggleIPodPlayer, 'Open Music Player')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.music} size={18} /></div>
               <div className="start-menu-text">Music Player</div>
             </div>
             {games.map(game => (
               <div 
                 key={game.id} 
                 className="start-menu-item"
-                onClick={() => {
+                {...asButtonProps(() => {
                   const GameComponent = GAME_COMPONENTS[game.id];
                   if (GameComponent) {
-                    addWindow(game.id, game.title, game.icon, <GameComponent />);
+                    addWindow(game.id, game.title, game.iconKey, <GameComponent />);
                   }
-                }}
+                }, `Launch ${game.title}`)}
               >
-                <div className="start-menu-icon">{game.icon}</div>
+                <div className="start-menu-icon"><AppIcon name={game.iconKey} size={18} /></div>
                 <div className="start-menu-text">{game.title}</div>
               </div>
             ))}
           </div>
           
           <div className="start-menu-right">
-            <div className="start-menu-item" onClick={toggleAboutWindow}>
-              <div className="start-menu-icon">ℹ️</div>
+            <div className="start-menu-item" {...asButtonProps(toggleAboutWindow, 'Open About')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.about} size={18} /></div>
               <div className="start-menu-text">About</div>
             </div>
             {currentUser ? (
               <>
-                <div className="start-menu-item" onClick={toggleUserProfile}>
-                  <div className="start-menu-icon">👤</div>
+                <div className="start-menu-item" {...asButtonProps(toggleUserProfile, 'Open My Profile')}>
+                  <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.profile} size={18} /></div>
                   <div className="start-menu-text">My Profile</div>
                 </div>
-                <div className="start-menu-item" onClick={handleLogoutClick}>
-                  <div className="start-menu-icon">🚪</div>
+                <div className="start-menu-item" {...asButtonProps(handleLogoutClick, 'Sign out')}>
+                  <div className="start-menu-icon"><AppIcon name={ICON_KEYS.system.signOut} size={18} /></div>
                   <div className="start-menu-text">Sign Out</div>
                 </div>
               </>
             ) : (
-              <div className="start-menu-item" onClick={handleLoginClick}>
-                <div className="start-menu-icon">🔑</div>
+              <div className="start-menu-item" {...asButtonProps(handleLoginClick, 'Sign in')}>
+                <div className="start-menu-icon"><AppIcon name={ICON_KEYS.system.signIn} size={18} /></div>
                 <div className="start-menu-text">Sign In</div>
               </div>
             )}
@@ -538,9 +569,8 @@ const Desktop = ({ games }) => {
     toggleFileExplorer,
     toggleInternetExplorer,
     toggleIPodPlayer,
-    toggleStickyNotes,
+    toggleLeaderboard,
     toggleUserProfile,
-    showStickyNotes,
     addWindow,
     toggleTerminal,
     toggleCodeEditor
@@ -550,40 +580,29 @@ const Desktop = ({ games }) => {
     <div className="winxp-desktop" onClick={handleDesktopClick}>
       {desktopIcons}
       
-      {showStickyNotes && (
-        <StickyNote 
-          title="Leaderboard" 
-          initialPosition={{ x: windowSize.width - 320, y: 50 }}
-          color="#ffff88"
-          onClose={() => setShowStickyNotes(false)}
-        >
-          <Leaderboard initialGame="wordsweeper" limitCount={5} />
-        </StickyNote>
-      )}
-      
       {renderWindows}
       
       <div className="taskbar">
         <div 
           className={`win-start-button ${startMenuOpen ? 'active' : ''}`} 
-          onClick={() => setStartMenuOpen(prev => !prev)}
+          {...asButtonProps(() => setStartMenuOpen(prev => !prev), startMenuOpen ? 'Close Start menu' : 'Open Start menu')}
         >
           <div className="start-logo"></div>
           <span>Start</span>
         </div>
         
         <div className="quick-launch">
-          <div className="quick-launch-item" onClick={toggleInternetExplorer}>
-            <div className="quick-icon">🌐</div>
+          <div className="quick-launch-item" {...asButtonProps(toggleInternetExplorer, 'Open Internet Explorer')}>
+            <div className="quick-icon"><AppIcon name={ICON_KEYS.app.internet} size={14} /></div>
           </div>
-          <div className="quick-launch-item" onClick={toggleFileExplorer}>
-            <div className="quick-icon">📁</div>
+          <div className="quick-launch-item" {...asButtonProps(toggleFileExplorer, 'Open Documents')}>
+            <div className="quick-icon"><AppIcon name={ICON_KEYS.app.documents} size={14} /></div>
           </div>
-          <div className="quick-launch-item" onClick={toggleIPodPlayer}>
-            <div className="quick-icon">🎵</div>
+          <div className="quick-launch-item" {...asButtonProps(toggleIPodPlayer, 'Open Music Player')}>
+            <div className="quick-icon"><AppIcon name={ICON_KEYS.app.music} size={14} /></div>
           </div>
-          <div className="quick-launch-item" onClick={toggleTerminal}>
-            <div className="quick-icon">🖥️</div>
+          <div className="quick-launch-item" {...asButtonProps(toggleTerminal, 'Open Terminal')}>
+            <div className="quick-icon"><AppIcon name={ICON_KEYS.app.terminal} size={14} /></div>
           </div>
           <div className="separator"></div>
         </div>
@@ -594,7 +613,7 @@ const Desktop = ({ games }) => {
           {currentUser && (
             <div 
               className="user-avatar-small"
-              onClick={toggleUserProfile}
+              {...asButtonProps(toggleUserProfile, 'Open user profile')}
               title={currentUser.displayName || 'User Profile'}
             >
               <img 
@@ -606,13 +625,17 @@ const Desktop = ({ games }) => {
           )}
           <div 
             className="tray-icon" 
-            onClick={toggleStickyNotes}
-            title={showStickyNotes ? "Hide Leaderboards" : "Show Leaderboards"}
+            {...asButtonProps(toggleLeaderboard, 'Toggle leaderboards')}
+            title="Leaderboard"
           >
-            🏆
+            <AppIcon name={ICON_KEYS.app.leaderboard} size={14} />
           </div>
           <div className="tray-icon connection-indicator" title={isOnline ? "Online" : "Offline"}>
-            {isOnline ? "🟢" : "🔴"}
+            <AppIcon
+              name={isOnline ? ICON_KEYS.status.online : ICON_KEYS.status.offline}
+              size={12}
+              state={isOnline ? 'active' : 'offline'}
+            />
           </div>
           <div className="time">{formatDate(currentTime)}</div>
         </div>

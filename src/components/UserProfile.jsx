@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useAuth } from '../firebase/AuthContext';
 import { getUserRecentScores } from '../firebase/scoreService';
+import AppIcon from './ui/AppIcon';
+import { ICON_KEYS } from '../config/iconRegistry';
 import './UserProfile.css';
 
 const UserProfile = ({ onLogout }) => {
@@ -23,15 +25,15 @@ const UserProfile = ({ onLogout }) => {
   }), []);
 
   const collectionIcons = useMemo(() => ({
-    'wordsweeper': '💣',
-    'refiner-30': '🔢',
-    'refiner-60': '🔢',
-    'refiner-180': '🔢',
-    'refiner-300': '🔢',
-    'refiner-600': '🔢',
-    'quantumchess': '♟️',
-    'wikiconnect': '🔗',
-    'rotateconnectfour': '🎲',
+    'wordsweeper': ICON_KEYS.game.wordsweeper,
+    'refiner-30': ICON_KEYS.game.refiner,
+    'refiner-60': ICON_KEYS.game.refiner,
+    'refiner-180': ICON_KEYS.game.refiner,
+    'refiner-300': ICON_KEYS.game.refiner,
+    'refiner-600': ICON_KEYS.game.refiner,
+    'quantumchess': ICON_KEYS.game.quantumchess,
+    'wikiconnect': ICON_KEYS.game.wikiconnect,
+    'rotateconnectfour': ICON_KEYS.game.rotateconnectfour,
   }), []);
 
   useEffect(() => {
@@ -90,7 +92,9 @@ const UserProfile = ({ onLogout }) => {
       <div className="user-profile-container">
         <div className="user-profile-card">
           <div className="winxp-message-box">
-            <div className="winxp-message-icon">🔑</div>
+              <div className="winxp-message-icon">
+                <AppIcon name={ICON_KEYS.system.signIn} size={28} />
+              </div>
             <div className="winxp-message-content">
               <h2>Sign In Required</h2>
               <p>Please sign in to view your profile and game statistics.</p>
@@ -126,7 +130,7 @@ const UserProfile = ({ onLogout }) => {
                 type="button"
                 aria-label="Sign Out"
               >
-                <span className="button-icon">🚪</span> Sign Out
+                <span className="button-icon"><AppIcon name={ICON_KEYS.system.signOut} size={14} /></span> Sign Out
               </button>
         </div>
         
@@ -152,7 +156,9 @@ const UserProfile = ({ onLogout }) => {
             <>
               <div className="winxp-section">
                 <div className="winxp-section-header">
-                  <span className="section-icon" aria-hidden="true">🏆</span>
+                  <span className="section-icon" aria-hidden="true">
+                    <AppIcon name={ICON_KEYS.app.leaderboard} size={16} />
+                  </span>
                   <h3>Your Recent Scores</h3>
                 </div>
                 
@@ -163,11 +169,14 @@ const UserProfile = ({ onLogout }) => {
                   </div>
                 ) : error ? (
                   <div className="error-message" role="alert">
-                    <span className="error-icon" aria-hidden="true">⚠️</span> {error}
+                    <span className="error-icon" aria-hidden="true">!</span> {error}
                   </div>
                 ) : recentScores.length === 0 ? (
                   <div className="no-scores-message">
-                    <span className="info-icon" aria-hidden="true">ℹ️</span> You haven't played any games yet. Start playing to see your scores here!
+                    <span className="info-icon" aria-hidden="true">
+                      <AppIcon name={ICON_KEYS.app.about} size={12} />
+                    </span>
+                    You haven't played any games yet. Start playing to see your scores here!
                   </div>
                 ) : (
                   <div className="recent-scores">
@@ -184,7 +193,7 @@ const UserProfile = ({ onLogout }) => {
                           <tr key={score.id}>
                             <td>
                               <span className="game-icon" aria-hidden="true">
-                                {collectionIcons[score.collectionName] || '🎮'}
+                                <AppIcon name={collectionIcons[score.collectionName]} size={14} />
                               </span>
                               {collectionNames[score.collectionName] || score.collectionName}
                             </td>
@@ -203,7 +212,9 @@ const UserProfile = ({ onLogout }) => {
           {activeTab === 'stats' && (
             <div className="winxp-section">
               <div className="winxp-section-header">
-                <span className="section-icon" aria-hidden="true">📊</span>
+                <span className="section-icon" aria-hidden="true">
+                  <AppIcon name={ICON_KEYS.game.colormania} size={16} />
+                </span>
                 <h3>Game Statistics</h3>
               </div>
               <div className="winxp-info-box">
@@ -215,7 +226,9 @@ const UserProfile = ({ onLogout }) => {
           
           <div className="winxp-footer">
             <div className="winxp-tip">
-              <span className="tip-icon" aria-hidden="true">💡</span> 
+              <span className="tip-icon" aria-hidden="true">
+                <AppIcon name={ICON_KEYS.app.about} size={14} />
+              </span> 
               <span className="tip-text">Tip: Play more games to improve your scores and unlock achievements!</span>
             </div>
           </div>

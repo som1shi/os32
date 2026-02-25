@@ -18,6 +18,7 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(!initialFile);
   const [currentFile, setCurrentFile] = useState(initialFile);
+  const [wordCount, setWordCount] = useState(0);
   const { currentUser } = useAuth();
   
   const editorRef = useRef(null);
@@ -43,11 +44,11 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
     return validFileName;
   }, []);
 
-  const handleFormat = useCallback((command) => {
+  const handleFormat = useCallback((command, value = null) => {
     if (editorRef.current) {
       try {
         editorRef.current.focus();
-        document.execCommand(command, false, null);
+        document.execCommand(command, false, value);
         setHasUnsavedChanges(true);
       } catch (error) {
         console.error(`Error applying format ${command}:`, error);
@@ -148,6 +149,9 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
   const handleInput = useCallback(() => {
     if (editorRef.current) {
       setHasUnsavedChanges(true);
+      const text = editorRef.current.innerText || '';
+      const words = text.trim().split(/\s+/).filter(Boolean);
+      setWordCount(words.length);
     }
   }, []);
 
@@ -161,7 +165,17 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
 
     const formatMenu = [
       { label: 'Bold (Ctrl+B)', onClick: () => handleFormat('bold') },
-      { label: 'Underline (Ctrl+U)', onClick: () => handleFormat('underline') }
+      { label: 'Italic (Ctrl+I)', onClick: () => handleFormat('italic') },
+      { label: 'Underline (Ctrl+U)', onClick: () => handleFormat('underline') },
+      { label: 'Strikethrough', onClick: () => handleFormat('strikeThrough') },
+      { type: 'separator' },
+      { label: 'Align Left', onClick: () => handleFormat('justifyLeft') },
+      { label: 'Align Center', onClick: () => handleFormat('justifyCenter') },
+      { label: 'Align Right', onClick: () => handleFormat('justifyRight') },
+      { type: 'separator' },
+      { label: 'Font: Small', onClick: () => handleFormat('fontSize', '2') },
+      { label: 'Font: Normal', onClick: () => handleFormat('fontSize', '3') },
+      { label: 'Font: Large', onClick: () => handleFormat('fontSize', '5') },
     ];
 
     return { fileMenu, formatMenu };
@@ -180,6 +194,10 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
           case 'u':
             e.preventDefault();
             handleFormat('underline');
+            break;
+          case 'i':
+            e.preventDefault();
+            handleFormat('italic');
             break;
           case 's':
             e.preventDefault();
@@ -253,14 +271,18 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
         <span>Format</span>
         <div className="menu-dropdown" role="menu">
           {menuItems.formatMenu.map((item, index) => (
-            <button 
-              key={`format-${index}`} 
-              onClick={item.onClick}
-              role="menuitem"
-              type="button"
-            >
-              {item.label}
-            </button>
+            item.type === 'separator' ? (
+              <div key={`fmt-sep-${index}`} className="menu-separator" role="separator" />
+            ) : (
+              <button 
+                key={`format-${index}`} 
+                onClick={item.onClick}
+                role="menuitem"
+                type="button"
+              >
+                {item.label}
+              </button>
+            )
           ))}
         </div>
       </div>
@@ -273,10 +295,13 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
         {hasUnsavedChanges ? 'Unsaved Changes' : 'Saved'}
       </div>
       <div className="status-item">
+        {wordCount} word{wordCount !== 1 ? 's' : ''}
+      </div>
+      <div className="status-item">
         {lastModifiedText}
       </div>
     </div>
-  ), [hasUnsavedChanges, lastModifiedText]);
+  ), [hasUnsavedChanges, wordCount, lastModifiedText]);
 
   if (showSaveDialog) {
     return (

@@ -3,24 +3,24 @@
 .colormania {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   width: 100%;
-  background: #FFFFFF;
-  font-family: 'Tahoma', sans-serif;
-  border: 3px solid #0054E3;
+  background: #1a0a2e;
+  font-family: 'VT323', 'Tahoma', sans-serif;
+  border: 3px solid #c77dff;
   overflow: hidden;
   box-sizing: border-box;
-  color: #000;
+  color: #e0c3fc;
 }
 
 .cm-window-header {
-  background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
+  background: linear-gradient(180deg, #7b2d8b 0%, #c77dff 10%, #7b2d8b 100%);
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 3px;
-  color: white;
+  color: #fce8ff;
   font-weight: bold;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
   user-select: none;

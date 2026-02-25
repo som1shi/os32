@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from '
 import { useAuth } from '../../firebase/AuthContext';
 import { getFiles, createFile, deleteFile, updateFile } from '../../firebase/fileService';
 import ContextMenu from './ContextMenu';
+import AppIcon from '../ui/AppIcon';
+import { ICON_KEYS } from '../../config/iconRegistry';
 import './FileExplorer.css';
 
 const FILE_EXTENSION = '.txt';
@@ -201,14 +203,14 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     if (!currentUser) return;
 
     const menuOptions = file ? [
-      { icon: '📝', label: 'Open', onClick: () => onOpenFile(file) },
+      { icon: <AppIcon name={ICON_KEYS.app.notepad} size={14} />, label: 'Open', onClick: () => onOpenFile(file) },
       { separator: true },
-      { icon: '✏️', label: 'Rename', onClick: () => handleRenameFile(file) },
-      { icon: '🗑️', label: 'Delete', onClick: () => handleDeleteFile(file.id) }
+      { icon: <AppIcon name={ICON_KEYS.app.rename} size={14} />, label: 'Rename', onClick: () => handleRenameFile(file) },
+      { icon: <AppIcon name={ICON_KEYS.app.delete} size={14} />, label: 'Delete', onClick: () => handleDeleteFile(file.id) }
     ] : [
-      { icon: '📝', label: 'New Document', onClick: () => handleCreateFile() },
-      { icon: '🐍', label: 'Python File', onClick: () => handleCreateFile('.py') },
-      { icon: '🔥', label: 'PYG File', onClick: () => handleCreateFile('.pyg') }
+      { icon: <AppIcon name={ICON_KEYS.app.notepad} size={14} />, label: 'New Document', onClick: () => handleCreateFile() },
+      { icon: <AppIcon name={ICON_KEYS.app.codeEditor} size={14} />, label: 'Python File', onClick: () => handleCreateFile('.py') },
+      { icon: <AppIcon name={ICON_KEYS.app.pyg} size={14} />, label: 'PYG File', onClick: () => handleCreateFile('.pyg') }
     ];
 
     setContextMenu({
@@ -321,7 +323,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
           type="button"
           disabled
         >
-          <span className="button-icon" aria-hidden="true">←</span>
+          <span className="button-icon"><AppIcon name={ICON_KEYS.nav.back} size={13} /></span>
           Back
         </button>
         <button 
@@ -330,7 +332,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
           type="button"
           disabled
         >
-          <span className="button-icon" aria-hidden="true">→</span>
+          <span className="button-icon"><AppIcon name={ICON_KEYS.nav.forward} size={13} /></span>
           Forward
         </button>
         <button 
@@ -339,7 +341,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
           type="button"
           disabled
         >
-          <span className="button-icon" aria-hidden="true">↑</span>
+          <span className="button-icon"><AppIcon name={ICON_KEYS.nav.up} size={13} /></span>
           Up
         </button>
         <div className="toolbar-separator" />
@@ -351,7 +353,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
               aria-label="Create new text document"
               type="button"
             >
-              <span className="button-icon" aria-hidden="true">📝</span>
+              <span className="button-icon"><AppIcon name={ICON_KEYS.app.notepad} size={13} /></span>
               New Document
             </button>
             <button 
@@ -360,7 +362,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
               aria-label="Create new Python file"
               type="button"
             >
-              <span className="button-icon" aria-hidden="true">🐍</span>
+              <span className="button-icon"><AppIcon name={ICON_KEYS.app.codeEditor} size={13} /></span>
               Python File
             </button>
             <button 
@@ -369,14 +371,14 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
               aria-label="Create new PYG file"
               type="button"
             >
-              <span className="button-icon" aria-hidden="true">🔥</span>
+              <span className="button-icon"><AppIcon name={ICON_KEYS.app.pyg} size={13} /></span>
               PYG File
             </button>
           </>
         )}
       </div>
       <div className="address-bar">
-        <span className="address-icon" aria-hidden="true">📁</span>
+        <span className="address-icon"><AppIcon name={ICON_KEYS.app.documents} size={14} /></span>
         <span className="address-text">Documents</span>
       </div>
     </div>
@@ -431,7 +433,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
             aria-label="Sign in with Google"
             type="button"
           >
-            <span aria-hidden="true" style={{ marginRight: '8px' }}>🔑</span>
+            <AppIcon name={ICON_KEYS.system.signIn} size={14} />
             Sign in with Google
           </button>
         </div>
@@ -484,9 +486,12 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
               </form>
             ) : (
               <>
-                <div className="file-icon" aria-hidden="true">
-                  {file.name.toLowerCase().endsWith('.py') ? '🐍' : 
-                   file.name.toLowerCase().endsWith('.pyg') ? '🔥' : '📝'}
+                <div className="file-icon">
+                  {file.name.toLowerCase().endsWith('.py') 
+                    ? <AppIcon name={ICON_KEYS.app.codeEditor} size={28} />
+                    : file.name.toLowerCase().endsWith('.pyg')
+                    ? <AppIcon name={ICON_KEYS.app.pyg} size={28} />
+                    : <AppIcon name={ICON_KEYS.app.notepad} size={28} />}
                 </div>
                 <span className="file-name">{file.name}</span>
               </>
@@ -523,7 +528,7 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
         <div className="sidebar">
           <div className="folder-tree" role="tree">
             <div className="tree-item active" role="treeitem" aria-selected="true" tabIndex={0}>
-              <span aria-hidden="true">📁</span>Documents
+              <AppIcon name={ICON_KEYS.app.documents} size={14} />Documents
             </div>
           </div>
         </div>

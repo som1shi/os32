@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, memo, lazy, Suspense } from 'react';
+import './GameLoader.css';
 
 const Minesweeper = lazy(() => import('./games/Minesweeper/Minesweeper'));
 const QuantumChess = lazy(() => import('./games/QuantumChess/QuantumChess'));
@@ -22,9 +23,19 @@ const GameLoader = ({ gameId }) => {
   }, [gameId]);
   
   const renderLoading = useCallback(() => (
-    <div className="game-loading" aria-live="polite">
-      <div className="loading-spinner" aria-hidden="true"></div>
-      <p>Loading game...</p>
+    <div className="game-loading retro-game-loading" aria-live="polite">
+      <div className="retro-game-loading-inner">
+        <div className="retro-game-loading-title">Launching Module</div>
+        <div className="retro-game-loading-lines">
+          <p>Allocating runtime resources ............ OK</p>
+          <p>Mounting game filesystem ............... OK</p>
+          <p>Bootstrapping renderer .................. OK</p>
+        </div>
+        <div className="retro-game-loading-progress" aria-hidden="true">
+          <div className="retro-game-loading-progress-fill"></div>
+        </div>
+        <p className="retro-game-loading-status">Loading game data, please wait...</p>
+      </div>
     </div>
   ), []);
 

@@ -1,16 +1,16 @@
 :root {
-  --xp-blue: #245edb;
-  --xp-blue-dark: #0c3d99;
-  --xp-blue-light: #4b6ecc;
-  --xp-green: #36a345;
-  --xp-red: #cc3333;
-  --xp-orange: #ff9900;
-  --xp-taskbar: #2256bc;
-  --xp-start-gradient-top: #3c8dfc;
-  --xp-start-gradient-bottom: #215dc6;
-  --xp-window-border: #0c3d99;
-  --xp-window-title: #1550af;
-  --xp-window-title-inactive: #7a99d1;
+  --xp-blue: var(--ui-xp-blue);
+  --xp-blue-dark: var(--ui-xp-blue-dark);
+  --xp-blue-light: var(--ui-xp-blue-light);
+  --xp-green: var(--ui-xp-green);
+  --xp-red: var(--ui-xp-red);
+  --xp-orange: var(--ui-xp-orange);
+  --xp-taskbar: var(--ui-xp-taskbar);
+  --xp-start-gradient-top: var(--ui-xp-start-top);
+  --xp-start-gradient-bottom: var(--ui-xp-start-bottom);
+  --xp-window-border: var(--ui-xp-blue-dark);
+  --xp-window-title: var(--ui-xp-window-title);
+  --xp-window-title-inactive: var(--ui-xp-window-title-inactive);
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -39,11 +39,10 @@
 
 .desktop-icons {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 100px);
-
-  grid-auto-rows: 100px;
-  gap: 10px;
-  padding: 10px;
+  grid-template-columns: repeat(auto-fill, 110px);
+  grid-auto-rows: 110px;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-2);
   align-content: start;
 }
 
@@ -52,36 +51,50 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   cursor: pointer; 
-  border-radius: 3px;
+  border-radius: var(--ui-radius-sm);
+  transition: background-color var(--ui-motion-fast) var(--ui-ease-standard);
 }
 
 .desktop-icon:hover {
-  background-color: #245edb50;
+  background-color: transparent;
+  outline: 1px dashed rgba(255, 255, 255, 0.7);
+  outline-offset: -2px;
 }
 
 .desktop-icon:active {
-  background-color: #245edb80;
+  background-color: rgba(36, 94, 219, 0.35);
+  outline: 1px solid rgba(255, 255, 255, 0.9);
+  outline-offset: -2px;
 }
 
 .desktop-icon .icon {
-  font-size: 32px;
-  margin-bottom: 5px;
+  font-size: 44px;
+  margin-bottom: var(--ui-space-1);
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 .desktop-icon .icon-text {
   color: white;
   text-align: center;
-  font-size: 12px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  font-size: 13px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.4);
   max-width: 100%;
   overflow: hidden;
-  font-family: 'Tahoma', sans-serif;
+  font-family: var(--ui-font-family);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.desktop-icon:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-focus-ring);
 }
 
 .taskbar {
@@ -89,43 +102,51 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 30px;
-  background: linear-gradient(to bottom, var(--xp-taskbar), var(--xp-blue-dark));
+  height: 40px;
+  background: linear-gradient(180deg, #3168d5 0%, #2456c3 15%, #1f4fbc 50%, #1941a5 85%, #163d9e 100%);
   display: flex;
   align-items: center;
   padding: 0 2px;
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-top: 1px solid #5c90e8;
   z-index: 1000;
+  color: white;
 }
 
 .win-start-button {
   display: flex;
   align-items: center;
-  height: 28px;
-  padding: 0 10px;
+  height: 36px;
+  padding: 0 14px;
   margin-right: 5px;
-  background: linear-gradient(to bottom, var(--xp-start-gradient-top), var(--xp-start-gradient-bottom));
-  border-radius: 3px;
+  background: linear-gradient(180deg, #5db332 0%, #3c9a18 15%, #398f15 50%, #328512 85%, #21740a 100%);
+  border-radius: 0 8px 8px 0;
   color: white;
   font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border: 1px solid var(--xp-blue-dark);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    1px 0 1px rgba(0, 0, 0, 0.2);
+  border: 1px solid #1d6808;
+  border-left: none;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  letter-spacing: 0.5px;
 }
 
 .win-start-button:hover {
-  background: linear-gradient(to bottom, #4d9aff, #2c6edb);
+  background: linear-gradient(180deg, #6ec442 0%, #4dab28 15%, #49a020 50%, #42961d 85%, #318514 100%);
 }
 
 .win-start-button.active {
-  background: linear-gradient(to bottom, #1e4bba, #3a7ce0);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, #328512 0%, #398f15 15%, #3c9a18 50%, #5db332 85%, #5db332 100%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .win-start-button .start-logo {
-  width: 16px;
-  height: 16px;
-  margin-right: 5px;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="0" y="0" width="7" height="7" fill="green"/><rect x="9" y="0" width="7" height="7" fill="red"/><rect x="0" y="9" width="7" height="7" fill="blue"/><rect x="9" y="9" width="7" height="7" fill="yellow"/></svg>');
   background-size: contain;
 }
@@ -138,13 +159,13 @@
 }
 
 .quick-launch-item {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 2px;
-  border-radius: 2px;
+  margin: 0 3px;
+  border-radius: var(--ui-radius-sm);
   cursor: pointer;
 }
 
@@ -154,14 +175,16 @@
 
 .quick-icon {
   font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .separator {
-  width: 1px;
-  height: 70%;
-  background-color: rgba(0, 0, 0, 0.3);
+  width: 2px;
+  height: 60%;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.15));
   margin: 0 5px;
-  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
 .taskbar-items {
@@ -221,20 +244,22 @@
   display: flex;
   align-items: center;
   padding: 0 10px;
-  border-left: 1px solid #999;
-  background: linear-gradient(to bottom, #f5f5f5 0%, #e5e5e5 100%);
+  height: 100%;
+  border-left: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #0f8bef 0%, #0978dc 30%, #0565c2 70%, #0258b2 100%);
 }
 
 .tray-icon {
   margin: 0 5px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
+  border-radius: var(--ui-radius-sm);
 }
 
 .tray-icon:hover {
@@ -251,22 +276,25 @@
 }
 
 .time {
-  font-size: 11px;
-  color: #333;
-  padding: 0 5px;
+  font-size: 12px;
+  color: #fff;
+  padding: 0 6px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
 }
 
 .start-menu {
   position: fixed;
-  bottom: 30px;
+  bottom: 40px;
   color: #000;
   left: 0;
   width: 380px;
   height: 480px;
   background: white;
-  border: 1px solid var(--xp-blue-dark);
-  border-radius: 0 8px 8px 0;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+  border: 2px solid;
+  border-color: #4580d0 #0a3088 #0a3088 #4580d0;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   z-index: 1001;
@@ -432,10 +460,11 @@
 }
 
 .start-menu-header {
-  padding: 10px;
-  background: linear-gradient(to right, #0078d7, #0067b9);
+  padding: 10px 12px;
+  background: linear-gradient(180deg, #1f5fc4 0%, #1951b0 50%, #15449e 100%);
   color: white;
-  border-bottom: 1px solid #005fa3;
+  border-bottom: 1px solid #0a3088;
+  border-radius: 6px 6px 0 0;
 }
 
 .start-user-info {
@@ -481,8 +510,8 @@
   width: 50%;
   height: 100%;
   align-content: flex-end;
-  background-color: #f0f0f0;
-  border-left: 1px solid #ddd;
+  background: linear-gradient(180deg, #d3e5fa 0%, #c0d8f4 50%, #b4ceed 100%);
+  border-left: 1px solid #9ab8dc;
   padding: 5px 0;
 }
 
@@ -491,10 +520,21 @@
   align-items: center;
   padding: 8px 10px;
   cursor: pointer;
+  transition: background-color 60ms ease, color 60ms ease;
 }
 
 .start-menu-item:hover {
-  background-color: #e5f1fb;
+  background-color: #316ac5;
+  color: #fff;
+}
+
+.start-menu-item:focus-visible,
+.quick-launch-item:focus-visible,
+.taskbar-window:focus-visible,
+.tray-icon:focus-visible,
+.win-start-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-focus-ring);
 }
 
 .start-menu-icon {
@@ -506,14 +546,33 @@
   margin-right: 10px;
 }
 
+.app-icon {
+  color: var(--ui-icon-default);
+  transition: color var(--ui-motion-fast) var(--ui-ease-standard), opacity var(--ui-motion-fast) var(--ui-ease-standard);
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
+}
+
+.app-icon.is-active {
+  color: var(--ui-icon-active);
+}
+
+.app-icon.is-disabled {
+  color: var(--ui-icon-disabled);
+  opacity: 0.8;
+}
+
+.app-icon.is-offline {
+  color: var(--ui-icon-offline);
+}
+
 .start-menu-text {
   font-size: 12px;
 }
 
 .start-menu-separator {
   height: 1px;
-  background-color: #ddd;
-  margin: 5px 0;
+  background: linear-gradient(to right, transparent, #c8c8c8 10%, #c8c8c8 90%, transparent);
+  margin: 4px 8px;
 }
 
 .start-menu-category {
@@ -535,30 +594,32 @@
   align-items: center;
   min-width: 120px;
   max-width: 200px;
-  height: 26px;
-  padding: 0 8px;
-  margin: 2px;
-  background: linear-gradient(to bottom, #ffffff 0%, #e3e3e3 100%);
-  border: 1px solid #7e7e7e;
+  height: 28px;
+  padding: 0 10px;
+  margin: 4px 2px;
+  background: linear-gradient(180deg, #3c8cf8 0%, #2e74e0 40%, #2468d4 60%, #1a5bc4 100%);
+  border: 1px solid;
+  border-color: rgba(255, 255, 255, 0.35) rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.2) rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: #000000;
+  color: #fff;
   font-size: 11px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .taskbar-window:hover:not(.active) {
-  background: linear-gradient(to bottom, #f2f7fe 0%, #e5f0fb 100%);
-  border-color: #7e7e7e;
+  background: linear-gradient(180deg, #5aa0ff 0%, #4088e8 40%, #3880e0 60%, #2e72d8 100%);
 }
 
 .taskbar-window.active {
-  background: linear-gradient(to bottom, #2572f2 0%, #0d47a1 100%);
-  border: 1px solid #044fb3;
+  background: linear-gradient(180deg, #1a5bc4 0%, #2468d4 40%, #2e74e0 60%, #3c8cf8 100%);
+  border-color: rgba(0, 0, 0, 0.25) rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.25);
   color: white;
   font-weight: bold;
-  box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .taskbar-icon {

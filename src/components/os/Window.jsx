@@ -30,12 +30,8 @@ const Window = ({
   
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.matchMedia('(max-width: 768px)').matches;
+      const mobile = window.matchMedia('(max-width: 560px)').matches;
       setIsMobileScreen(mobile);
-      
-      if (mobile && !isMaximized && onMaximize) {
-        onMaximize(true);
-      }
     };
     
     checkMobile();
@@ -44,7 +40,7 @@ const Window = ({
     return () => {
       window.removeEventListener('resize', checkMobile);
     };
-  }, [isMaximized, onMaximize]);
+  }, []);
   
   const handleMouseDown = useCallback((e) => {
     if (isMaximized || isMobileScreen) return;
@@ -79,7 +75,7 @@ const Window = ({
     const handleMouseMove = (e) => {
       if (isDragging) {
         const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - size.width));
-        const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - size.height - 30));
+        const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - size.height - 40));
         
         setPosition({
           x: newX,
@@ -104,7 +100,7 @@ const Window = ({
           newX = position.x + boundedDeltaX;
         }
         if (resizeDirection.includes('s')) {
-          newHeight = Math.max(200, Math.min(size.height + deltaY, window.innerHeight - position.y - 30));
+          newHeight = Math.max(200, Math.min(size.height + deltaY, window.innerHeight - position.y - 40));
         }
         if (resizeDirection.includes('n')) {
           const maxDeltaY = size.height - 200;
@@ -147,7 +143,7 @@ const Window = ({
       setPrevSize(size);
       setPrevPosition(position);
       
-      setSize({ width: window.innerWidth, height: window.innerHeight - 30 });
+      setSize({ width: window.innerWidth, height: window.innerHeight - 40 });
       setPosition({ x: 0, y: 0 });
       if (onMaximize) onMaximize(true);
     }

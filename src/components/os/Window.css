@@ -1,8 +1,11 @@
 .window {
   position: absolute;
-  background-color: #fff;
-  border: 1px solid var(--xp-window-border);
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ece9d8;
+  border: 3px solid;
+  border-color: #0055ea #001ea0 #001ea0 #0055ea;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -11,33 +14,37 @@
 }
 
 .window-header {
-  height: 30px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 5px;
+  padding: 0 6px;
   cursor: move;
   user-select: none;
+  border-radius: 6px 6px 0 0;
 }
 
 .window-header.active {
-  background: linear-gradient(to right, var(--xp-window-title), #2c71e0);
+  background: linear-gradient(180deg, #0997ff 0%, #0160d8 6%, #0553cf 20%, #0453ce 34%, #0350cc 46%, #024dc9 54%, #0241be 66%, #003dba 80%, #0037b4 90%, #0034b0 100%);
   color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .window-header.inactive {
-  background: linear-gradient(to right, var(--xp-window-title-inactive), #a5b7e5);
-  color: #f0f0f0;
+  background: linear-gradient(180deg, #b4c5e7 0%, #9ab3de 6%, #8caad8 20%, #8aa9d7 34%, #89a8d6 46%, #88a6d4 54%, #86a3d1 66%, #83a0ce 80%, #7f9dcb 90%, #7c9ac8 100%);
+  color: #d8e4f0;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
 }
 
 .window-title {
   display: flex;
   align-items: center;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 13px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  letter-spacing: 0.2px;
 }
 
 .window-icon {
@@ -54,20 +61,26 @@
   width: 22px;
   height: 22px;
   margin-left: 2px;
-  border: 1px solid transparent;
+  border: 1px solid;
+  border-color: rgba(255, 255, 255, 0.55) rgba(0, 0, 0, 0.25) rgba(0, 0, 0, 0.25) rgba(255, 255, 255, 0.55);
   border-radius: 3px;
-  background: transparent;
+  background: linear-gradient(180deg, #3c8cf8 0%, #2068d4 40%, #1a5bc4 60%, #1554b8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 10px;
   color: white;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .window-button:hover {
-  border-color: rgba(255, 255, 255, 0.5);
-  background-color: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, #5aa0ff 0%, #3880e8 40%, #2e72d8 60%, #2868cc 100%);
+}
+
+.window-button:active {
+  border-color: rgba(0, 0, 0, 0.3) rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.4) rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, #1554b8 0%, #1a5bc4 40%, #2068d4 60%, #3c8cf8 100%);
 }
 
 .window-button.minimize {
@@ -75,11 +88,17 @@
 }
 
 .window-button.close {
-  background-color: #c75050;
+  background: linear-gradient(180deg, #e48e6e 0%, #d25038 40%, #c23a22 60%, #b63018 100%);
+  border-color: rgba(255, 255, 255, 0.45) rgba(100, 20, 10, 0.5) rgba(100, 20, 10, 0.5) rgba(255, 255, 255, 0.45);
 }
 
 .window-button.close:hover {
-  background-color: #e04343;
+  background: linear-gradient(180deg, #f0a888 0%, #e06048 40%, #d44a32 60%, #c84028 100%);
+}
+
+.window-button.close:active {
+  border-color: rgba(100, 20, 10, 0.5) rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.35) rgba(100, 20, 10, 0.5);
+  background: linear-gradient(180deg, #b63018 0%, #c23a22 40%, #d25038 60%, #e48e6e 100%);
 }
 
 .window-content {
@@ -87,34 +106,23 @@
   overflow: auto;
   background-color: #f0f0f0;
   position: relative;
+  border-top: 1px solid #a0a0a0;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff;
 }
 
-.window-content::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.window-content::-webkit-scrollbar-track {
-  background: #e0e0e0;
-}
-
-.window-content::-webkit-scrollbar-thumb {
-  background-color: #a0a0a0;
-  border-radius: 2px;
-  border: 2px solid #e0e0e0;
-}
-
-.window-content::-webkit-scrollbar-thumb:hover {
-  background-color: #808080;
-}
-
-.window-content::-webkit-scrollbar-corner {
-  background: #e0e0e0;
+/* Hide game-internal window chrome when embedded in OS window */
+.window-content > .minesweeper > .window-header,
+.window-content > .quantum-chess > .window-header,
+.window-content > .wiki-connect > .window-header,
+.window-content > .connect-game > .connect-window-header,
+.window-content > .colormania > .cm-window-header,
+.window-content > .refiner > .mdr-header > .back-button {
+  display: none;
 }
 
 .window-content {
-  scrollbar-width: thin;
-  scrollbar-color: #a0a0a0 #e0e0e0;
+  scrollbar-width: auto;
+  scrollbar-color: #b4b4b4 #ece9d8;
 }
 
 .resize-handle {
@@ -198,7 +206,7 @@
   transition: width 0.1s, height 0.1s;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 560px) {
   .window {
     position: fixed !important;
     width: 100% !important;
