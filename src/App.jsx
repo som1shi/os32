@@ -45,41 +45,47 @@ function App() {
   }, []);
 
   const games = [
-    { 
-      id: 'minesweeper', 
-      title: 'WordSweeper', 
+    {
+      id: 'minesweeper',
+      title: 'WordSweeper',
       iconKey: ICON_KEYS.game.wordsweeper,
       description: 'The Classic Minesweeper game with a twist.'
     },
-    { 
-      id: 'quantumchess', 
-      title: 'Schrödinger\'s Chess', 
+    {
+      id: 'quantumchess',
+      title: 'Schrödinger\'s Chess',
       iconKey: ICON_KEYS.game.quantumchess,
       description: 'Chess where pieces exist in quantum superposition until observed.'
     },
-    { 
-      id: 'rotateconnectfour', 
-      title: 'Rotate Connect Four', 
+    {
+      id: 'rotateconnectfour',
+      title: 'Rotate Connect Four',
       iconKey: ICON_KEYS.game.rotateconnectfour,
       description: 'Connect Four with dice rolls and board rotation mechanics.'
     },
-    { 
-      id: 'refiner', 
-      title: 'Refiner', 
+    {
+      id: 'refiner',
+      title: 'Refiner',
       iconKey: ICON_KEYS.game.refiner,
       description: 'Sort scary numbers in this Severance-inspired terminal game.'
     },
-    { 
-      id: 'wikiconnect', 
-      title: 'WikiConnect', 
+    {
+      id: 'wikiconnect',
+      title: 'WikiConnect',
       iconKey: ICON_KEYS.game.wikiconnect,
       description: 'Navigate through Wikipedia to connect two random articles.'
     },
-    { 
-      id: 'colormania', 
-      title: 'ColorMania', 
+    {
+      id: 'colormania',
+      title: 'ColorMania',
       iconKey: ICON_KEYS.game.colormania,
       description: 'Match colors of adjacent tiles to fill the board and earn points.'
+    },
+    {
+      id: 'dosemulator',
+      title: 'Emulator',
+      iconKey: ICON_KEYS.game.dosemulator,
+      description: 'Classic DOS game emulator — browse and play legendary 90s titles.'
     },
   ];
 

@@ -5,7 +5,7 @@
     width: 100%;
     background: #000;
     color: #7AF3D0;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -36,7 +36,7 @@
 .score-value {
     color: #FF0000 !important;
     font-size: 36px !important;
-    text-shadow: 0 0 5px rgba(255,0,0,0.5);
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
     letter-spacing: 2px;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -237,7 +237,7 @@
     text-shadow: 0 0 15px rgba(122, 243, 208, 0.8);
 }
 
-.target-box.receiving::before, 
+.target-box.receiving::before,
 .target-box.receiving::after {
     box-shadow: 0 0 20px rgba(122, 243, 208, 0.7);
 }
@@ -248,9 +248,17 @@
 }
 
 @keyframes box-edge-glow {
-    0% { box-shadow: 0 0 10px rgba(122, 243, 208, 0.2); }
-    50% { box-shadow: 0 0 25px rgba(122, 243, 208, 0.8); }
-    100% { box-shadow: 0 0 15px rgba(122, 243, 208, 0.4); }
+    0% {
+        box-shadow: 0 0 10px rgba(122, 243, 208, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(122, 243, 208, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 15px rgba(122, 243, 208, 0.4);
+    }
 }
 
 .target-label {
@@ -298,7 +306,7 @@
 
 .flying-number {
     position: fixed;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     font-weight: bold;
     color: #7AF3D0;
     display: flex;
@@ -318,10 +326,12 @@
         transform: scale(1) translate(0, -40px);
         opacity: 1;
     }
+
     80% {
         transform: scale(1.5) translate(0, 0);
         opacity: 1;
     }
+
     100% {
         transform: scale(1) translate(0, 0);
         opacity: 0;
@@ -333,7 +343,7 @@
     color: #7AF3D0;
     border: 2px solid #7AF3D0;
     padding: 12px 25px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     font-size: 16px;
     cursor: pointer;
     letter-spacing: 2px;
@@ -380,7 +390,8 @@
     gap: 10px;
 }
 
-.intro-screen h1, .game-over h2 {
+.intro-screen h1,
+.game-over h2 {
     font-size: 28px;
     letter-spacing: 2px;
     margin: 0 0 20px 0;
@@ -390,7 +401,8 @@
     user-select: none;
 }
 
-.intro-screen p, .game-over p {
+.intro-screen p,
+.game-over p {
     font-size: 16px;
     max-width: 600px;
     line-height: 1.6;
@@ -406,7 +418,7 @@
     color: #7AF3D0;
     border: 2px solid #7AF3D0;
     padding: 12px 25px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     font-size: 16px;
     cursor: pointer;
     letter-spacing: 2px;
@@ -421,29 +433,45 @@
 }
 
 @keyframes selected-flash {
-    0% { color: rgba(122, 243, 208, 0.7); text-shadow: 0 0 5px rgba(122, 243, 208, 0.7); }
-    50% { color: #fff; text-shadow: 0 0 15px #fff, 0 0 20px #7AF3D0; }
-    100% { color: #7AF3D0; text-shadow: 0 0 10px rgba(122, 243, 208, 0.8); }
+    0% {
+        color: rgba(122, 243, 208, 0.7);
+        text-shadow: 0 0 5px rgba(122, 243, 208, 0.7);
+    }
+
+    50% {
+        color: #fff;
+        text-shadow: 0 0 15px #fff, 0 0 20px #7AF3D0;
+    }
+
+    100% {
+        color: #7AF3D0;
+        text-shadow: 0 0 10px rgba(122, 243, 208, 0.8);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @media (max-width: 768px) {
     .grid-cell {
         font-size: 14px;
     }
-    
+
     .timer-container {
         width: 150px;
     }
-    
+
     .mdr-header {
         padding: 0 10px;
     }
-    
+
     .score-display {
         font-size: 12px;
     }
@@ -455,35 +483,36 @@
         max-height: 95%;
         padding: 10px;
     }
-    
+
     .game-over-content {
         padding: 10px;
     }
-    
+
     .game-over h2 {
         font-size: 20px;
         margin-bottom: 5px;
     }
-    
+
     .score-result {
         margin-bottom: 5px;
     }
-    
+
     .score-value {
         font-size: 24px;
     }
-    
-    .play-again-button, .share-button {
+
+    .play-again-button,
+    .share-button {
         padding: 8px 12px;
         font-size: 12px;
         margin: 4px 0;
     }
-    
+
     .score-submission-status p {
         padding: 3px 6px;
         font-size: 12px;
     }
-    
+
     .back-button {
         top: 3px;
         right: 3px;
@@ -491,46 +520,46 @@
         height: 24px;
         font-size: 16px;
     }
-    
+
     .mdr-header {
         height: 30px;
         padding: 0 5px;
     }
-    
+
     .grid-cell {
         font-size: 12px;
     }
-    
+
     .timer-container {
         width: 100px;
     }
-    
+
     .company-logo {
         display: none;
     }
-    
+
     .target-label {
         font-size: 12px;
     }
-    
+
     .target-value {
         font-size: 18px;
     }
-    
+
     .numbers-grid {
         grid-template-columns: repeat(8, 1fr);
         grid-template-rows: repeat(16, 1fr);
     }
-    
+
     .numbers-grid {
         touch-action: none;
     }
-    
+
     .grid-cell {
         touch-action: none;
         -webkit-touch-callout: none;
     }
-    
+
     .selection-box {
         background-color: rgba(122, 243, 208, 0.2);
         border: 2px dashed rgba(122, 243, 208, 0.6);
@@ -549,15 +578,35 @@ body.game-active {
 }
 
 @keyframes target-hit {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); color: #fff; text-shadow: 0 0 15px #fff; }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+        color: #fff;
+        text-shadow: 0 0 15px #fff;
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes cell-replace {
-    0% { transform: scale(1); }
-    50% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .grid-cell.new {
@@ -575,15 +624,17 @@ body.game-active {
 }
 
 @keyframes scary-pulse {
-    0% { 
+    0% {
         transform: scale(1);
         text-shadow: 0 0 5px rgba(122, 243, 208, 0.7);
     }
-    50% { 
+
+    50% {
         transform: scale(1.6);
         text-shadow: 0 0 15px rgba(122, 243, 208, 1);
     }
-    100% { 
+
+    100% {
         transform: scale(1);
         text-shadow: 0 0 5px rgba(122, 243, 208, 0.7);
     }
@@ -624,7 +675,8 @@ body.game-active {
     display: none;
 }
 
-.mute-button:hover, .mute-button.muted {
+.mute-button:hover,
+.mute-button.muted {
     display: none;
 }
 
@@ -642,7 +694,7 @@ body.game-active {
     background: rgba(0, 0, 0, 0.7) !important;
     color: #7AF3D0;
     padding: 8px 12px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     font-size: 14px;
     cursor: pointer;
     letter-spacing: 1px;
@@ -656,7 +708,7 @@ body.game-active {
 }
 
 .duration-button.selected {
-    background: #7AF3D0 !important; 
+    background: #7AF3D0 !important;
     color: #000 !important;
     box-shadow: 0 0 15px rgba(122, 243, 208, 0.4);
     font-weight: bold;
@@ -668,7 +720,7 @@ body.game-active {
     color: #7AF3D0;
     border: 2px solid #7AF3D0;
     padding: 10px 20px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     font-size: 14px;
     cursor: pointer;
     letter-spacing: 1px;
@@ -683,9 +735,17 @@ body.game-active {
 }
 
 @keyframes clipboard-feedback {
-    0% { background: rgba(122, 243, 208, 0.1); }
-    50% { background: rgba(122, 243, 208, 0.3); }
-    100% { background: rgba(122, 243, 208, 0.1); }
+    0% {
+        background: rgba(122, 243, 208, 0.1);
+    }
+
+    50% {
+        background: rgba(122, 243, 208, 0.3);
+    }
+
+    100% {
+        background: rgba(122, 243, 208, 0.1);
+    }
 }
 
 .share-button:has(.clipboard-feedback) {
@@ -848,9 +908,20 @@ body.game-active {
 }
 
 @keyframes target-change {
-    0% { transform: scale(1); box-shadow: 0 0 15px rgba(122, 243, 208, 0.4); }
-    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(122, 243, 208, 0.8); }
-    100% { transform: scale(1); box-shadow: 0 0 15px rgba(122, 243, 208, 0.4); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(122, 243, 208, 0.4);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(122, 243, 208, 0.8);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(122, 243, 208, 0.4);
+    }
 }
 
 .target-label {
@@ -931,7 +1002,7 @@ body.game-active {
     .refiner .numbers-grid {
         grid-template-columns: repeat(16, 1fr);
         grid-template-rows: repeat(8, 1fr);
-        
+
     }
 
 
@@ -951,40 +1022,42 @@ body.game-active {
         max-height: 80%;
         overflow-y: auto;
     }
-    
+
     .game-over-content {
         width: 100%;
         height: auto;
         padding: 15px;
     }
-    
+
     .game-over h2 {
         font-size: 24px;
         margin-bottom: 10px;
     }
-    
+
     .score-value {
         font-size: 28px;
     }
-    
-    .score-label, .duration-label {
+
+    .score-label,
+    .duration-label {
         font-size: 12px;
     }
-    
+
     .duration-value {
         font-size: 22px;
     }
-    
+
     .score-submission-status {
         margin: 5px 0;
     }
-    
+
     .score-submission-status p {
         font-size: 14px;
         padding: 3px 8px;
     }
-    
-    .play-again-button, .share-button {
+
+    .play-again-button,
+    .share-button {
         padding: 8px 16px;
         font-size: 14px;
         margin: 5px 0;
@@ -998,13 +1071,14 @@ body.game-active {
     }
 }
 
-.play-again-button, .share-button {
+.play-again-button,
+.share-button {
     margin: 8px 0;
     background: #000;
     color: #7AF3D0;
     border: 2px solid #7AF3D0;
     padding: 10px 20px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--ui-font-family);
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
@@ -1015,7 +1089,8 @@ body.game-active {
     text-transform: uppercase;
 }
 
-.play-again-button:hover, .share-button:hover {
+.play-again-button:hover,
+.share-button:hover {
     background: rgba(122, 243, 208, 0.2);
     box-shadow: 0 0 15px rgba(122, 243, 208, 0.5);
-} 
+}

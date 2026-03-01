@@ -19,6 +19,7 @@ import RotateConnectFour from '../games/RotateConnectFour/RotateConnectFour';
 import Refiner from '../games/Refiner/Refiner';
 import WikiConnect from '../games/WikiConnect/WikiConnect';
 import ColorMania from '../games/ColorMania/ColorMania';
+import DOSEmulator from '../games/DOSEmulator/DOSEmulator';
 import Notepad from '../Notepad/Notepad';
 
 import { useAuth } from '../../firebase/AuthContext';
@@ -37,9 +38,9 @@ const GAME_COMPONENTS = {
   'rotateconnectfour': RotateConnectFour,
   'refiner': Refiner,
   'wikiconnect': WikiConnect,
-  'colormania': ColorMania
+  'colormania': ColorMania,
+  'dosemulator': DOSEmulator,
 };
-
 const Desktop = ({ games }) => {
   const { currentUser, logOut } = useAuth();
 
@@ -55,17 +56,17 @@ const Desktop = ({ games }) => {
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    
+
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight
       });
     };
-    
+
     window.addEventListener('resize', handleResize);
     const removeConnectionListener = addConnectionStateListener(setIsOnline);
-    
+
     return () => {
       clearInterval(timer);
       window.removeEventListener('resize', handleResize);
@@ -76,7 +77,7 @@ const Desktop = ({ games }) => {
   const addWindow = useCallback((id, title, iconKey, component, options = {}) => {
     setWindows(prev => {
       const existingWindowIndex = prev.findIndex(w => w.id === id);
-      
+
       if (existingWindowIndex !== -1) {
         if (minimizedWindows.includes(id)) {
           setMinimizedWindows(prevMinimized => prevMinimized.filter(wId => wId !== id));
@@ -90,12 +91,12 @@ const Desktop = ({ games }) => {
         title,
         iconKey,
         component,
-        isMaximized: false,
+        isMaximized: options.isMaximized ?? false,
         position: options.position || { x: 50 + (prev.length * 30), y: 50 + (prev.length * 30) },
         size: options.size || { width: 800, height: 600 },
         zIndex: prev.length + 1
       };
-      
+
       setActiveWindow(id);
       setStartMenuOpen(false);
       return [...prev, newWindow];
@@ -105,15 +106,15 @@ const Desktop = ({ games }) => {
   const closeWindow = useCallback((windowId) => {
     setWindows(prev => {
       const filteredWindows = prev.filter(w => w.id !== windowId);
-      
+
       if (activeWindow === windowId) {
         const remainingWindows = filteredWindows.filter(w => !minimizedWindows.includes(w.id));
         setActiveWindow(remainingWindows.length > 0 ? remainingWindows[remainingWindows.length - 1].id : null);
       }
-      
+
       return filteredWindows;
     });
-    
+
     setMinimizedWindows(prev => prev.filter(id => id !== windowId));
   }, [activeWindow, minimizedWindows]);
 
@@ -121,7 +122,7 @@ const Desktop = ({ games }) => {
     if (!minimizedWindows.includes(windowId)) {
       setMinimizedWindows(prev => [...prev, windowId]);
     }
-    
+
     if (activeWindow === windowId) {
       setWindows(prev => {
         const visibleWindows = prev.filter(w => w.id !== windowId && !minimizedWindows.includes(w.id));
@@ -162,9 +163,9 @@ const Desktop = ({ games }) => {
       `notepad-${Date.now()}`,
       'Untitled.txt - Notepad',
       ICON_KEYS.app.notepad,
-      <Notepad 
-        file={newFile} 
-        onClose={() => closeWindow(`notepad-${Date.now()}`)} 
+      <Notepad
+        file={newFile}
+        onClose={() => closeWindow(`notepad-${Date.now()}`)}
       />
     );
   }, [addWindow, closeWindow]);
@@ -172,16 +173,16 @@ const Desktop = ({ games }) => {
   const toggleCodeEditor = useCallback((file = null) => {
     const windowId = `codeeditor-${file ? file.id : Date.now()}`;
     const initialTitle = file ? `${file.name} - Code Editor` : 'Untitled.py - Code Editor';
-    
+
     addWindow(
       windowId,
       initialTitle,
       ICON_KEYS.app.codeEditor,
-      <CodeEditor 
+      <CodeEditor
         file={file}
-        onClose={() => closeWindow(windowId)} 
+        onClose={() => closeWindow(windowId)}
         setWindowTitle={(title) => {
-          setWindows(prev => prev.map(w => 
+          setWindows(prev => prev.map(w =>
             w.id === windowId ? { ...w, title } : w
           ));
         }}
@@ -192,7 +193,7 @@ const Desktop = ({ games }) => {
 
   const handleOpenFile = useCallback((file) => {
     if (!file || !file.id) return;
-    
+
     if (file.name.toLowerCase().endsWith('.py') || file.name.toLowerCase().endsWith('.pyg')) {
       toggleCodeEditor(file);
       return;
@@ -202,9 +203,9 @@ const Desktop = ({ games }) => {
       notepadId,
       `${file.name} - Notepad`,
       ICON_KEYS.app.notepad,
-      <Notepad 
-        file={file} 
-        onClose={() => closeWindow(notepadId)} 
+      <Notepad
+        file={file}
+        onClose={() => closeWindow(notepadId)}
       />
     );
   }, [addWindow, closeWindow, toggleCodeEditor]);
@@ -358,13 +359,13 @@ const Desktop = ({ games }) => {
       </div>
 
       {games.map(game => (
-        <div 
-          key={game.id} 
-          className="desktop-icon" 
+        <div
+          key={game.id}
+          className="desktop-icon"
           {...asButtonProps(() => {
             const GameComponent = GAME_COMPONENTS[game.id];
             if (GameComponent) {
-              addWindow(game.id, game.title, game.iconKey, <GameComponent />);
+              addWindow(game.id, game.title, game.iconKey, <GameComponent />, (game.id === 'refiner' || game.id === 'doom') ? { isMaximized: true } : {});
             }
           }, `Launch ${game.title}`)}
         >
@@ -372,7 +373,7 @@ const Desktop = ({ games }) => {
           <div className="icon-text">{game.title}</div>
         </div>
       ))}
-      
+
       <div className="desktop-icon" {...asButtonProps(toggleInternetExplorer, 'Open Internet Explorer')}>
         <div className="icon"><AppIcon name={ICON_KEYS.app.internet} size={44} /></div>
         <div className="icon-text">Internet Explorer</div>
@@ -391,13 +392,13 @@ const Desktop = ({ games }) => {
       )}
     </div>
   ), [
-    currentUser, 
-    games, 
-    handleNewNotepad, 
-    addWindow, 
-    toggleFileExplorer, 
-    toggleInternetExplorer, 
-    toggleIPodPlayer, 
+    currentUser,
+    games,
+    handleNewNotepad,
+    addWindow,
+    toggleFileExplorer,
+    toggleInternetExplorer,
+    toggleIPodPlayer,
     toggleUserProfile,
     toggleTerminal,
     toggleCodeEditor
@@ -421,7 +422,7 @@ const Desktop = ({ games }) => {
           onClose={() => closeWindow(window.id)}
           onMinimize={() => minimizeWindow(window.id)}
           onMaximize={(isMax) => {
-            setWindows(prev => prev.map(w => 
+            setWindows(prev => prev.map(w =>
               w.id === window.id ? { ...w, isMaximized: isMax } : w
             ));
           }}
@@ -438,7 +439,7 @@ const Desktop = ({ games }) => {
       {windows.map(window => {
         const isMinimized = minimizedWindows.includes(window.id);
         return (
-          <div 
+          <div
             key={window.id}
             className={`taskbar-window ${activeWindow === window.id && !isMinimized ? 'active' : ''}`}
             {...asButtonProps(
@@ -461,9 +462,9 @@ const Desktop = ({ games }) => {
           {currentUser ? (
             <div className="start-user-info">
               <div className="start-user-avatar">
-                <img 
-                  src={currentUser.photoURL || '/default-avatar.svg'} 
-                  alt={currentUser.displayName || 'User'} 
+                <img
+                  src={currentUser.photoURL || '/user.png'}
+                  alt={currentUser.displayName || 'User'}
                 />
               </div>
               <div className="start-user-name">{currentUser.displayName || 'User'}</div>
@@ -471,37 +472,37 @@ const Desktop = ({ games }) => {
           ) : (
             <div className="start-user-info">
               <div className="start-user-avatar">
-                <img src="/default-avatar.svg" alt="Guest" />
+                <img src="/user.png" alt="Guest" />
               </div>
               <div className="start-user-name">Guest</div>
             </div>
           )}
         </div>
-        
+
         <div className="start-menu-items">
           <div className="start-menu-left">
             <div className="start-menu-item" {...asButtonProps(toggleFileExplorer, 'Open Documents')}>
               <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.documents} size={18} /></div>
               <div className="start-menu-text">Documents</div>
             </div>
-            
+
             <div className="start-menu-item" {...asButtonProps(handleNewNotepad, 'Open Notepad')}>
               <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.notepad} size={18} /></div>
               <div className="start-menu-text">Notepad</div>
             </div>
-            
+
             <div className="start-menu-item" {...asButtonProps(toggleTerminal, 'Open Terminal')}>
               <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.terminal} size={18} /></div>
               <div className="start-menu-text">Terminal</div>
             </div>
-            
+
             <div className="start-menu-item" {...asButtonProps(toggleCodeEditor, 'Open Code Editor')}>
               <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.codeEditor} size={18} /></div>
               <div className="start-menu-text">Code Editor</div>
             </div>
-            
+
             <div className="start-menu-separator" />
-            
+
             <div className="start-menu-item" {...asButtonProps(toggleLeaderboard, 'Toggle Leaderboards')}>
               <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.leaderboard} size={18} /></div>
               <div className="start-menu-text">Leaderboard</div>
@@ -516,13 +517,13 @@ const Desktop = ({ games }) => {
               <div className="start-menu-text">Music Player</div>
             </div>
             {games.map(game => (
-              <div 
-                key={game.id} 
+              <div
+                key={game.id}
                 className="start-menu-item"
                 {...asButtonProps(() => {
                   const GameComponent = GAME_COMPONENTS[game.id];
                   if (GameComponent) {
-                    addWindow(game.id, game.title, game.iconKey, <GameComponent />);
+                    addWindow(game.id, game.title, game.iconKey, <GameComponent />, game.id === 'refiner' ? { isMaximized: true } : {});
                   }
                 }, `Launch ${game.title}`)}
               >
@@ -531,7 +532,7 @@ const Desktop = ({ games }) => {
               </div>
             ))}
           </div>
-          
+
           <div className="start-menu-right">
             <div className="start-menu-item" {...asButtonProps(toggleAboutWindow, 'Open About')}>
               <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.about} size={18} /></div>
@@ -579,18 +580,30 @@ const Desktop = ({ games }) => {
   return (
     <div className="winxp-desktop" onClick={handleDesktopClick}>
       {desktopIcons}
-      
+
       {renderWindows}
-      
+
       <div className="taskbar">
-        <div 
-          className={`win-start-button ${startMenuOpen ? 'active' : ''}`} 
+        <div
+          className={`win-start-button ${startMenuOpen ? 'active' : ''}`}
           {...asButtonProps(() => setStartMenuOpen(prev => !prev), startMenuOpen ? 'Close Start menu' : 'Open Start menu')}
         >
-          <div className="start-logo"></div>
+          <div className="start-logo-ascii" style={{
+            fontSize: '2px',
+            lineHeight: '1.2',
+            marginLeft: '-5px',
+            marginRight: '6px',
+            fontFamily: 'monospace',
+            textShadow: 'none',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <pre style={{ color: '#ECE9D8', margin: 0 }}>{`██████╗ \n╚════██╗\n █████╔╝\n ╚═══██╗\n██████╔╝\n╚═════╝ `}</pre>
+            <pre style={{ color: '#ECE9D8', margin: 0 }}>{`██████╗\n╚════██╗\n █████╔╝\n██╔═══╝\n███████╗\n╚══════╝`}</pre>
+          </div>
           <span>Start</span>
         </div>
-        
+
         <div className="quick-launch">
           <div className="quick-launch-item" {...asButtonProps(toggleInternetExplorer, 'Open Internet Explorer')}>
             <div className="quick-icon"><AppIcon name={ICON_KEYS.app.internet} size={14} /></div>
@@ -606,25 +619,25 @@ const Desktop = ({ games }) => {
           </div>
           <div className="separator"></div>
         </div>
-        
+
         {taskbarWindows}
-        
+
         <div className="system-tray">
           {currentUser && (
-            <div 
+            <div
               className="user-avatar-small"
               {...asButtonProps(toggleUserProfile, 'Open user profile')}
               title={currentUser.displayName || 'User Profile'}
             >
-              <img 
-                src={currentUser.photoURL || '/default-avatar.svg'} 
-                alt={currentUser.displayName || 'User'} 
-                onError={(e) => {e.target.src = '/default-avatar.svg'}} 
+              <img
+                src={currentUser.photoURL || '/user.png'}
+                alt={currentUser.displayName || 'User'}
+                onError={(e) => { e.target.src = '/user.png' }}
               />
             </div>
           )}
-          <div 
-            className="tray-icon" 
+          <div
+            className="tray-icon"
             {...asButtonProps(toggleLeaderboard, 'Toggle leaderboards')}
             title="Leaderboard"
           >
@@ -640,9 +653,9 @@ const Desktop = ({ games }) => {
           <div className="time">{formatDate(currentTime)}</div>
         </div>
       </div>
-      
+
       {startMenu}
-      
+
       <Modal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}

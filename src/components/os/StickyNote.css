@@ -6,7 +6,7 @@
   box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 2px;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  font-family: var(--ui-font-family);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -68,29 +68,6 @@
 }
 
 
-.sticky-note-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.sticky-note-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.sticky-note-content::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-.sticky-note-content::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-
-.sticky-note-content {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
-}
-
 .sticky-note .leaderboard-container {
   box-shadow: none;
   border: none;
@@ -134,4 +111,4 @@
 
 .sticky-note .score-date {
   font-size: 10px;
-} 
+}

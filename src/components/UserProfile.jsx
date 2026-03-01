@@ -11,7 +11,7 @@ const UserProfile = ({ onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('recent');
-  
+
   const collectionNames = useMemo(() => ({
     'wordsweeper': 'WordSweeper',
     'refiner-30': 'Refiner (30s)',
@@ -40,7 +40,7 @@ const UserProfile = ({ onLogout }) => {
     let isMounted = true;
     const fetchUserScores = async () => {
       if (!currentUser) return;
-      
+
       try {
         setLoading(true);
         const scores = await getUserRecentScores(currentUser.uid);
@@ -67,7 +67,7 @@ const UserProfile = ({ onLogout }) => {
 
   const formatDate = useCallback((date) => {
     if (!date) return '';
-    
+
     return new Date(date).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
@@ -92,9 +92,9 @@ const UserProfile = ({ onLogout }) => {
       <div className="user-profile-container">
         <div className="user-profile-card">
           <div className="winxp-message-box">
-              <div className="winxp-message-icon">
-                <AppIcon name={ICON_KEYS.system.signIn} size={28} />
-              </div>
+            <div className="winxp-message-icon">
+              <AppIcon name={ICON_KEYS.system.signIn} size={28} />
+            </div>
             <div className="winxp-message-content">
               <h2>Sign In Required</h2>
               <p>Please sign in to view your profile and game statistics.</p>
@@ -105,17 +105,17 @@ const UserProfile = ({ onLogout }) => {
     );
   }
 
-  const photoURL = currentUser.photoURL || '/default-avatar.svg';
+  const photoURL = currentUser.photoURL || '/user.png';
   const displayName = currentUser.displayName || 'User';
-  
+
   return (
     <div className="user-profile-container winxp-window-content">
       <div className="user-profile-card">
         <div className="user-profile-header">
           <div className="user-avatar-large">
-            <img 
-              src={photoURL} 
-              alt={displayName} 
+            <img
+              src={photoURL}
+              alt={displayName}
             />
           </div>
           <div className="user-info">
@@ -124,25 +124,25 @@ const UserProfile = ({ onLogout }) => {
             <div className="user-actions">
             </div>
           </div>
-          <button 
-                className="winxp-button logout-button" 
-                onClick={handleLogout}
-                type="button"
-                aria-label="Sign Out"
-              >
-                <span className="button-icon"><AppIcon name={ICON_KEYS.system.signOut} size={14} /></span> Sign Out
-              </button>
+          <button
+            className="winxp-button logout-button"
+            onClick={handleLogout}
+            type="button"
+            aria-label="Sign Out"
+          >
+            <span className="button-icon"><AppIcon name={ICON_KEYS.system.signOut} size={14} /></span> Sign Out
+          </button>
         </div>
-        
+
         <div className="winxp-tabs">
-          <button 
+          <button
             className={`winxp-tab ${activeTab === 'recent' ? 'active' : ''}`}
             onClick={() => handleTabChange('recent')}
             type="button"
           >
             Recent Activity
           </button>
-          <button 
+          <button
             className={`winxp-tab ${activeTab === 'stats' ? 'active' : ''}`}
             onClick={() => handleTabChange('stats')}
             type="button"
@@ -150,7 +150,7 @@ const UserProfile = ({ onLogout }) => {
             Game Statistics
           </button>
         </div>
-        
+
         <div className="user-stats">
           {activeTab === 'recent' && (
             <>
@@ -161,7 +161,7 @@ const UserProfile = ({ onLogout }) => {
                   </span>
                   <h3>Your Recent Scores</h3>
                 </div>
-                
+
                 {loading ? (
                   <div className="loading-message" aria-live="polite">
                     <div className="winxp-loading-spinner"></div>
@@ -208,7 +208,7 @@ const UserProfile = ({ onLogout }) => {
               </div>
             </>
           )}
-          
+
           {activeTab === 'stats' && (
             <div className="winxp-section">
               <div className="winxp-section-header">
@@ -223,12 +223,12 @@ const UserProfile = ({ onLogout }) => {
               </div>
             </div>
           )}
-          
+
           <div className="winxp-footer">
             <div className="winxp-tip">
               <span className="tip-icon" aria-hidden="true">
                 <AppIcon name={ICON_KEYS.app.about} size={14} />
-              </span> 
+              </span>
               <span className="tip-text">Tip: Play more games to improve your scores and unlock achievements!</span>
             </div>
           </div>

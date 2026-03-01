@@ -111,19 +111,15 @@
 }
 
 /* Hide game-internal window chrome when embedded in OS window */
-.window-content > .minesweeper > .window-header,
-.window-content > .quantum-chess > .window-header,
-.window-content > .wiki-connect > .window-header,
-.window-content > .connect-game > .connect-window-header,
-.window-content > .colormania > .cm-window-header,
-.window-content > .refiner > .mdr-header > .back-button {
+.window-content>.minesweeper>.window-header,
+.window-content>.quantum-chess>.window-header,
+.window-content>.wiki-connect>.window-header,
+.window-content>.connect-game>.connect-window-header,
+.window-content>.colormania>.cm-window-header,
+.window-content>.refiner>.mdr-header>.back-button {
   display: none;
 }
 
-.window-content {
-  scrollbar-width: auto;
-  scrollbar-color: #b4b4b4 #ece9d8;
-}
 
 .resize-handle {
   position: absolute;
@@ -221,34 +217,34 @@
     border-radius: 0;
     z-index: 1000 !important;
   }
-  
+
   .window-header {
     height: 40px;
     padding: 0 10px;
   }
-  
+
   .window-title {
     font-size: 16px;
   }
-  
+
   .window-icon {
     font-size: 20px;
     margin-right: 8px;
   }
-  
+
   .window-button {
     width: 32px;
     height: 32px;
     font-size: 14px;
     margin-left: 4px;
   }
-  
+
   .window-content {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .resize-handle {
     display: none !important;
   }
-} 
+}

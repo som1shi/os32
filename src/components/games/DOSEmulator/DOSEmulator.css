@@ -1,0 +1,14 @@
+/* DOSEmulator — fills the OS Window, iframe is the content */
+.dosemu-content {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+}
+
+.dosemu-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}

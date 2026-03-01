@@ -211,6 +211,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Inspired by Microsoft Windows XP
 - [Miracode](https://github.com/IdreesInc/Miracode) font by IdreesInc used in the Terminal application
+- [Monocraft](https://github.com/IdreesInc/Monocraft) font by IdreesInc
 - PYG language: [PyGyat](https://github.com/shamith09/pygyat)
+- Icon Set: [Windows 98 Icon Set](https://win98icons.alexmeub.com/)
 - Thanks to all contributors who have helped shape this project
 - Special thanks to the open-source community for the tools and libraries used

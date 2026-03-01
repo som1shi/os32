@@ -4,7 +4,7 @@
   height: 100%;
   width: 100%;
   background: #ECE9D8;
-  font-family: 'Tahoma', sans-serif;
+  font-family: var(--ui-font-family);
   overflow: hidden;
   color: #000000;
 }

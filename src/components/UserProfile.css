@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   padding: 0;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  font-family: var(--ui-font-family);
   height: 100%;
   overflow: auto;
 }

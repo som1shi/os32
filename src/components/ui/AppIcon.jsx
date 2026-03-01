@@ -10,7 +10,7 @@ const AppIcon = ({
   decorative = true,
 }) => {
   const iconName = name || FALLBACK_ICON_KEY;
-  const IconComponent = getIconComponent(iconName);
+  const icon = getIconComponent(iconName);
   const stateClass = ICON_STATE_CLASS[state] || ICON_STATE_CLASS.default;
   const mergedClassName = ['app-icon', stateClass, className].filter(Boolean).join(' ');
 
@@ -18,6 +18,21 @@ const AppIcon = ({
     ? { 'aria-hidden': true }
     : { role: 'img', 'aria-label': title || iconName };
 
+  if (typeof icon === 'string') {
+    return (
+      <img
+        src={icon}
+        className={mergedClassName}
+        width={size}
+        height={size}
+        alt={decorative ? '' : (title || iconName)}
+        style={{ objectFit: 'contain', imageRendering: 'pixelated' }}
+        {...(decorative ? { 'aria-hidden': true } : { role: 'img' })}
+      />
+    );
+  }
+
+  const IconComponent = icon;
   return <IconComponent className={mergedClassName} size={size} title={title} {...accessibilityProps} />;
 };
 

@@ -2,25 +2,31 @@ import {
   FaArrowLeft,
   FaArrowRight,
   FaArrowUp,
-  FaChessKnight,
-  FaCode,
-  FaDoorOpen,
-  FaFire,
-  FaFolder,
-  FaFolderOpen,
-  FaGlobeAmericas,
-  FaInfoCircle,
-  FaKey,
-  FaLink,
-  FaMusic,
-  FaPencilAlt,
   FaRegCircle,
-  FaRegUser,
-  FaTrash,
 } from 'react-icons/fa';
-import { LuBomb, LuDice5, LuTerminal } from 'react-icons/lu';
-import { MdOutlineColorLens, MdOutlineGridOn, MdOutlineLeaderboard } from 'react-icons/md';
-import { PiNotebookFill } from 'react-icons/pi';
+
+// Custom PNG icons
+import chessIcon from '../assets/icons/chess.png';
+import codeEditorIcon from '../assets/icons/code_editor.png';
+import colormanaIcon from '../assets/icons/colormania.png';
+import computerIcon from '../assets/icons/computer.png';
+import deleteIcon from '../assets/icons/delete.png';
+import documentsIcon from '../assets/icons/documents.png';
+import emulatorIcon from '../assets/icons/emulator.png';
+import infoIcon from '../assets/icons/info.png';
+import internetExplorerIcon from '../assets/icons/internet_explorer.png';
+import leaderboardIcon from '../assets/icons/leaderboard.png';
+import loginIcon from '../assets/icons/login.png';
+import musicPlayerIcon from '../assets/icons/music_player.png';
+import notepadIcon from '../assets/icons/notepad.png';
+import pygFileIcon from '../assets/icons/pyg_file.png';
+import refinerIcon from '../assets/icons/refiner.png';
+import renameIcon from '../assets/icons/rename.png';
+import rotateConnectFourIcon from '../assets/icons/rotate_connect_four.png';
+import signOutIcon from '../assets/icons/sign_out.png';
+import terminalIcon from '../assets/icons/terminal.png';
+import wikiConnectIcon from '../assets/icons/wiki_connect.png';
+import wordsweeperIcon from '../assets/icons/wordsweeper.png';
 
 export const ICON_KEYS = {
   app: {
@@ -49,6 +55,7 @@ export const ICON_KEYS = {
     refiner: 'game.refiner',
     wikiconnect: 'game.wikiconnect',
     colormania: 'game.colormania',
+    dosemulator: 'game.dosemulator',
   },
   system: {
     signIn: 'system.signIn',
@@ -61,38 +68,44 @@ export const ICON_KEYS = {
 };
 
 export const iconRegistry = {
-  [ICON_KEYS.app.documents]: FaFolder,
-  [ICON_KEYS.app.notepad]: PiNotebookFill,
-  [ICON_KEYS.app.terminal]: LuTerminal,
-  [ICON_KEYS.app.codeEditor]: FaCode,
-  [ICON_KEYS.app.internet]: FaGlobeAmericas,
-  [ICON_KEYS.app.music]: FaMusic,
-  [ICON_KEYS.app.profile]: FaRegUser,
-  [ICON_KEYS.app.about]: FaInfoCircle,
-  [ICON_KEYS.app.leaderboard]: MdOutlineLeaderboard,
-  [ICON_KEYS.app.pyg]: FaFire,
-  [ICON_KEYS.app.rename]: FaPencilAlt,
-  [ICON_KEYS.app.delete]: FaTrash,
+  // Apps
+  [ICON_KEYS.app.documents]: documentsIcon,
+  [ICON_KEYS.app.notepad]: notepadIcon,
+  [ICON_KEYS.app.terminal]: terminalIcon,
+  [ICON_KEYS.app.codeEditor]: codeEditorIcon,
+  [ICON_KEYS.app.internet]: internetExplorerIcon,
+  [ICON_KEYS.app.music]: musicPlayerIcon,
+  [ICON_KEYS.app.profile]: computerIcon,
+  [ICON_KEYS.app.about]: infoIcon,
+  [ICON_KEYS.app.leaderboard]: leaderboardIcon,
+  [ICON_KEYS.app.pyg]: pygFileIcon,
+  [ICON_KEYS.app.rename]: renameIcon,
+  [ICON_KEYS.app.delete]: deleteIcon,
 
+  // Nav
   [ICON_KEYS.nav.back]: FaArrowLeft,
   [ICON_KEYS.nav.forward]: FaArrowRight,
   [ICON_KEYS.nav.up]: FaArrowUp,
 
-  [ICON_KEYS.game.wordsweeper]: LuBomb,
-  [ICON_KEYS.game.quantumchess]: FaChessKnight,
-  [ICON_KEYS.game.rotateconnectfour]: LuDice5,
-  [ICON_KEYS.game.refiner]: MdOutlineGridOn,
-  [ICON_KEYS.game.wikiconnect]: FaLink,
-  [ICON_KEYS.game.colormania]: MdOutlineColorLens,
+  // Games
+  [ICON_KEYS.game.wordsweeper]: wordsweeperIcon,
+  [ICON_KEYS.game.quantumchess]: chessIcon,
+  [ICON_KEYS.game.rotateconnectfour]: rotateConnectFourIcon,
+  [ICON_KEYS.game.refiner]: refinerIcon,
+  [ICON_KEYS.game.wikiconnect]: wikiConnectIcon,
+  [ICON_KEYS.game.colormania]: colormanaIcon,
+  [ICON_KEYS.game.dosemulator]: emulatorIcon,
 
-  [ICON_KEYS.system.signIn]: FaKey,
-  [ICON_KEYS.system.signOut]: FaDoorOpen,
+  // System
+  [ICON_KEYS.system.signIn]: loginIcon,
+  [ICON_KEYS.system.signOut]: signOutIcon,
 
+  // Status
   [ICON_KEYS.status.online]: FaRegCircle,
   [ICON_KEYS.status.offline]: FaRegCircle,
 };
 
-export const getIconComponent = (name) => iconRegistry[name] || FaFolderOpen;
+export const getIconComponent = (name) => iconRegistry[name] || documentsIcon;
 export const FALLBACK_ICON_KEY = ICON_KEYS.app.documents;
 export const ICON_STATE_CLASS = {
   default: 'is-default',

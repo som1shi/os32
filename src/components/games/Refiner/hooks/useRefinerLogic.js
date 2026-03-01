@@ -188,7 +188,7 @@ export default function useRefinerLogic() {
                     flyingEl.style.justifyContent = 'center';
                     flyingEl.style.fontSize = '16px';
                     flyingEl.style.fontWeight = 'bold';
-                    flyingEl.style.color = '#7AF3D0';
+                    flyingEl.style.color = '#fff';
                     flyingEl.style.zIndex = '50';
                     
                     document.body.appendChild(flyingEl);

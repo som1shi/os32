@@ -5,24 +5,23 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    background: #0b1a3b;
-    font-family: 'VT323', 'Tahoma', sans-serif;
-    border: 3px solid #f4a621;
+    background: #FFFFFF;
+    font-family: var(--ui-font-family);
+    border: 3px solid #0054E3;
     overflow: hidden;
     box-sizing: border-box;
-    color: #e8d5a3;
 }
 
 .minesweeper .window-header {
-    background: linear-gradient(180deg, #c47a0a 0%, #f4a621 10%, #c47a0a 100%);
+    background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 3px;
-    color: #0b1a3b;
+    color: white;
     font-weight: bold;
-    text-shadow: 1px 1px 1px rgba(255, 220, 100, 0.3);
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
     user-select: none;
 }
 
@@ -162,7 +161,7 @@
     border-color: #fff #848484 #848484 #fff;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 11px;
     font-weight: bold;
     color: #000;
@@ -307,7 +306,7 @@
     border-color: #fff #848484 #848484 #fff;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 11px;
     font-weight: bold;
 }
@@ -381,7 +380,7 @@
     border: 2px solid;
     border-color: #848484 #fff #fff #848484;
     border-radius: 3px;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 14px;
     color: #000;
     outline: none;
@@ -401,7 +400,7 @@
     border-color: #fff #848484 #848484 #fff;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 11px;
     font-weight: bold;
     color: #000;
@@ -505,7 +504,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 100;
     width: 300px;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
 }
 
 .game-over-message::before,
@@ -518,7 +517,7 @@
     right: 0;
     background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
     color: white;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 13px;
     font-weight: bold;
     padding: 8px 12px;
@@ -536,7 +535,7 @@
 .win-message h2 {
     margin: 0 0 15px 0;
     color: #000;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 14px;
     font-weight: bold;
 }
@@ -556,7 +555,7 @@
     border-color: #fff #848484 #848484 #fff;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 11px;
     font-weight: bold;
     color: #000;
@@ -586,7 +585,7 @@
     min-width: 300px;
     max-width: 500px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     color: #000;
 }
 
@@ -598,7 +597,7 @@
     right: 0;
     background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
     color: white;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 13px;
     font-weight: bold;
     padding: 8px 12px;
@@ -610,14 +609,14 @@
 
 .info-modal h3 {
     margin: 0 0 15px 0;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 14px;
     font-weight: bold;
     color: #000;
 }
 
 .info-content {
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 12px;
     line-height: 1.5;
     margin-bottom: 15px;
@@ -637,7 +636,7 @@
     border-color: #fff #848484 #848484 #fff;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Tahoma', sans-serif;
+    font-family: var(--ui-font-family);
     font-size: 11px;
     font-weight: bold;
     color: #000;

@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100%;
   background-color: #f0f0f0;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  font-family: var(--ui-font-family);
 }
 
 .ie-toolbar {

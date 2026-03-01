@@ -22,7 +22,7 @@
   align-items: center;
   padding: 4px 20px;
   cursor: pointer;
-  font-family: 'Tahoma', sans-serif;
+  font-family: var(--ui-font-family);
   font-size: 11px;
   color: #000;
 }

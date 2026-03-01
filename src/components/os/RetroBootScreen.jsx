@@ -1,25 +1,63 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './RetroBootScreen.css';
 
-const POWER_ON_MS = 300;
+const POWER_ON_MS = 500;
 const POST_MS = 2500;
-const LOADER_MS = 2500;
+const LOADER_MS = 1000;
 const POWER_OFF_MS = 450;
 
 const TOTAL_MEMORY_KB = 65536;
 const MEMORY_STEPS = [640, 8192, 16384, 32768, 49152, TOTAL_MEMORY_KB];
 
+const getSystemInfo = () => {
+  if (typeof navigator === 'undefined') return { browser: 'Unknown', os: 'Unknown', cores: 1, mem: 4, res: '1024x768', colorDepth: 24, language: 'en-US', timezone: 'UTC', connection: 'Unknown', touch: false };
+  const ua = navigator.userAgent;
+  let browser = 'Unknown Browser';
+  let os = 'Unknown OS';
+
+  if (ua.includes('Firefox')) browser = 'Mozilla Firefox';
+  else if (ua.includes('Edg/')) browser = 'Microsoft Edge';
+  else if (ua.includes('Chrome')) browser = 'Google Chrome';
+  else if (ua.includes('Safari')) browser = 'Apple Safari';
+  else if (ua.includes('MSIE') || ua.includes('Trident/')) browser = 'Internet Explorer';
+
+  if (ua.includes('Win')) os = 'Microsoft Windows Operating System';
+  else if (ua.includes('Mac')) os = 'Apple Macintosh Operating System';
+  else if (ua.includes('Linux')) os = 'Linux Operating System';
+  else if (ua.includes('Android')) os = 'Android Operating System';
+  else if (ua.includes('like Mac')) os = 'iOS Operating System';
+
+  const cores = navigator.hardwareConcurrency || 2;
+  const mem = navigator.deviceMemory ? navigator.deviceMemory + 'GB' : 'Unknown';
+  const res = typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : '1024x768';
+  const colorDepth = typeof screen !== 'undefined' ? screen.colorDepth : 24;
+  const language = navigator.language || 'en-US';
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const connection = navigator.connection ? navigator.connection.effectiveType.toUpperCase() : 'LAN';
+  const touch = navigator.maxTouchPoints > 0;
+
+  return { browser, os, cores, mem, res, colorDepth, language, timezone, connection, touch };
+};
+
+const sysInfo = getSystemInfo();
+
 const POST_LINES_BEFORE_MEMORY = [
   'AMIBIOS (C) 2026 OS32 Systems Inc.',
   'OS32 BIOS v4.51PG — Release 03/2026',
   '',
+  `Host OS        : ${sysInfo.os}`,
+  `Host Browser   : ${sysInfo.browser}`,
+  `Locale         : ${sysInfo.language} (${sysInfo.timezone})`,
+  `Logical Cores  : ${sysInfo.cores} Processors`,
+  `Host Memory    : ${sysInfo.mem} RAM Detected`,
   'Main Processor : Intel Pentium III 933MHz',
 ];
 
 const POST_LINES_AFTER_MEMORY = [
   '',
-  'Keyboard ............ Detected',
-  'Display Adapter ..... SVGA 1024x768',
+  `Network Adapter ..... ${sysInfo.connection} Network Detected`,
+  `Display Adapter ..... SVGA ${sysInfo.res} ${sysInfo.colorDepth}-bit`,
+  `Input Device(s) ..... Keyboard, Mouse${sysInfo.touch ? ', Touchscreen' : ''}`,
   'System Clock ........ Set',
   'Boot Device ......... HDD0',
   '',

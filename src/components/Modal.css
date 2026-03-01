@@ -22,7 +22,7 @@
   max-height: 90vh;
   width: 500px;
   animation: modalFadeIn 0.2s ease-out;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  font-family: var(--ui-font-family);
   border: 1px solid #0078d7;
   overflow: hidden;
 }

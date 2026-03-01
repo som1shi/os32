@@ -15,7 +15,7 @@
   background: linear-gradient(to bottom, rgba(17, 37, 78, 0.95), rgba(8, 18, 38, 0.98));
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(0, 0, 0, 0.45);
   padding: 20px 22px;
-  font-family: 'Consolas', 'Courier New', monospace;
+  font-family: var(--ui-font-family);
 }
 
 .retro-game-loading-title {

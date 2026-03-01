@@ -25,7 +25,7 @@
   position: relative;
   padding: 2px 10px;
   cursor: pointer;
-  font-family: 'Tahoma', sans-serif;
+  font-family: var(--ui-font-family);
   font-size: 14px;
 }
 
@@ -41,7 +41,7 @@
   left: 0;
   background: #ECE9D8;
   border: 1px solid #919B9C;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   min-width: 150px;
   z-index: 30;
 }
@@ -86,7 +86,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  font-family: 'Tahoma', 'Arial', sans-serif;
+  font-family: var(--ui-font-family);
   font-size: 11px;
 }
 
@@ -107,7 +107,7 @@
   padding: 2px 8px;
   cursor: pointer;
   color: #000;
-  font-family: 'Tahoma', 'Arial', sans-serif;
+  font-family: var(--ui-font-family);
   font-size: 11px;
 }
 
@@ -116,18 +116,20 @@
   color: white;
 }
 
-.save-button, .load-button {
+.save-button,
+.load-button {
   background-color: #ECE9D8;
   color: #000;
   border: 1px solid #919B9C;
   padding: 2px 8px;
   border-radius: 2px;
   cursor: pointer;
-  font-family: 'Tahoma', 'Arial', sans-serif;
+  font-family: var(--ui-font-family);
   font-size: 11px;
 }
 
-.save-button:hover, .load-button:hover {
+.save-button:hover,
+.load-button:hover {
   background-color: #c2c2c2;
 }
 
@@ -240,33 +242,11 @@
 }
 
 
-.code-editor-textarea::-webkit-scrollbar,
-.code-editor-output::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.code-editor-textarea::-webkit-scrollbar-track,
-.code-editor-output::-webkit-scrollbar-track {
-  background: #1e1e1e;
-}
-
-.code-editor-textarea::-webkit-scrollbar-thumb,
-.code-editor-output::-webkit-scrollbar-thumb {
-  background: #3e3e3e;
-  border-radius: 0;
-}
-
-.code-editor-textarea::-webkit-scrollbar-thumb:hover,
-.code-editor-output::-webkit-scrollbar-thumb:hover {
-  background: #505050;
-}
-
-
-.code-editor-textarea,
-.code-editor-output {
-  scrollbar-width: auto;
-  scrollbar-color: #3e3e3e #1e1e1e;
+.code-editor-line-numbers {
+  padding: 10px 5px 10px 10px;
+  background-color: var(--editor-bg);
+  color: #6e7681;
+  text-align: right;
 }
 
 
@@ -298,8 +278,8 @@
   background: linear-gradient(to right, #0058ab, #3a93e6);
   color: white;
   padding: 5px 10px;
-  font-family: 'Tahoma', sans-serif;
+  font-family: var(--ui-font-family);
   font-size: 13px;
   font-weight: bold;
   border-bottom: 1px solid #919B9C;
-} 
+}

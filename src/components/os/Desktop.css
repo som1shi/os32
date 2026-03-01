@@ -27,7 +27,7 @@
   background-size: cover;
   background-position: center;
   overflow: hidden;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  font-family: var(--ui-font-family);
   user-select: none;
 }
 
@@ -39,11 +39,24 @@
 
 .desktop-icons {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 110px);
+  grid-template-columns: repeat(4, 110px);
   grid-auto-rows: 110px;
   gap: var(--ui-space-2);
   padding: var(--ui-space-2);
   align-content: start;
+}
+
+/* 4-3-3-2-1 pyramid layout: force row breaks at items 8, 11, 13 */
+.desktop-icon:nth-child(8) {
+  grid-column-start: 1;
+}
+
+.desktop-icon:nth-child(11) {
+  grid-column-start: 1;
+}
+
+.desktop-icon:nth-child(13) {
+  grid-column-start: 1;
 }
 
 .desktop-icon {
@@ -53,7 +66,7 @@
   justify-content: center;
   width: 110px;
   height: 110px;
-  cursor: pointer; 
+  cursor: pointer;
   border-radius: var(--ui-radius-sm);
   transition: background-color var(--ui-motion-fast) var(--ui-ease-standard);
 }
@@ -84,12 +97,17 @@
   color: white;
   text-align: center;
   font-size: 13px;
+  line-height: 1.1;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.4);
   max-width: 100%;
-  overflow: hidden;
   font-family: var(--ui-font-family);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
+  padding: 0 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .desktop-icon:focus-visible {
@@ -143,13 +161,6 @@
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-.win-start-button .start-logo {
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect x="0" y="0" width="7" height="7" fill="green"/><rect x="9" y="0" width="7" height="7" fill="red"/><rect x="0" y="9" width="7" height="7" fill="blue"/><rect x="9" y="9" width="7" height="7" fill="yellow"/></svg>');
-  background-size: contain;
-}
 
 .quick-launch {
   display: flex;
@@ -631,4 +642,4 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-} 
+}
