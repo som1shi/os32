@@ -1,4 +1,5 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState, useEffect } from 'react';
+import soundService from '../../../services/soundService';
 import './WikiConnect.css';
 import PersonCard from './components/PersonCard';
 import ConnectionChain from './components/ConnectionChain';
@@ -63,6 +64,12 @@ const WikiConnect = () => {
         debounce,
     } = useWikipediaSearch();
 
+    const [showIntro, setShowIntro] = useState(true);
+
+    useEffect(() => {
+        if (gameComplete) soundService.play('notify');
+    }, [gameComplete]);
+
     const startPersonCard = useMemo(() => (
         <PersonCard
             label="Start"
@@ -105,20 +112,33 @@ const WikiConnect = () => {
         />
     ), [personChain, seconds, startGame, shareScore, formatTime]);
 
-    return (
-        <div className="wiki-connect">
-            <div className="window-header">
-                <div className="window-title">
-                    <span>WikiConnect</span>
-                </div>
-                <div className="window-controls">
-                    <button 
-                        className="window-button close"
-                        onClick={() => window.location.href = "/"}
-                    ></button>
+    if (showIntro) {
+        return (
+            <div className="wiki-connect">
+                <div className="wc-intro-screen">
+                    <div className="wc-intro-logo">WikiConnect</div>
+                    <p className="wc-intro-tagline">
+                        Connect two Wikipedia personalities in as few steps as possible.
+                    </p>
+                    <div className="wc-intro-rules">
+                        <h3>How to Play</h3>
+                        <ul>
+                            <li>You'll get a <strong>Start</strong> and a <strong>Target</strong> Wikipedia person</li>
+                            <li>Type the name of anyone who links to your current person</li>
+                            <li>Navigate through Wikipedia connections to reach the target</li>
+                            <li>Fewer steps and faster time = better score!</li>
+                        </ul>
+                    </div>
+                    <button className="wc-intro-btn" onClick={() => { soundService.play('click'); startGame(); setShowIntro(false); }}>
+                        ▶ Play WikiConnect
+                    </button>
                 </div>
             </div>
-            
+        );
+    }
+
+    return (
+        <div className="wiki-connect">
             <div className="wiki-connect-menu-bar">
                 <div className="wiki-connect-menu-item">
                     <span>File</span>
@@ -138,7 +158,6 @@ const WikiConnect = () => {
             
             <div className="wiki-header">
                 <div className="wiki-header-content">
-                <h1 className="wiki-title">WikiConnect</h1>
                     <div className="wiki-stats">
                         <span className="stats-item">
                             Steps: <span className="stats-value">{personChain.length - 1}</span>

@@ -1,8 +1,11 @@
-import React, { useMemo, memo, useCallback } from 'react';
+import React, { useMemo, memo, useCallback, useState, useEffect } from 'react';
 import useGameLogic from './hooks/useGameLogic';
+import soundService from '../../../services/soundService';
 import './Minesweeper.css';
 
 const Minesweeper = memo(() => {
+    const [showIntro, setShowIntro] = useState(true);
+
     const {
         board,
         gameOver,
@@ -27,6 +30,20 @@ const Minesweeper = memo(() => {
         handleCellClick,
         handleShare
     } = useGameLogic();
+
+    useEffect(() => {
+        if (gameOver) soundService.play('error');
+    }, [gameOver]);
+
+    useEffect(() => {
+        if (win) soundService.play('notify');
+    }, [win]);
+
+    const handleStartGame = useCallback(() => {
+        soundService.play('click');
+        startNewGame();
+        setShowIntro(false);
+    }, [startNewGame]);
 
     const Scoreboard = useMemo(() => (
         <div className="scoreboard">
@@ -53,8 +70,8 @@ const Minesweeper = memo(() => {
                         <div
                             key={`${i}-${j}`}
                             className={`cell ${cell.isRevealed ? 'revealed' : ''} ${cell.isFlagged ? 'flagged' : ''} ${cell.isMine && cell.isRevealed ? 'mine' : ''} ${cell.neighborMines === 1 ? 'level-1' : cell.neighborMines === 2 ? 'level-2' : cell.neighborMines === 3 ? 'level-3' : ''}`}
-                            onClick={(e) => handleCellClick(i, j, e)}
-                            onContextMenu={(e) => handleCellClick(i, j, e)}
+                            onClick={(e) => { soundService.play('click'); handleCellClick(i, j, e); }}
+                            onContextMenu={(e) => { soundService.play('click'); handleCellClick(i, j, e); }}
                         >
                             {cell.isRevealed && (cell.isMine ? cell.word : cell.neighborMines > 0 ? cell.word : '')}
                             {!cell.isRevealed && cell.isFlagged && '🚩'}
@@ -87,32 +104,44 @@ const Minesweeper = memo(() => {
         </div>
     ), [flagMode, setFlagMode, setShowCustomInput, startNewGame, setShowInfo]);
 
-    const Header = useMemo(() => (
-        <div className="window-header">
-            <div className="window-title">
-                <span>WordSweeper</span>
-            </div>
-            <div className="window-controls">
-                <button 
-                    className="window-button close"
-                    onClick={() => window.location.href = "/"}
-                ></button>
-            </div>
-        </div>
-    ), []);
-
     const handleCloseCustomInput = useCallback(() => setShowCustomInput(false), [setShowCustomInput]);
     const handleCloseInfo = useCallback(() => setShowInfo(false), [setShowInfo]);
 
+    if (showIntro) {
+        return (
+            <div className="minesweeper">
+                <div className="ms-intro-screen">
+                    <div className="ms-intro-logo">
+                        <span className="ms-logo-word">Word</span>
+                        <span className="ms-logo-sweeper">Sweeper</span>
+                    </div>
+                    <p className="ms-intro-tagline">A word-based twist on the classic mine-dodging puzzle.</p>
+                    <div className="ms-intro-rules">
+                        <h3>How to Play</h3>
+                        <ul>
+                            <li>Each mine cell contains the <strong>target word</strong></li>
+                            <li>Adjacent cells show semantically related words</li>
+                            <li>The closer the word, the more mines are nearby</li>
+                            <li>Right-click or use Flags mode to mark suspected mines</li>
+                            <li>Clear all safe cells to win!</li>
+                        </ul>
+                    </div>
+                    <button className="ms-intro-btn" onClick={handleStartGame}>
+                        ▶ Play WordSweeper
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="minesweeper">
-            {Header}
             {MenuBar}
-            
+
             <div className="game-container">
                 {Scoreboard}
                 {Board}
-                
+
                 {gameOver && (
                     <div className="game-over-message">
                         <h2>Game Over!</h2>
@@ -121,7 +150,7 @@ const Minesweeper = memo(() => {
                         <button onClick={handleShare}>Share Result</button>
                     </div>
                 )}
-                
+
                 {win && (
                     <div className="win-message">
                         <h2>You Win!</h2>
@@ -134,13 +163,13 @@ const Minesweeper = memo(() => {
                         <button onClick={handleShare}>Share Result</button>
                     </div>
                 )}
-                
+
                 {showScoreSubmitted && !gameOver && !win && (
                     <div className="score-submitted-notification">
                         <p>Score submitted successfully!</p>
                     </div>
                 )}
-                
+
                 {showCustomInput && (
                     <>
                         <div className="custom-word-overlay" onClick={handleCloseCustomInput} />
@@ -156,6 +185,7 @@ const Minesweeper = memo(() => {
                         </div>
                     </>
                 )}
+
                 {showInfo && (
                     <>
                         <div className="custom-word-overlay" onClick={handleCloseInfo} />

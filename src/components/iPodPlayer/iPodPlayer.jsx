@@ -16,32 +16,32 @@ const IPodPlayer = memo(({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [audioError, setAudioError] = useState(null);
-  
+
   const audioRef = useRef(null);
-  
+
   const searchItunesAPI = useCallback(async (query, type = 'song') => {
     setIsLoading(true);
-    
+
     try {
       let searchUrl;
-      
+
       if (type === 'artist') {
         searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=musicArtist&attribute=artistTerm&limit=20`;
       } else {
         searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&attribute=songTerm&limit=20`;
       }
-      
+
       const response = await fetch(searchUrl);
-      
+
       if (!response.ok) throw new Error("iTunes search failed");
-      
+
       const data = await response.json();
-      
+
       if (type === 'artist') {
         const uniqueArtists = Array.from(new Map(
           data.results.map(artist => [artist.artistId, artist])
         ).values());
-        
+
         setArtists(uniqueArtists.map(artist => ({
           id: artist.artistId,
           name: artist.artistName,
@@ -57,24 +57,24 @@ const IPodPlayer = memo(({ onClose }) => {
           previewUrl: track.previewUrl,
           type: 'track'
         }));
-        
+
         if (songResults.length === 0) {
           const backupSearchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=20`;
           const backupResponse = await fetch(backupSearchUrl);
-          
+
           if (backupResponse.ok) {
             const backupData = await backupResponse.json();
-            
+
             const backupResults = backupData.results.map(track => ({
               id: track.trackId,
               title: track.trackName,
-              artist: track.artistName, 
+              artist: track.artistName,
               duration: track.trackTimeMillis / 1000,
               imageUrl: track.artworkUrl100?.replace('100x100', '300x300') || DEFAULT_ALBUM_IMAGE,
               previewUrl: track.previewUrl,
               type: 'track'
             }));
-            
+
             setPlaylist(backupResults);
           } else {
             setPlaylist(songResults);
@@ -90,22 +90,22 @@ const IPodPlayer = memo(({ onClose }) => {
       setIsLoading(false);
     }
   }, []);
-  
+
   const getArtistTracks = useCallback(async (artistId, artistName) => {
     setIsLoading(true);
     try {
       const searchUrl = `https://itunes.apple.com/lookup?id=${artistId}&entity=song&limit=50`;
-      
+
       const response = await fetch(searchUrl);
-      
+
       if (!response.ok) throw new Error();
-      
+
       const data = await response.json();
-      
+
       const exactArtistName = artistName.toLowerCase().trim();
       let tracks = data.results
-        .filter(item => 
-          item.wrapperType === 'track' && 
+        .filter(item =>
+          item.wrapperType === 'track' &&
           item.artistName.toLowerCase().trim() === exactArtistName)
         .map(track => ({
           id: track.trackId,
@@ -116,17 +116,17 @@ const IPodPlayer = memo(({ onClose }) => {
           previewUrl: track.previewUrl,
           type: 'track'
         }));
-      
+
       if (tracks.length < 3) {
         const backupUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&attribute=artistTerm&limit=50`;
-        
+
         const backupResponse = await fetch(backupUrl);
-        
+
         if (backupResponse.ok) {
           const backupData = await backupResponse.json();
-          
+
           const backupTracks = backupData.results
-            .filter(item => 
+            .filter(item =>
               item.artistName.toLowerCase().trim() === exactArtistName)
             .map(track => ({
               id: track.trackId,
@@ -137,22 +137,22 @@ const IPodPlayer = memo(({ onClose }) => {
               previewUrl: track.previewUrl,
               type: 'track'
             }));
-          
+
           if (backupTracks.length > tracks.length) {
             tracks = backupTracks;
           }
         }
       }
-      
+
       if (tracks.length === 0) {
         const fallbackUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&media=music&entity=song&limit=25`;
-        
+
         const fallbackResponse = await fetch(fallbackUrl);
-        
+
         if (fallbackResponse.ok) {
           const fallbackData = await fallbackResponse.json();
           tracks = fallbackData.results
-            .filter(item => 
+            .filter(item =>
               item.artistName.toLowerCase().includes(artistName.toLowerCase().trim().split(' ')[0]))
             .map(track => ({
               id: track.trackId,
@@ -165,7 +165,7 @@ const IPodPlayer = memo(({ onClose }) => {
             }));
         }
       }
-      
+
       setPlaylist(tracks);
       setActiveMenu('songs');
     } catch {
@@ -181,17 +181,17 @@ const IPodPlayer = memo(({ onClose }) => {
     setAudioError(null);
     setIsPlaying(false);
     setIsLoading(true);
-    
+
     try {
       if (track.previewUrl) {
         const updatedTrack = { ...track };
         setCurrentTrack(updatedTrack);
-        
+
         if (audioRef.current) {
           try {
             audioRef.current.src = track.previewUrl;
             await audioRef.current.load();
-            
+
             const playPromise = audioRef.current.play();
             if (playPromise !== undefined) {
               playPromise
@@ -230,7 +230,7 @@ const IPodPlayer = memo(({ onClose }) => {
 
   const handlePlay = useCallback(async () => {
     if (!currentTrack) return;
-    
+
     try {
       if (isPlaying) {
         audioRef.current?.pause();
@@ -241,11 +241,11 @@ const IPodPlayer = memo(({ onClose }) => {
             setAudioError("No audio source available");
             return;
           }
-          
+
           if (audioRef.current.currentTime >= audioRef.current.duration - 1) {
             audioRef.current.currentTime = 0;
           }
-          
+
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
             playPromise
@@ -278,10 +278,10 @@ const IPodPlayer = memo(({ onClose }) => {
 
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
-    
+
     try {
       await searchItunesAPI(searchQuery, activeMenu === 'artists' ? 'artist' : 'song');
-      
+
       setSearchQuery('');
     } catch (error) {
       console.error("Search error:", error);
@@ -319,8 +319,8 @@ const IPodPlayer = memo(({ onClose }) => {
 
   const handleMenuClick = useCallback((menu) => {
     if (menu !== activeMenu) {
-      if ((activeMenu === 'songs' || activeMenu === 'artists') && 
-          (menu !== 'songs' && menu !== 'artists')) {
+      if ((activeMenu === 'songs' || activeMenu === 'artists') &&
+        (menu !== 'songs' && menu !== 'artists')) {
         setSearchQuery('');
         if (menu !== 'now-playing') {
           setPlaylist([]);
@@ -328,7 +328,7 @@ const IPodPlayer = memo(({ onClose }) => {
         }
       }
     }
-    
+
     setActiveMenu(menu);
   }, [activeMenu]);
 
@@ -361,8 +361,8 @@ const IPodPlayer = memo(({ onClose }) => {
   }, [handleSearch]);
 
   const renderArtistItem = useCallback((artist) => (
-    <div 
-      key={artist.id} 
+    <div
+      key={artist.id}
       className="artist-item"
       onClick={() => handleArtistSelect(artist)}
     >
@@ -371,8 +371,8 @@ const IPodPlayer = memo(({ onClose }) => {
   ), [handleArtistSelect]);
 
   const renderSongItem = useCallback((track) => (
-    <div 
-      key={track.id} 
+    <div
+      key={track.id}
       className="song-item"
       onClick={() => handleTrackSelect(track)}
     >
@@ -394,7 +394,7 @@ const IPodPlayer = memo(({ onClose }) => {
         <button className="close-button" onClick={onClose}>X</button>
         <h2>Music Player</h2>
       </div>
-      
+
       <div className="ipod-screen">
         {isLoading && (
           <div className="loading-overlay">
@@ -402,14 +402,14 @@ const IPodPlayer = memo(({ onClose }) => {
             <div>Loading...</div>
           </div>
         )}
-        
+
         {error && (
           <div className="error-message">
             <p>Error: {error}</p>
             <button onClick={() => setError(null)}>Dismiss</button>
           </div>
         )}
-        
+
         <>
           {activeMenu === 'main' && (
             <div className="ipod-menu">
@@ -420,7 +420,7 @@ const IPodPlayer = memo(({ onClose }) => {
               )}
             </div>
           )}
-          
+
           {activeMenu === 'artists' && (
             <div className="ipod-artists">
               <div className="menu-header">
@@ -428,9 +428,9 @@ const IPodPlayer = memo(({ onClose }) => {
                 <h3>Artists</h3>
               </div>
               <div className="search-bar">
-                <input 
-                  type="text" 
-                  placeholder="Search artists..." 
+                <input
+                  type="text"
+                  placeholder="Search artists..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -442,7 +442,7 @@ const IPodPlayer = memo(({ onClose }) => {
               </div>
             </div>
           )}
-          
+
           {activeMenu === 'songs' && (
             <div className="ipod-songs">
               <div className="menu-header">
@@ -450,9 +450,9 @@ const IPodPlayer = memo(({ onClose }) => {
                 <h3>Songs</h3>
               </div>
               <div className="search-bar">
-                <input 
-                  type="text" 
-                  placeholder="Search songs..." 
+                <input
+                  type="text"
+                  placeholder="Search songs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -464,7 +464,7 @@ const IPodPlayer = memo(({ onClose }) => {
               </div>
             </div>
           )}
-          
+
           {activeMenu === 'now-playing' && currentTrack && (
             <div className="now-playing">
               <div className="menu-header">
@@ -479,14 +479,14 @@ const IPodPlayer = memo(({ onClose }) => {
                 )}
                 <div className="track-title">{currentTrack.title}</div>
                 <div className="track-artist">{currentTrack.artist}</div>
-                
+
                 {audioError ? (
                   <div className="audio-error">{audioError}</div>
                 ) : (
                   <>
                     <div className="progress-bar">
-                      <div 
-                        className="progress" 
+                      <div
+                        className="progress"
                         style={{ width: `${(currentTime / duration) * 100}%` }}
                       ></div>
                     </div>
@@ -499,7 +499,7 @@ const IPodPlayer = memo(({ onClose }) => {
             </div>
           )}
         </>
-        
+
         <audio
           ref={audioRef}
           src={currentTrack?.previewUrl || ''}
@@ -508,7 +508,7 @@ const IPodPlayer = memo(({ onClose }) => {
           onError={() => setAudioError('Preview playback failed')}
         />
       </div>
-      
+
       <div className="ipod-controls">
         <div className="control-wheel">
           <button className="menu-button" onClick={() => handleMenuClick('main')}>MENU</button>

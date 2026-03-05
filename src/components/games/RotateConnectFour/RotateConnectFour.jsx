@@ -1,6 +1,7 @@
-import React, { useMemo, useCallback, memo, useState } from 'react';
+import React, { useMemo, useCallback, memo, useState, useEffect } from 'react';
 import './RotateConnectFour.css';
 import useGameLogic from './hooks/useGameLogic';
+import soundService from '../../../services/soundService';
 
 const RotateConnectFour = memo(() => {
     const {
@@ -14,13 +15,27 @@ const RotateConnectFour = memo(() => {
         showRules,
         setShowRules,
         diceFaceRef,
+        boardRef,
         isDiceRolling,
         dropPiece,
         rotateBoard,
         shareGame,
         resetGame
     } = useGameLogic();
+
+    const [showIntro, setShowIntro] = useState(true);
     const [activeMenu, setActiveMenu] = useState(null);
+
+    useEffect(() => {
+        if (gameOver && winner) soundService.play('notify');
+        else if (gameOver && !winner) soundService.play('error');
+    }, [gameOver, winner]);
+
+    const handleStartGame = useCallback(() => {
+        soundService.play('click');
+        resetGame();
+        setShowIntro(false);
+    }, [resetGame]);
 
     const handleExit = useCallback(() => {
         window.location.href = "/";
@@ -30,11 +45,18 @@ const RotateConnectFour = memo(() => {
         setShowRules(true);
     }, [setShowRules]);
 
+    const handleDropPiece = useCallback((colIndex) => {
+        soundService.play('click');
+        dropPiece(colIndex);
+    }, [dropPiece]);
+
     const handleRotateLeft = useCallback(() => {
+        soundService.play('click');
         rotateBoard('left');
     }, [rotateBoard]);
 
     const handleRotateRight = useCallback(() => {
+        soundService.play('click');
         rotateBoard('right');
     }, [rotateBoard]);
 
@@ -43,31 +65,29 @@ const RotateConnectFour = memo(() => {
     }, [activeMenu]);
 
     const handleClickOutside = useCallback(() => {
-        if (activeMenu) {
-            setActiveMenu(null);
-        }
+        if (activeMenu) setActiveMenu(null);
     }, [activeMenu]);
 
     const statusMessage = useMemo(() => {
         if (gameOver) {
-            return winner ? `${winner.toUpperCase()} Wins!` : 'Game Over!';
+            return winner ? `${winner.toUpperCase()} Wins!` : 'Draw!';
         }
         return `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s Turn`;
     }, [gameOver, winner, currentPlayer]);
 
     const diceMessage = useMemo(() => {
-        return canRotate ? "You rolled 6 - You can rotate!" : `Rolled: ${diceRoll}`;
+        return canRotate ? "You rolled 6 — rotate the board!" : `Rolled: ${diceRoll}`;
     }, [canRotate, diceRoll]);
 
     const boardDisplay = useMemo(() => (
-        <div className="connect-board">
+        <div ref={boardRef} className="connect-board">
             {board.map((row, rowIndex) => (
                 <div key={rowIndex} className="connect-row">
                     {row.map((cell, colIndex) => (
                         <div
                             key={colIndex}
                             className={`connect-cell ${cell || ''}`}
-                            onClick={() => dropPiece(colIndex)}
+                            onClick={() => handleDropPiece(colIndex)}
                         >
                             {cell && <div className={`connect-piece ${cell}`}></div>}
                         </div>
@@ -75,100 +95,100 @@ const RotateConnectFour = memo(() => {
                 </div>
             ))}
         </div>
-    ), [board, dropPiece]);
+    ), [board, handleDropPiece]);
 
     const rulesModal = useMemo(() => showRules && (
         <div className="connect-rules-modal">
             <div className="connect-rules-content">
-                <h2>How to Play Rotate Connect Four</h2>
-                <p>This is Connect Four with a twist - after dropping a piece, roll a dice to see if you can rotate the board!</p>
+                <h2>How to Play</h2>
+                <p>Connect Four with a twist — rolling a 6 lets you rotate the board!</p>
                 <ol>
-                    <li>Players take turns dropping their colored pieces into columns</li>
-                    <li>After dropping a piece, a dice is rolled</li>
-                    <li>If you roll a 6, you can rotate the board 90° clockwise or counterclockwise</li>
-                    <li>After rotation, pieces will fall to reflect the new gravity</li>
-                    <li>Connect four pieces in a row (horizontally, vertically, or diagonally) to win</li>
+                    <li>Take turns dropping your colored pieces into columns</li>
+                    <li>After dropping, a dice is rolled automatically</li>
+                    <li>Roll a 6 to rotate the board 90° left or right</li>
+                    <li>Pieces fall to reflect the new gravity after rotation</li>
+                    <li>Connect four in a row (any direction) to win!</li>
                 </ol>
                 <button onClick={() => setShowRules(false)}>Got it!</button>
             </div>
         </div>
     ), [showRules, setShowRules]);
 
+    if (showIntro) {
+        return (
+            <div className="connect-game">
+                <div className="connect-menu-bar">
+                    <div className="connect-menu-item" onClick={() => { soundService.play('click'); setShowIntro(false); }}>
+                        <span>File</span>
+                    </div>
+                    <div className="connect-menu-item" onClick={() => setShowRules(true)}>
+                        <span>Help</span>
+                    </div>
+                </div>
+                <div className="rcf-intro-screen">
+                    <div className="rcf-intro-logo">
+                        <span className="rcf-logo-red">●</span>
+                        <span className="rcf-logo-yellow">●</span>
+                        Rotate Connect Four
+                        <span className="rcf-logo-yellow">●</span>
+                        <span className="rcf-logo-red">●</span>
+                    </div>
+                    <p className="rcf-intro-tagline">
+                        Classic Connect Four — but rolling a 6 lets you spin the board and change everything!
+                    </p>
+                    <div className="rcf-intro-rules">
+                        <h3>How to Play</h3>
+                        <ol>
+                            <li>Drop your colored piece into any column</li>
+                            <li>A dice rolls after each move</li>
+                            <li>Roll a <strong>6</strong> to rotate the board 90° left or right</li>
+                            <li>Pieces fall with the new gravity after rotation</li>
+                            <li>Connect <strong>4 in a row</strong> to win!</li>
+                        </ol>
+                    </div>
+                    <button className="rcf-intro-btn" onClick={handleStartGame}>
+                        ▶ Play Rotate Connect Four
+                    </button>
+                </div>
+                {rulesModal}
+            </div>
+        );
+    }
+
     return (
         <div className="connect-game" onClick={handleClickOutside}>
-            <div className="connect-window-header">
-                <div className="connect-window-title">
-                    <span>Rotate Connect Four</span>
-                </div>
-                <div className="connect-window-controls">
-                    <button 
-                        className="connect-window-button close"
-                        onClick={handleExit}
-                    ></button>
-                </div>
-            </div>
-            
             <div className="connect-menu-bar">
-                <div 
+                <div
                     className={`connect-menu-item ${activeMenu === 'file' ? 'active' : ''}`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        toggleMenu('file');
-                    }}
+                    onClick={(e) => { e.stopPropagation(); toggleMenu('file'); }}
                 >
                     <span>File</span>
                     <div className="connect-menu-dropdown">
-                        <div className="connect-menu-option" onClick={(e) => {
-                            e.stopPropagation();
-                            resetGame();
-                            setActiveMenu(null);
-                        }}>New Game</div>
-                        <div className="connect-menu-option" onClick={(e) => {
-                            e.stopPropagation();
-                            handleExit();
-                        }}>Exit</div>
+                        <div className="connect-menu-option" onClick={(e) => { e.stopPropagation(); resetGame(); setActiveMenu(null); }}>New Game</div>
+                        <div className="connect-menu-option" onClick={(e) => { e.stopPropagation(); handleExit(); }}>Exit</div>
                     </div>
                 </div>
-                <div 
+                <div
                     className={`connect-menu-item ${activeMenu === 'help' ? 'active' : ''}`}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        toggleMenu('help');
-                    }}
+                    onClick={(e) => { e.stopPropagation(); toggleMenu('help'); }}
                 >
                     <span>Help</span>
                     <div className="connect-menu-dropdown">
-                        <div className="connect-menu-option" onClick={(e) => {
-                            e.stopPropagation();
-                            toggleRules();
-                            setActiveMenu(null);
-                        }}>How to Play</div>
+                        <div className="connect-menu-option" onClick={(e) => { e.stopPropagation(); toggleRules(); setActiveMenu(null); }}>How to Play</div>
                     </div>
                 </div>
             </div>
-            
+
             <div className="connect-game-container">
                 <div className="connect-controls">
-                    
-                    {showRules && (
-                        <div className="connect-rules-panel">
-                            <h3>How to Play Rotate Connect Four</h3>
-                            <ol>
-                                <li>Players take turns dropping their pieces into the board.</li>
-                                <li>After each move, roll the dice.</li>
-                                <li>If you roll a 6, you can rotate the board left or right before your turn ends.</li>
-                                <li>Connect four of your pieces in a row (horizontally, vertically, or diagonally) to win!</li>
-                                <li>When the board rotates, pieces will fall due to gravity.</li>
-                            </ol>
-                        </div>
-                    )}
-                    
+
                     <div className="connect-controls-row">
                         <div className="connect-turn-indicator">
+                            <span className={`connect-player-dot ${currentPlayer}`}></span>
                             {statusMessage}
                         </div>
                     </div>
-                    
+
                     {diceRoll !== null && (
                         <div className="connect-controls-row connect-dice-container">
                             <div className="connect-dice">
@@ -186,12 +206,12 @@ const RotateConnectFour = memo(() => {
                             </div>
                         </div>
                     )}
-                    
+
                     {canRotate && (
                         <div className="connect-controls-row">
                             <div className="connect-rotation-controls">
-                                <button onClick={handleRotateLeft} disabled={isRotating}>Rotate Left</button>
-                                <button onClick={handleRotateRight} disabled={isRotating}>Rotate Right</button>
+                                <button className="connect-rotate-btn" onClick={handleRotateLeft} disabled={isRotating}>↺ Left</button>
+                                <button className="connect-rotate-btn" onClick={handleRotateRight} disabled={isRotating}>↻ Right</button>
                             </div>
                         </div>
                     )}
@@ -199,6 +219,7 @@ const RotateConnectFour = memo(() => {
                     {gameOver && winner && (
                         <div className="connect-controls-row connect-winner-controls">
                             <div className="connect-winner-message">
+                                <span className={`connect-player-dot ${winner}`}></span>
                                 {`${winner.toUpperCase()} Wins!`}
                             </div>
                             <button className="connect-share-button" onClick={shareGame}>
@@ -207,12 +228,13 @@ const RotateConnectFour = memo(() => {
                         </div>
                     )}
                 </div>
+
                 {boardDisplay}
             </div>
-            
+
             {rulesModal}
         </div>
     );
 });
 
-export default RotateConnectFour; 
+export default RotateConnectFour;

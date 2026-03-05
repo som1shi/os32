@@ -1,0 +1,471 @@
+/* ChaosTetris — XP retro style */
+
+.ct-game {
+  width: 100%;
+  height: 100%;
+  background: #ECE9D8;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--ui-font-family, 'Tahoma', sans-serif);
+  font-size: 11px;
+  position: relative;
+}
+
+/* ── Menu Bar ────────────────────────────────────────── */
+.ct-menu-bar {
+  display: flex;
+  align-items: center;
+  background: #ECE9D8;
+  border-bottom: 1px solid #ACA899;
+  padding: 0 4px;
+  height: 22px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.ct-menu-item {
+  position: relative;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #000;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.ct-menu-item:hover,
+.ct-menu-item.active {
+  background: #316AC5;
+  color: #fff;
+  border-color: #316AC5;
+}
+
+.ct-menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ECE9D8;
+  border: 1px solid #ACA899;
+  min-width: 120px;
+  z-index: 1000;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ct-menu-item.active .ct-menu-dropdown {
+  display: block;
+}
+
+.ct-menu-option {
+  padding: 4px 20px;
+  cursor: pointer;
+  color: #000;
+  white-space: nowrap;
+}
+
+.ct-menu-option:hover {
+  background: #316AC5;
+  color: #fff;
+}
+
+/* ── Game Area ───────────────────────────────────────── */
+.ct-game-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px;
+  overflow: hidden;
+}
+
+/* ── Board ───────────────────────────────────────────── */
+.ct-board-wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ct-board-wrapper.ct-flipping {
+  animation: ct-flip 0.5s ease-in-out;
+}
+
+@keyframes ct-flip {
+  0% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  40% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.ct-board {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  background: #0d0d0d;
+  border: 2px solid;
+  border-color: #848484 #fff #fff #848484;
+  height: min(calc(100% - 0px), calc((100vw - 200px) * 2));
+  aspect-ratio: 0.5;
+  gap: 1px;
+  padding: 1px;
+}
+
+.ct-cell {
+  background: #1c1c1c;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.ct-cell.ct-filled {
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.45),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.ct-cell.ct-filled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+.ct-cell.ct-ghost {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* ── Side Panel ──────────────────────────────────────── */
+.ct-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 100px;
+  max-width: 130px;
+}
+
+.ct-panel-section {
+  background: #fff;
+  border: 2px solid;
+  border-color: #848484 #fff #fff #848484;
+  padding: 6px 8px;
+}
+
+.ct-panel-label {
+  font-size: 9px;
+  font-weight: bold;
+  color: #555;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.ct-panel-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #003399;
+}
+
+.ct-panel-value-sm {
+  font-size: 13px;
+}
+
+/* ── Chaos Meter ─────────────────────────────────────── */
+.ct-chaos-meter {
+  height: 10px;
+  background: #ddd;
+  border: 1px solid #999;
+  border-radius: 0;
+  overflow: hidden;
+  margin: 3px 0;
+}
+
+.ct-chaos-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffcc00, #ff4400);
+  transition: width 0.2s ease;
+}
+
+.ct-chaos-label {
+  font-size: 9px;
+  color: #666;
+}
+
+/* ── Next Piece ──────────────────────────────────────── */
+.ct-next-box {
+  display: grid;
+  grid-template-columns: repeat(4, 16px);
+  grid-template-rows: repeat(4, 16px);
+  gap: 1px;
+  background: #111;
+  padding: 4px;
+  border: 1px solid #555;
+  width: fit-content;
+}
+
+.ct-next-cell {
+  width: 16px;
+  height: 16px;
+  background: #1a1a1a;
+  position: relative;
+}
+
+.ct-next-cell.ct-filled {
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.45),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.ct-next-cell.ct-filled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+/* ── Paused Badge ────────────────────────────────────── */
+.ct-paused-badge {
+  background: #cc8800;
+  color: #fff;
+  font-weight: bold;
+  padding: 4px 6px;
+  border: 1px solid #884400;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* ── Overlay ─────────────────────────────────────────── */
+.ct-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.ct-overlay-box {
+  background: #ECE9D8;
+  border: 2px solid;
+  border-color: #fff #848484 #848484 #fff;
+  padding: 24px 32px;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.ct-overlay-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #cc1111;
+  margin-bottom: 8px;
+}
+
+.ct-overlay-score {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.ct-overlay-hs {
+  font-size: 11px;
+  color: #316AC5;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.ct-overlay-submitting {
+  font-size: 10px;
+  color: #888;
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.ct-overlay-submitted {
+  font-size: 10px;
+  color: #267326;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.ct-overlay-btn {
+  background: #ECE9D8;
+  border: 2px solid;
+  border-color: #fff #848484 #848484 #fff;
+  padding: 4px 16px;
+  cursor: pointer;
+  font-family: var(--ui-font-family, 'Tahoma', sans-serif);
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.ct-overlay-btn:hover {
+  background: #c8c5b6;
+}
+
+.ct-overlay-btn:active {
+  border-color: #848484 #fff #fff #848484;
+}
+
+/* ── Intro Screen ────────────────────────────────────── */
+.ct-intro-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.ct-intro-logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #003399;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 1px;
+}
+
+.ct-logo-chaos {
+  color: #ff6600;
+  font-size: 24px;
+}
+
+.ct-intro-tagline {
+  color: #444;
+  font-size: 12px;
+  text-align: center;
+  max-width: 380px;
+  margin: 0;
+}
+
+.ct-intro-rules {
+  background: #fff;
+  border: 1px solid;
+  border-color: #848484 #fff #fff #848484;
+  padding: 12px 20px;
+  max-width: 380px;
+  width: 100%;
+}
+
+.ct-intro-rules h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #003399;
+}
+
+.ct-intro-rules ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.ct-intro-rules li {
+  margin-bottom: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ct-intro-hs {
+  font-size: 12px;
+  color: #003399;
+}
+
+.ct-intro-btn {
+  background: linear-gradient(180deg, #0997ff 0%, #0034b0 100%);
+  color: #fff;
+  border: 2px solid;
+  border-color: #5ac8ff #001ea0 #001ea0 #5ac8ff;
+  padding: 6px 24px;
+  cursor: pointer;
+  font-family: var(--ui-font-family, 'Tahoma', sans-serif);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.ct-intro-btn:hover {
+  background: linear-gradient(180deg, #2aabff 0%, #0045d0 100%);
+}
+
+.ct-intro-btn:active {
+  border-color: #001ea0 #5ac8ff #5ac8ff #001ea0;
+}
+
+/* ── Rules Modal ─────────────────────────────────────── */
+.ct-rules-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.ct-rules-content {
+  background: #ECE9D8;
+  border: 2px solid;
+  border-color: #fff #848484 #848484 #fff;
+  padding: 20px 28px;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.ct-rules-content h2 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #003399;
+}
+
+.ct-rules-content ol {
+  padding-left: 18px;
+  margin: 0 0 14px;
+}
+
+.ct-rules-content li {
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+.ct-rules-content button {
+  background: #ECE9D8;
+  border: 2px solid;
+  border-color: #fff #848484 #848484 #fff;
+  padding: 3px 14px;
+  cursor: pointer;
+  font-family: var(--ui-font-family, 'Tahoma', sans-serif);
+  font-size: 11px;
+}
+
+.ct-rules-content button:hover {
+  background: #c8c5b6;
+}

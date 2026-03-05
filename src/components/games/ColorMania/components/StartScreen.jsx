@@ -1,15 +1,35 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
+
+const COLORS = ['royalblue', 'forestgreen', 'firebrick', 'goldenrod', 'blueviolet', 'darkorange', 'mediumturquoise', 'deeppink', 'sienna', 'midnightblue'];
 
 const StartScreen = ({ onStart }) => {
   return (
     <div className="cm-start-screen">
-      <h2>ColorMania</h2>
-      <p>Click on a blank space to reveal matching colored tiles! If the color of the blank area lines up with its neighbors vertically or horizontally, you'll collect those tiles.</p> 
-      <p>Earn 1 point for each tile and watch your score climb!</p> 
-      <p>You have 120 seconds to play, but be cautious—every incorrect click costs you 10 seconds!</p>
-      <button onClick={onStart}>Start Game</button>
+      <div className="cm-start-logo">
+        {'ColorMania'.split('').map((char, i) => (
+          <span key={i} className={`cm-logo-char cm-logo-char-${COLORS[i % COLORS.length]}`}>{char}</span>
+        ))}
+      </div>
+      <p className="cm-start-desc">
+        Match colors! Reveal blank tiles that align with their colored neighbors to score points.
+      </p>
+      <div className="cm-start-rules">
+        <div className="cm-start-rule">
+          <span>Click a blank tile to reveal its color</span>
+        </div>
+        <div className="cm-start-rule">
+          <span>Matching neighbors score 1 point each</span>
+        </div>
+        <div className="cm-start-rule">
+          <span>Wrong clicks cost you 10 seconds</span>
+        </div>
+        <div className="cm-start-rule">
+          <span>120 seconds on the clock — go fast!</span>
+        </div>
+      </div>
+      <button className="cm-start-btn" onClick={onStart}>▶ Start Game</button>
     </div>
   );
 };
 
-export default memo(StartScreen); 
+export default memo(StartScreen);

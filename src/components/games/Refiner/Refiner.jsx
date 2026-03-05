@@ -1,4 +1,5 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
+import soundService from '../../../services/soundService';
 import './Refiner.css';
 import useRefinerLogic from './hooks/useRefinerLogic';
 import {
@@ -54,6 +55,19 @@ const Refiner = () => {
     
     const currentSum = getCurrentSum();
     const shareButtonText = shareFeedback ? 'Copied to clipboard!' : 'Share Score';
+
+    const prevSelectionsRef = useRef(0);
+
+    useEffect(() => {
+        if (gameOver) soundService.play('error');
+    }, [gameOver]);
+
+    useEffect(() => {
+        if (successfulSelections > prevSelectionsRef.current) {
+            soundService.play('notify');
+        }
+        prevSelectionsRef.current = successfulSelections;
+    }, [successfulSelections]);
 
     useEffect(() => {
         updateViewport();

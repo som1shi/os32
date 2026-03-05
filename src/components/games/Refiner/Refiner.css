@@ -87,7 +87,8 @@
 .refiner-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 40px - 80px);
+    flex: 1;
+    min-height: 0;
     width: 100%;
     background: #000;
     padding: 0;
@@ -170,11 +171,8 @@
     padding: 10px 0;
     background: #000;
     border-top: 1px solid #7AF3D0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
     height: 80px;
-    z-index: 20;
+    flex-shrink: 0;
 }
 
 .target-box {

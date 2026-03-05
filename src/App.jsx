@@ -87,6 +87,24 @@ function App() {
       iconKey: ICON_KEYS.game.dosemulator,
       description: 'Classic DOS game emulator — browse and play legendary 90s titles.'
     },
+    {
+      id: 'doom',
+      title: 'Doom',
+      iconKey: ICON_KEYS.game.doom,
+      description: 'The iconic 1993 first-person shooter that defined the genre.'
+    },
+    {
+      id: 'chaostetris',
+      title: 'Chaos Tetris',
+      iconKey: ICON_KEYS.game.chaostetris,
+      description: 'Tetris with a twist — every 4 lines cleared flips the board upside down!'
+    },
+    {
+      id: 'decrypt',
+      title: 'Decrypt',
+      iconKey: ICON_KEYS.game.decrypt,
+      description: 'Decode scrambled tech words before the clock runs out.'
+    },
   ];
 
   return (

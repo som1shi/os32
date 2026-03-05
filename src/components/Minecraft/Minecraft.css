@@ -1,0 +1,146 @@
+/* Minecraft — XP retro style wrapper */
+
+.mc-app {
+  width: 100%;
+  height: 100%;
+  background: #ECE9D8;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--ui-font-family, 'Tahoma', sans-serif);
+  font-size: 11px;
+  position: relative;
+}
+
+/* ── Menu Bar ────────────────────────────────────────── */
+.mc-menu-bar {
+  display: flex;
+  align-items: center;
+  background: #ECE9D8;
+  border-bottom: 1px solid #ACA899;
+  padding: 0 4px;
+  height: 22px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.mc-menu-item {
+  position: relative;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #000;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.mc-menu-item:hover,
+.mc-menu-item.active {
+  background: #316AC5;
+  color: #fff;
+  border-color: #316AC5;
+}
+
+.mc-menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ECE9D8;
+  border: 1px solid #ACA899;
+  min-width: 130px;
+  z-index: 1000;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.mc-menu-item.active .mc-menu-dropdown {
+  display: block;
+}
+
+.mc-menu-option {
+  padding: 4px 20px;
+  cursor: pointer;
+  color: #000;
+  white-space: nowrap;
+}
+
+.mc-menu-option:hover {
+  background: #316AC5;
+  color: #fff;
+}
+
+.mc-menu-separator {
+  height: 1px;
+  background: #ACA899;
+  margin: 2px 4px;
+}
+
+/* ── Frame Wrapper ───────────────────────────────────── */
+.mc-frame-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.mc-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── Loading Screen ──────────────────────────────────── */
+.mc-loading {
+  position: absolute;
+  inset: 0;
+  background: #ECE9D8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.mc-loading-box {
+  background: #ECE9D8;
+  border: 2px solid;
+  border-color: #fff #848484 #848484 #fff;
+  padding: 20px 32px;
+  min-width: 260px;
+  text-align: center;
+  box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+}
+
+.mc-loading-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #003399;
+  margin-bottom: 14px;
+}
+
+.mc-loading-bar-wrap {
+  height: 16px;
+  background: #fff;
+  border: 1px solid;
+  border-color: #848484 #fff #fff #848484;
+  padding: 1px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.mc-loading-bar {
+  height: 100%;
+  background: linear-gradient(to bottom, #6CBEFF 0%, #0080FF 45%, #0065CB 50%, #0074E8 100%);
+  animation: mc-loading-anim 1.4s ease-in-out infinite;
+}
+
+@keyframes mc-loading-anim {
+  0%   { width: 0%; margin-left: 0%; }
+  50%  { width: 60%; margin-left: 20%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+
+.mc-loading-text {
+  font-size: 10px;
+  color: #555;
+}

@@ -46,18 +46,12 @@
   align-content: start;
 }
 
-/* 4-3-3-2-1 pyramid layout: force row breaks at items 8, 11, 13 */
-.desktop-icon:nth-child(8) {
-  grid-column-start: 1;
-}
-
-.desktop-icon:nth-child(11) {
-  grid-column-start: 1;
-}
-
-.desktop-icon:nth-child(13) {
-  grid-column-start: 1;
-}
+/* 4-3-2-2-2-2 pyramid layout */
+.desktop-icon:nth-child(5)  { grid-column-start: 1; }
+.desktop-icon:nth-child(8)  { grid-column-start: 1; }
+.desktop-icon:nth-child(10) { grid-column-start: 1; }
+.desktop-icon:nth-child(12) { grid-column-start: 1; }
+.desktop-icon:nth-child(14) { grid-column-start: 1; }
 
 .desktop-icon {
   display: flex;

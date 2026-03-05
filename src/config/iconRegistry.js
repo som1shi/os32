@@ -3,7 +3,15 @@ import {
   FaArrowRight,
   FaArrowUp,
   FaRegCircle,
+  FaVolumeUp,
+  FaVolumeMute,
 } from 'react-icons/fa';
+
+import paintIcon from '../assets/icons/paint.ico';
+import calculatorIcon from '../assets/icons/calculator.png';
+import minecraftIcon from '../assets/icons/minecraft.png';
+import tetrisIcon from '../assets/icons/tetris.png';
+import decryptIcon from '../assets/icons/decrypt.png';
 
 // Custom PNG icons
 import chessIcon from '../assets/icons/chess.png';
@@ -42,6 +50,11 @@ export const ICON_KEYS = {
     pyg: 'app.pyg',
     rename: 'app.rename',
     delete: 'app.delete',
+    paint: 'app.paint',
+    calculator: 'app.calculator',
+    minecraft: 'app.minecraft',
+    soundOn: 'app.soundOn',
+    soundOff: 'app.soundOff',
   },
   nav: {
     back: 'nav.back',
@@ -56,6 +69,9 @@ export const ICON_KEYS = {
     wikiconnect: 'game.wikiconnect',
     colormania: 'game.colormania',
     dosemulator: 'game.dosemulator',
+    doom: 'game.doom',
+    chaostetris: 'game.chaostetris',
+    decrypt: 'game.decrypt',
   },
   system: {
     signIn: 'system.signIn',
@@ -81,6 +97,11 @@ export const iconRegistry = {
   [ICON_KEYS.app.pyg]: pygFileIcon,
   [ICON_KEYS.app.rename]: renameIcon,
   [ICON_KEYS.app.delete]: deleteIcon,
+  [ICON_KEYS.app.paint]: paintIcon,
+  [ICON_KEYS.app.calculator]: calculatorIcon,
+  [ICON_KEYS.app.minecraft]: minecraftIcon,
+  [ICON_KEYS.app.soundOn]: FaVolumeUp,
+  [ICON_KEYS.app.soundOff]: FaVolumeMute,
 
   // Nav
   [ICON_KEYS.nav.back]: FaArrowLeft,
@@ -95,6 +116,9 @@ export const iconRegistry = {
   [ICON_KEYS.game.wikiconnect]: wikiConnectIcon,
   [ICON_KEYS.game.colormania]: colormanaIcon,
   [ICON_KEYS.game.dosemulator]: emulatorIcon,
+  [ICON_KEYS.game.doom]: emulatorIcon,
+  [ICON_KEYS.game.chaostetris]: tetrisIcon,
+  [ICON_KEYS.game.decrypt]: decryptIcon,
 
   // System
   [ICON_KEYS.system.signIn]: loginIcon,

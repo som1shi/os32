@@ -6,7 +6,9 @@ import './Leaderboard.css';
 const GAMES = [
   { id: 'refiner', name: 'Refiner' },
   { id: 'colormania', name: 'Color Mania' },
-  { id: 'wordsweeper', name: 'Word Sweeper' }
+  { id: 'wordsweeper', name: 'Word Sweeper' },
+  { id: 'chaostetris', name: 'Chaos Tetris' },
+  { id: 'decrypt', name: 'Decrypt' }
 ];
 
 const REFINER_TIMES = [

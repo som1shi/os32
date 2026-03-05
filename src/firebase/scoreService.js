@@ -1,11 +1,11 @@
-import { 
-  collection, 
-  addDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  getDocs, 
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
   serverTimestamp,
   doc,
   getDoc,
@@ -31,19 +31,21 @@ const VALID_COLLECTIONS = [
   'refiner-300',
   'refiner-600',
   'wordsweeper',
-  'colormania'
+  'colormania',
+  'chaostetris',
+  'decrypt'
 ];
 
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     isOnline = true;
-    enableNetwork(db).catch(() => {});
+    enableNetwork(db).catch(() => { });
     notifyConnectionStateChange(true);
   });
-  
+
   window.addEventListener('offline', () => {
     isOnline = false;
-    disableNetwork(db).catch(() => {});
+    disableNetwork(db).catch(() => { });
     notifyConnectionStateChange(false);
   });
 }
@@ -52,14 +54,14 @@ function notifyConnectionStateChange(online) {
   connectionStateListeners.forEach(listener => {
     try {
       listener(online);
-    } catch (err) {}
+    } catch (err) { }
   });
 }
 
 export const addConnectionStateListener = (listener) => {
   connectionStateListeners.push(listener);
   listener(isOnline);
-  
+
   return () => {
     connectionStateListeners = connectionStateListeners.filter(l => l !== listener);
   };
@@ -79,7 +81,7 @@ const safeTimestamp = (scoreData) => {
     } else if (scoreData.clientTimestamp) {
       return new Date(scoreData.clientTimestamp);
     }
-  } catch (err) {}
+  } catch (err) { }
   return new Date();
 };
 
@@ -87,23 +89,23 @@ const batchFetchUserData = async (userIds) => {
   if (!userIds || userIds.length === 0) {
     return [];
   }
-  
+
   const uniqueUserIds = [...new Set(userIds)];
-  
+
   const uncachedUserIds = uniqueUserIds.filter(id => !userCache.has(id));
-  
+
   if (uncachedUserIds.length === 0) {
     return uniqueUserIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
   }
-  
+
   const batchSize = 10;
-  
+
   const fetchPromises = [];
-  
+
   for (let i = 0; i < uncachedUserIds.length; i += batchSize) {
     const batch = uncachedUserIds.slice(i, i + batchSize);
     if (batch.length === 0) continue;
-    
+
     fetchPromises.push((async () => {
       try {
         if (batch.length === 1) {
@@ -120,16 +122,16 @@ const batchFetchUserData = async (userIds) => {
             collection(db, 'users'),
             where('__name__', 'in', batch)
           );
-          
+
           const userSnapshots = await getDocs(usersQuery);
-          
+
           const foundUserIds = new Set();
-          
+
           userSnapshots.forEach(userDoc => {
             userCache.set(userDoc.id, userDoc.data());
             foundUserIds.add(userDoc.id);
           });
-          
+
           batch.forEach(userId => {
             if (!foundUserIds.has(userId) && !userCache.has(userId)) {
               userCache.set(userId, { displayName: 'Unknown Player' });
@@ -146,7 +148,7 @@ const batchFetchUserData = async (userIds) => {
       }
     })());
   }
-  
+
   try {
     await Promise.all(fetchPromises);
   } catch (err) {
@@ -157,7 +159,7 @@ const batchFetchUserData = async (userIds) => {
       }
     });
   }
-  
+
   return uniqueUserIds.map(id => userCache.get(id) || { displayName: 'Unknown Player' });
 };
 
@@ -179,9 +181,9 @@ const withTimeout = (promise) => {
 export const submitScore = async (userId, collectionName, score, gameDetails = {}) => {
   try {
     const validatedCollection = validateCollection(collectionName);
-    
+
     let numericScore;
-    
+
     if (typeof score === 'number') {
       numericScore = score;
     } else if (typeof score === 'string') {
@@ -189,7 +191,7 @@ export const submitScore = async (userId, collectionName, score, gameDetails = {
     } else {
       numericScore = Number(score);
     }
-    
+
     if (isNaN(numericScore)) {
       if (gameDetails && typeof gameDetails.finalScore === 'number') {
         numericScore = gameDetails.finalScore;
@@ -199,18 +201,18 @@ export const submitScore = async (userId, collectionName, score, gameDetails = {
         numericScore = 0;
       }
     }
-    
+
     if (!isOnline) {
       throw new Error('Device is offline');
     }
-    
+
     const cleanGameDetails = { ...gameDetails };
     Object.keys(cleanGameDetails).forEach(key => {
       if (cleanGameDetails[key] === undefined || cleanGameDetails[key] === null) {
         delete cleanGameDetails[key];
       }
     });
-    
+
     const scoreData = {
       userId,
       score: numericScore,
@@ -219,16 +221,16 @@ export const submitScore = async (userId, collectionName, score, gameDetails = {
       playerName: cleanGameDetails.playerName || 'Unknown Player',
       ...cleanGameDetails
     };
-    
+
     const collectionRef = collection(db, validatedCollection);
-    
+
     const customId = `${numericScore}-${validatedCollection}-${userId}-${Date.now()}`;
     const docRef = doc(collectionRef, customId);
-    
+
     await setDoc(docRef, scoreData);
-    
+
     leaderboardCache.delete(validatedCollection);
-    
+
     return customId;
   } catch (error) {
     if (error.code === 'invalid-argument') {
@@ -240,7 +242,7 @@ export const submitScore = async (userId, collectionName, score, gameDetails = {
         throw fallbackError;
       }
     }
-    
+
     throw error;
   }
 };
@@ -248,10 +250,10 @@ export const submitScore = async (userId, collectionName, score, gameDetails = {
 export const getTopScores = async (collectionName, limitCount = 5, forceRefresh = false) => {
   try {
     const validatedCollection = validateCollection(collectionName);
-    
+
     const cacheKey = validatedCollection;
     const cachedData = getCachedLeaderboard(cacheKey, limitCount);
-    
+
     if (!forceRefresh && cachedData) {
       if ((Date.now() - cachedData.timestamp) >= CACHE_EXPIRATION) {
         Promise.resolve().then(() => {
@@ -261,18 +263,18 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
       }
       return cachedData.scores;
     }
-    
+
     const scoresQuery = query(
       collection(db, validatedCollection),
       orderBy('score', 'desc'),
       limit(limitCount * 2)
     );
-    
+
     const querySnapshot = await getDocs(scoresQuery);
-    
+
     const userIds = [];
     const scoresData = [];
-    
+
     querySnapshot.docs.forEach(scoreDoc => {
       const scoreData = scoreDoc.data();
       if (scoreData.userId) {
@@ -284,14 +286,14 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
         timestamp: safeTimestamp(scoreData)
       });
     });
-    
+
     await batchFetchUserData(userIds);
-    
+
     const scores = scoresData.map(scoreData => {
-      const userData = scoreData.userId ? 
+      const userData = scoreData.userId ?
         userCache.get(scoreData.userId) || { displayName: scoreData.playerName || 'Unknown Player' } :
         { displayName: scoreData.playerName || 'Unknown Player' };
-      
+
       let photoURL = userData.photoURL || null;
       if (photoURL) {
         if (photoURL.includes('=s96-c')) {
@@ -300,7 +302,7 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
           photoURL = photoURL.replace('&s96-c', '&s32-c');
         }
       }
-      
+
       return {
         ...scoreData,
         user: {
@@ -309,22 +311,22 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
         }
       };
     });
-    
+
     leaderboardCache.set(cacheKey, {
       scores,
       timestamp: Date.now()
     });
-    
+
     return scores.slice(0, limitCount);
   } catch (error) {
     console.error('Error fetching top scores:', error);
-    
+
     const cacheKey = validateCollection(collectionName);
     const cachedData = getCachedLeaderboard(cacheKey, limitCount);
     if (cachedData) {
       return cachedData.scores;
     }
-    
+
     return [];
   }
 };
@@ -332,22 +334,22 @@ export const getTopScores = async (collectionName, limitCount = 5, forceRefresh 
 export const getUserBestScore = async (userId, collectionName) => {
   try {
     const validatedCollection = validateCollection(collectionName);
-    
+
     const scoresQuery = query(
       collection(db, validatedCollection),
       where('userId', '==', userId),
       orderBy('score', 'desc'),
       limit(1)
     );
-    
+
     const querySnapshot = await getDocs(scoresQuery);
-    
+
     if (querySnapshot.empty) {
       return null;
     }
-    
+
     const scoreData = querySnapshot.docs[0].data();
-    
+
     return {
       id: querySnapshot.docs[0].id,
       ...scoreData,
@@ -361,21 +363,20 @@ export const getUserBestScore = async (userId, collectionName) => {
 export const getUserRecentScores = async (userId, limitCount = 10) => {
   try {
     const allScores = [];
-    
+
     for (const collectionName of VALID_COLLECTIONS) {
       try {
         const scoresQuery = query(
           collection(db, collectionName),
           where('userId', '==', userId),
-          orderBy('timestamp', 'desc'),
           limit(limitCount)
         );
-        
+
         const querySnapshot = await getDocs(scoresQuery);
-        
+
         querySnapshot.docs.forEach(doc => {
           const data = doc.data();
-          
+
           allScores.push({
             id: doc.id,
             collectionName,
@@ -383,9 +384,9 @@ export const getUserRecentScores = async (userId, limitCount = 10) => {
             timestamp: safeTimestamp(data)
           });
         });
-      } catch (err) {}
+      } catch (err) { }
     }
-    
+
     return allScores
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limitCount);
@@ -397,22 +398,22 @@ export const getUserRecentScores = async (userId, limitCount = 10) => {
 export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback) => {
   try {
     const validatedCollection = validateCollection(collectionName);
-    
+
     const cacheKey = validatedCollection;
     const cachedData = getCachedLeaderboard(cacheKey, limitCount);
-    
+
     if (cachedData) {
       Promise.resolve().then(() => {
         callback(cachedData.scores);
       });
     }
-    
+
     const scoresQuery = query(
       collection(db, validatedCollection),
       orderBy('score', 'desc'),
       limit(limitCount * 2)
     );
-    
+
     return onSnapshot(scoresQuery, async (snapshot) => {
       if (snapshot.empty) {
         if (cachedData) {
@@ -422,10 +423,10 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
         }
         return;
       }
-      
+
       const userIds = [];
       const scoresData = [];
-      
+
       snapshot.docs.forEach(scoreDoc => {
         const scoreData = scoreDoc.data();
         if (scoreData.userId) {
@@ -437,18 +438,18 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
           timestamp: safeTimestamp(scoreData)
         });
       });
-      
+
       try {
         await batchFetchUserData(userIds);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
-      
+
       const scores = scoresData.map(scoreData => {
-        const userData = scoreData.userId ? 
+        const userData = scoreData.userId ?
           userCache.get(scoreData.userId) || { displayName: scoreData.playerName || 'Unknown Player' } :
           { displayName: scoreData.playerName || 'Unknown Player' };
-        
+
         let photoURL = userData.photoURL || null;
         if (photoURL) {
           if (photoURL.includes('=s96-c')) {
@@ -457,7 +458,7 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
             photoURL = photoURL.replace('&s96-c', '&s32-c');
           }
         }
-        
+
         return {
           ...scoreData,
           user: {
@@ -466,16 +467,16 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
           }
         };
       });
-      
+
       leaderboardCache.set(cacheKey, {
         scores,
         timestamp: Date.now()
       });
-      
+
       callback(scores.slice(0, limitCount));
     }, (error) => {
       console.error('Snapshot error:', error);
-      
+
       const cachedData = getCachedLeaderboard(cacheKey, limitCount);
       if (cachedData) {
         callback(cachedData.scores);
@@ -485,14 +486,14 @@ export const subscribeToLeaderboard = (collectionName, limitCount = 5, callback)
     });
   } catch (error) {
     console.error('Subscribe error:', error);
-    
+
     const cachedData = getCachedLeaderboard(cacheKey, limitCount);
     if (cachedData) {
       callback(cachedData.scores);
     } else {
       callback([]);
     }
-    
-    return () => {};
+
+    return () => { };
   }
 }; 

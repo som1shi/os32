@@ -10,7 +10,9 @@ const COLLECTION_MAPPING = {
   'refiner-300': 'refiner-300',
   'refiner-600': 'refiner-600',
   'refiner': 'refiner-30',
-  'colormania': 'colormania'
+  'colormania': 'colormania',
+  'chaostetris': 'chaostetris',
+  'decrypt': 'decrypt'
 };
 
 const REFINER_DURATIONS = {
@@ -31,7 +33,7 @@ const useScoreSubmission = () => {
   const [success, setSuccess] = useState(false);
   const { currentUser } = useAuth();
   const lastSubmissionRef = useRef(null);
-  
+
   const SUBMISSION_COOLDOWN = 1000;
 
   /**
@@ -44,24 +46,24 @@ const useScoreSubmission = () => {
     if (COLLECTION_MAPPING[gameId]) {
       return COLLECTION_MAPPING[gameId];
     }
-    
+
     if (gameId === 'refiner' || gameId.startsWith('refiner-')) {
       if (gameDetails && gameDetails.duration) {
         const duration = Number(gameDetails.duration);
-        
+
         const durations = Object.keys(REFINER_DURATIONS)
           .map(Number)
           .sort((a, b) => a - b);
-        
+
         for (const maxDuration of durations) {
           if (duration <= maxDuration) {
             return REFINER_DURATIONS[maxDuration];
           }
         }
-        
+
         return REFINER_DURATIONS[durations[durations.length - 1]];
       }
-      
+
       if (gameId.startsWith('refiner-')) {
         const durationMatch = gameId.match(/refiner-(\d+)/);
         if (durationMatch && durationMatch[1]) {
@@ -71,10 +73,10 @@ const useScoreSubmission = () => {
           }
         }
       }
-      
+
       return 'refiner-30';
     }
-    
+
     return gameId;
   }, []);
 
@@ -85,7 +87,7 @@ const useScoreSubmission = () => {
    */
   const validateScore = useCallback((score) => {
     let validScore;
-    
+
     if (typeof score === 'number') {
       validScore = score;
     } else if (typeof score === 'string') {
@@ -95,7 +97,7 @@ const useScoreSubmission = () => {
     } else {
       validScore = Number(score);
     }
-    
+
     return isNaN(validScore) ? null : validScore;
   }, []);
 
@@ -108,51 +110,51 @@ const useScoreSubmission = () => {
    */
   const submitGameScore = useCallback(async (gameId, score, gameDetails = {}) => {
     setError(null);
-    
+
     const validScore = validateScore(score);
     if (validScore === null) {
       setError('Invalid score value');
       return null;
     }
-    
+
     if (!currentUser) {
       storeScoreLocally('anonymous', getCollectionName(gameId, gameDetails), validScore, gameDetails);
       setError('Score saved locally. Sign in to submit to leaderboard.');
       return null;
     }
-    
+
     const now = Date.now();
     const submissionKey = `${gameId}_${validScore}_${currentUser.uid}`;
-    
-    if (lastSubmissionRef.current && 
-        lastSubmissionRef.current.key === submissionKey && 
-        now - lastSubmissionRef.current.timestamp < SUBMISSION_COOLDOWN) {
+
+    if (lastSubmissionRef.current &&
+      lastSubmissionRef.current.key === submissionKey &&
+      now - lastSubmissionRef.current.timestamp < SUBMISSION_COOLDOWN) {
       return lastSubmissionRef.current.scoreId;
     }
-    
+
     if (submitting) {
       return null;
     }
-    
+
     try {
       setSubmitting(true);
       setSuccess(false);
-      
+
       const collectionName = getCollectionName(gameId, gameDetails);
-      
+
       const cleanGameDetails = Object.entries(gameDetails || {})
         .filter(([_, value]) => value !== undefined && value !== null)
         .reduce((obj, [key, value]) => {
           obj[key] = value;
           return obj;
         }, {});
-      
+
       if (cleanGameDetails.gameDuration && !cleanGameDetails.duration) {
         cleanGameDetails.duration = cleanGameDetails.gameDuration;
       }
-      
-      if ((gameId === 'refiner' || gameId.startsWith('refiner-')) && 
-          typeof cleanGameDetails.duration === 'undefined') {
+
+      if ((gameId === 'refiner' || gameId.startsWith('refiner-')) &&
+        typeof cleanGameDetails.duration === 'undefined') {
         if (gameId.startsWith('refiner-')) {
           const durationMatch = gameId.match(/refiner-(\d+)/);
           if (durationMatch && durationMatch[1]) {
@@ -164,34 +166,34 @@ const useScoreSubmission = () => {
           cleanGameDetails.duration = 30;
         }
       }
-      
+
       const enhancedGameDetails = {
         ...cleanGameDetails,
         clientTimestamp: Date.now(),
         playerName: currentUser.displayName || 'Unknown Player'
       };
-      
+
       const scoreId = await submitScore(
-        currentUser.uid, 
-        collectionName, 
-        validScore, 
+        currentUser.uid,
+        collectionName,
+        validScore,
         enhancedGameDetails
       );
-      
+
       lastSubmissionRef.current = {
         key: submissionKey,
         timestamp: Date.now(),
         scoreId
       };
-      
+
       setSuccess(true);
       return scoreId;
     } catch (err) {
       console.error('Score submission error:', err);
-      
-      if (err.message === 'Device is offline' || 
-          err.code === 'unavailable' || 
-          err.code === 'failed-precondition') {
+
+      if (err.message === 'Device is offline' ||
+        err.code === 'unavailable' ||
+        err.code === 'failed-precondition') {
         storeScoreLocally(currentUser.uid, getCollectionName(gameId, gameDetails), validScore, gameDetails);
       } else {
         setError('Failed to submit score. Please try again.');
@@ -208,11 +210,11 @@ const useScoreSubmission = () => {
   const storeScoreLocally = useCallback((userId, collectionName, score, gameDetails) => {
     try {
       const pendingScores = JSON.parse(localStorage.getItem('pendingScores') || '[]');
-      
+
       if (pendingScores.length >= 50) {
         pendingScores.shift();
       }
-      
+
       pendingScores.push({
         userId,
         collectionName,
@@ -221,9 +223,9 @@ const useScoreSubmission = () => {
         clientTimestamp: Date.now(),
         ...gameDetails
       });
-      
+
       localStorage.setItem('pendingScores', JSON.stringify(pendingScores));
-      
+
       setError('Score saved locally. Will submit when connection is restored.');
     } catch (localErr) {
       console.error('Local storage error:', localErr);

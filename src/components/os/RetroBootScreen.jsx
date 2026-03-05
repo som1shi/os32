@@ -82,14 +82,12 @@ const RetroBootScreen = ({ onComplete, reducedMotion = false }) => {
     setTimeout(() => onComplete(), reducedMotion ? 50 : POWER_OFF_MS);
   }, [onComplete, reducedMotion]);
 
-  // Stage: power-on flash
   useEffect(() => {
     if (stage !== 'poweron') return;
     const t = setTimeout(() => setStage('post'), reducedMotion ? 50 : POWER_ON_MS);
     return () => clearTimeout(t);
   }, [stage, reducedMotion]);
 
-  // Stage: POST — print pre-memory lines
   useEffect(() => {
     if (stage !== 'post') return;
 
@@ -106,7 +104,6 @@ const RetroBootScreen = ({ onComplete, reducedMotion = false }) => {
     return () => clearInterval(id);
   }, [stage, reducedMotion]);
 
-  // Stage: POST — memory count-up (starts after pre-memory lines finish)
   useEffect(() => {
     if (stage !== 'post') return;
 
@@ -132,7 +129,6 @@ const RetroBootScreen = ({ onComplete, reducedMotion = false }) => {
     return () => clearTimeout(startTimer);
   }, [stage, reducedMotion]);
 
-  // Stage: POST — after-memory lines, then transition to loader
   useEffect(() => {
     if (!memoryDone || stage !== 'post') return;
 
@@ -150,7 +146,6 @@ const RetroBootScreen = ({ onComplete, reducedMotion = false }) => {
     return () => clearInterval(id);
   }, [memoryDone, stage, reducedMotion]);
 
-  // Stage: loader — fill blocks
   useEffect(() => {
     if (stage !== 'loader') return;
 
@@ -167,7 +162,6 @@ const RetroBootScreen = ({ onComplete, reducedMotion = false }) => {
     return () => clearInterval(id);
   }, [stage, reducedMotion, triggerComplete]);
 
-  // Esc key to skip
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') triggerComplete();

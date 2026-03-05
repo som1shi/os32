@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 const ROWS = 7;
 const COLS = 7;
@@ -14,6 +14,7 @@ export default function useGameLogic() {
     const [showRules, setShowRules] = useState(false);
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const diceFaceRef = useRef(null);
+    const boardRef = useRef(null);
     const [isDiceRolling, setIsDiceRolling] = useState(false);
 
     function createEmptyBoard() {
@@ -49,19 +50,17 @@ export default function useGameLogic() {
 
     const rollDice = () => {
         setIsDiceRolling(true);
-        
-        const diceFaceElement = document.querySelector('.rotate-connect-four .dice-face');
-        if (diceFaceElement) {
-            diceFaceElement.classList.add('rolling');
+
+        if (diceFaceRef.current) {
+            diceFaceRef.current.classList.add('rolling');
         }
-        
+
         setTimeout(() => {
             const roll = Math.floor(Math.random() * 6) + 1;
             setDiceRoll(roll);
-            
+
             if (diceFaceRef.current) {
-                diceFaceRef.current.classList.remove('rolling');
-                diceFaceRef.current.className = `dice-face face-${roll}`;
+                diceFaceRef.current.className = `connect-dice-face face-${roll}`;
             }
             
             if (roll === 6) {
@@ -97,7 +96,7 @@ export default function useGameLogic() {
         
         const finalBoard = applyGravity(newBoard);
         
-        const boardElement = document.querySelector('.rotate-connect-four .board');
+        const boardElement = boardRef.current;
         if (boardElement) {
             boardElement.classList.add(direction === 'left' ? 'rotating-left' : 'rotating-right');
             
@@ -237,6 +236,7 @@ export default function useGameLogic() {
         showRules,
         setShowRules,
         diceFaceRef,
+        boardRef,
         isDiceRolling,
         isPlayerTurn,
         dropPiece,

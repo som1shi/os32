@@ -79,9 +79,10 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
     }
 
     try {
-      const isCodeFile = fileExt === '.py' || fileExt === '.pyg';
-      const extension = fileExt || (fileType === 'code' ? (mode === 'pyg' ? '.pyg' : '.py') : '.txt');
-      let baseName = isCodeFile ? 'New Python File' : 'New Text Document';
+      const CODE_EXTS = ['.py', '.pyg', '.js', '.c', '.cpp', '.cc', '.cxx'];
+      const isCodeFile = CODE_EXTS.includes(fileExt);
+      const extension = fileExt || (fileType === 'code' ? '.py' : '.txt');
+      let baseName = isCodeFile ? 'New Code File' : 'New Text Document';
       let newFileName = `${baseName}${extension}`;
       
       let counter = 0;
@@ -487,10 +488,10 @@ const FileExplorer = memo(({ onOpenFile, mode = 'browse', onSaveAs = null, initi
             ) : (
               <>
                 <div className="file-icon">
-                  {file.name.toLowerCase().endsWith('.py') 
-                    ? <AppIcon name={ICON_KEYS.app.codeEditor} size={28} />
-                    : file.name.toLowerCase().endsWith('.pyg')
+                  {file.name.toLowerCase().endsWith('.pyg')
                     ? <AppIcon name={ICON_KEYS.app.pyg} size={28} />
+                    : ['.py', '.js', '.c', '.cpp', '.cc', '.cxx'].some(e => file.name.toLowerCase().endsWith(e))
+                    ? <AppIcon name={ICON_KEYS.app.codeEditor} size={28} />
                     : <AppIcon name={ICON_KEYS.app.notepad} size={28} />}
                 </div>
                 <span className="file-name">{file.name}</span>

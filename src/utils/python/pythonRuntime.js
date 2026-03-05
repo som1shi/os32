@@ -1,141 +1,130 @@
 /**
- * Python runtime implementation using Skulpt
- * This module provides functions to execute Python code in the browser
+ * Python runtime — uses a Web Worker so execution never blocks the UI.
+ * The worker loads Skulpt from public/ via importScripts.
  */
 
-
-let skulptInstance = null;
+let currentWorker = null;
 
 /**
- * Initialize the Skulpt Python runtime
- * @param {Function} outputCallback - Function to call with output from Python code
- * @returns {Object} Configured Skulpt runtime
- * @throws {Error} If Skulpt is not loaded
+ * Statically detect obvious infinite loops before execution.
+ * Checks every `while True/1:` block for break/return/raise/sys.exit.
+ * Returns { safe: true } or { safe: false, line, message }.
  */
-export const initializeSkulpt = (outputCallback) => {
-  
-  if (skulptInstance) {
-    
-    Sk.configure({ output: outputCallback });
-    return skulptInstance;
+export const detectInfiniteLoop = (code) => {
+  const lines = code.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const stripped = raw.trimStart();
+
+    if (stripped === '' || stripped.startsWith('#')) continue;
+
+    if (/^while\s*\(?\s*(True|1)\s*\)?\s*:/.test(stripped)) {
+      const loopIndent = raw.length - stripped.length;
+      let hasExit = false;
+
+      for (let j = i + 1; j < lines.length; j++) {
+        const bodyRaw = lines[j];
+        const bodyStripped = bodyRaw.trimStart();
+
+        if (bodyStripped === '' || bodyStripped.startsWith('#')) continue;
+
+        const bodyIndent = bodyRaw.length - bodyStripped.length;
+        if (bodyIndent <= loopIndent) break;
+
+        if (/^(break|return|raise|sys\.exit)\b/.test(bodyStripped)) {
+          hasExit = true;
+          break;
+        }
+      }
+
+      if (!hasExit) {
+        return {
+          safe: false,
+          line: i + 1,
+          message: `Infinite loop detected on line ${i + 1}: 'while True' has no break, return, or raise.`,
+        };
+      }
+    }
   }
 
-  if (typeof Sk === 'undefined') {
-    throw new Error('Skulpt is not loaded. Make sure to include skulpt.min.js and skulpt-stdlib.js');
-  }
-
-  
-  Sk.configure({
-    output: outputCallback,
-    read: builtinRead,
-    __future__: Sk.python3,
-    execLimit: 10000, 
-    killableWhile: true, 
-    killableFor: true,
-    yieldLimit: 1000 
-  });
-
-  
-  skulptInstance = Sk;
-  return skulptInstance;
+  return { safe: true };
 };
 
 /**
- * Run Python code using Skulpt
- * @param {string} code - Python code to run
- * @param {Function} outputCallback - Function to handle output
- * @param {Function} errorCallback - Function to handle errors
- * @returns {Promise} Promise that resolves when execution is complete
+ * Terminate any currently running Python execution immediately.
+ */
+export const terminateExecution = () => {
+  if (currentWorker) {
+    currentWorker.terminate();
+    currentWorker = null;
+  }
+};
+
+/**
+ * Run Python code in an isolated Web Worker.
+ * @param {string} code - Python source to execute
+ * @param {Function} outputCallback - called with each chunk of stdout
+ * @param {Function} errorCallback - called with a formatted error string
+ * @returns {Promise<{success: boolean}>}
  */
 export const runPython = (code, outputCallback, errorCallback) => {
   if (!code || typeof code !== 'string') {
-    const error = new Error('Invalid code input: code must be a non-empty string');
-    errorCallback(error.message);
-    return Promise.reject(error);
+    const msg = 'Invalid code input: code must be a non-empty string';
+    errorCallback(msg);
+    return Promise.reject(new Error(msg));
   }
 
-  try {
-    const Sk = initializeSkulpt(outputCallback);
-    
-    
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Execution timed out. Your code took too long to run.'));
-      }, 15000); 
-    });
+  terminateExecution();
 
-    
-    const executionPromise = Sk.misceval.asyncToPromise(() => {
-      return Sk.importMainWithBody("<stdin>", false, code, true);
-    }).then(
-      (mod) => {
-        return { success: true, module: mod };
-      },
-      (err) => {
-        errorCallback(prettyError(err));
-        return { success: false, error: err };
-      }
-    );
-
-    
-    return Promise.race([executionPromise, timeoutPromise]);
-  } catch (err) {
-    errorCallback(`Runtime initialization error: ${err.message}`);
-    return Promise.reject(err);
-  }
-};
-
-/**
- * Format Python errors to be more user-friendly
- * @param {Error} err - The error object from Skulpt
- * @returns {string} Formatted error message
- */
-const prettyError = (err) => {
-  if (!err) return 'Unknown error';
-  
-  try {
-    if (err.traceback) {
-      const lines = [];
-      for (let i = 0; i < err.traceback.length; i++) {
-        const t = err.traceback[i];
-        lines.push(`Line ${t.lineno}: ${t.line}`);
-      }
-      return `${err.toString()}\n\n${lines.join('\n')}`;
-    } 
-    
-    
-    if (err.toString().includes('maximum recursion')) {
-      return 'Maximum recursion depth exceeded. You may have an infinite recursion in your code.';
+  return new Promise((resolve) => {
+    let worker;
+    try {
+      worker = new Worker('/pythonWorker.js');
+      currentWorker = worker;
+    } catch (err) {
+      errorCallback(`Failed to start Python runtime: ${err.message}`);
+      resolve({ success: false });
+      return;
     }
-    
-    
-    return err.toString();
-  } catch (formatError) {
-    
-    return 'An error occurred while running your code';
-  }
+
+    const TIMEOUT_MS = 10000;
+    const timeout = setTimeout(() => {
+      worker.terminate();
+      currentWorker = null;
+      errorCallback('Execution timed out after 10 seconds.');
+      resolve({ success: false, timedOut: true });
+    }, TIMEOUT_MS);
+
+    worker.onmessage = ({ data }) => {
+      const { type, text, message } = data;
+      if (type === 'output') {
+        outputCallback(text);
+      } else if (type === 'done') {
+        clearTimeout(timeout);
+        worker.terminate();
+        currentWorker = null;
+        resolve({ success: true });
+      } else if (type === 'error') {
+        clearTimeout(timeout);
+        worker.terminate();
+        currentWorker = null;
+        errorCallback(message);
+        resolve({ success: false });
+      }
+    };
+
+    worker.onerror = (err) => {
+      clearTimeout(timeout);
+      worker.terminate();
+      currentWorker = null;
+      errorCallback(`Runtime error: ${err.message}`);
+      resolve({ success: false });
+    };
+
+    worker.postMessage({ code });
+  });
 };
 
-/**
- * Handle file import requests from Skulpt
- * @param {string} filename - Name of the file to read
- * @returns {string} File contents
- * @throws {Error} If file is not found
- */
-function builtinRead(filename) {
-  if (
-    Sk.builtinFiles === undefined ||
-    Sk.builtinFiles["files"][filename] === undefined
-  ) {
-    throw new Error(`Module not found: ${filename}. Check your import statements.`);
-  }
-  return Sk.builtinFiles["files"][filename];
-}
-
-/**
- * Reset the Skulpt runtime instance
- * Useful to clear any state between executions
- */
-export const resetSkulpt = () => {
-  skulptInstance = null;
-}; 
+/** No-op kept for API compatibility — worker approach is always fresh. */
+export const resetSkulpt = () => { };

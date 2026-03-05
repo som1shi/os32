@@ -47,7 +47,6 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
   const handleFormat = useCallback((command, value = null) => {
     if (editorRef.current) {
       try {
-        editorRef.current.focus();
         document.execCommand(command, false, value);
         setHasUnsavedChanges(true);
       } catch (error) {
@@ -181,40 +180,37 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
     return { fileMenu, formatMenu };
   }, [handleSave, handleShowSaveDialog, handleClose, handleFormat]);
 
+  const handleKeyDown = useCallback((e) => {
+    if (e.ctrlKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          handleFormat('bold');
+          break;
+        case 'u':
+          e.preventDefault();
+          handleFormat('underline');
+          break;
+        case 'i':
+          e.preventDefault();
+          handleFormat('italic');
+          break;
+        case 's':
+          e.preventDefault();
+          handleSave();
+          break;
+        default:
+          break;
+      }
+    }
+  }, [handleFormat, handleSave]);
+
   useEffect(() => {
     isMountedRef.current = true;
-    
-    const handleKeyCommand = (e) => {
-      if (e.ctrlKey) {
-        switch (e.key.toLowerCase()) {
-          case 'b':
-            e.preventDefault();
-            handleFormat('bold');
-            break;
-          case 'u':
-            e.preventDefault();
-            handleFormat('underline');
-            break;
-          case 'i':
-            e.preventDefault();
-            handleFormat('italic');
-            break;
-          case 's':
-            e.preventDefault();
-            handleSave();
-            break;
-          default:
-            break;
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyCommand);
     return () => {
       isMountedRef.current = false;
-      document.removeEventListener('keydown', handleKeyCommand);
     };
-  }, [handleFormat, handleSave]);
+  }, []);
 
   useEffect(() => {
     if (editorRef.current && isInitialMount.current) {
@@ -237,6 +233,7 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
         className="editor"
         contentEditable
         onInput={handleInput}
+        onKeyDown={handleKeyDown}
         spellCheck={false}
         role="textbox"
         aria-multiline="true"
@@ -244,7 +241,7 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
         tabIndex={0}
       />
     </div>
-  ), [handleInput]);
+  ), [handleInput, handleKeyDown]);
 
   const renderMenuBar = useCallback(() => (
     <div className="menu-bar" role="menubar">
@@ -274,9 +271,9 @@ const Notepad = memo(({ file: initialFile, onClose }) => {
             item.type === 'separator' ? (
               <div key={`fmt-sep-${index}`} className="menu-separator" role="separator" />
             ) : (
-              <button 
-                key={`format-${index}`} 
-                onClick={item.onClick}
+              <button
+                key={`format-${index}`}
+                onMouseDown={(e) => { e.preventDefault(); item.onClick(); }}
                 role="menuitem"
                 type="button"
               >

@@ -20,7 +20,14 @@ import Refiner from '../games/Refiner/Refiner';
 import WikiConnect from '../games/WikiConnect/WikiConnect';
 import ColorMania from '../games/ColorMania/ColorMania';
 import DOSEmulator from '../games/DOSEmulator/DOSEmulator';
+import Doom from '../games/Doom/Doom';
 import Notepad from '../Notepad/Notepad';
+import Paint from '../Paint/Paint';
+import Calculator from '../Calculator/Calculator';
+import ChaosTetris from '../games/ChaosTetris/ChaosTetris';
+import Decrypt from '../games/Decrypt/Decrypt';
+import Minecraft from '../Minecraft/Minecraft';
+import soundService from '../../services/soundService';
 
 import { useAuth } from '../../firebase/AuthContext';
 import { addConnectionStateListener } from '../../firebase/scoreService';
@@ -40,6 +47,9 @@ const GAME_COMPONENTS = {
   'wikiconnect': WikiConnect,
   'colormania': ColorMania,
   'dosemulator': DOSEmulator,
+  'doom': Doom,
+  'chaostetris': ChaosTetris,
+  'decrypt': Decrypt,
 };
 const Desktop = ({ games }) => {
   const { currentUser, logOut } = useAuth();
@@ -50,6 +60,7 @@ const Desktop = ({ games }) => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [startMenuOpen, setStartMenuOpen] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(!soundService.isEnabled());
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [windowSize, setWindowSize] = useState(INITIAL_WINDOW_SIZE);
@@ -67,8 +78,11 @@ const Desktop = ({ games }) => {
     window.addEventListener('resize', handleResize);
     const removeConnectionListener = addConnectionStateListener(setIsOnline);
 
+    const startupTimer = setTimeout(() => soundService.play('startup'), 800);
+
     return () => {
       clearInterval(timer);
+      clearTimeout(startupTimer);
       window.removeEventListener('resize', handleResize);
       removeConnectionListener();
     };
@@ -85,6 +99,8 @@ const Desktop = ({ games }) => {
         setActiveWindow(id);
         return prev;
       }
+
+      soundService.play('windowOpen');
 
       const newWindow = {
         id,
@@ -104,6 +120,7 @@ const Desktop = ({ games }) => {
   }, [minimizedWindows]);
 
   const closeWindow = useCallback((windowId) => {
+    soundService.play('windowClose');
     setWindows(prev => {
       const filteredWindows = prev.filter(w => w.id !== windowId);
 
@@ -119,6 +136,7 @@ const Desktop = ({ games }) => {
   }, [activeWindow, minimizedWindows]);
 
   const minimizeWindow = useCallback((windowId) => {
+    soundService.play('windowMinimize');
     if (!minimizedWindows.includes(windowId)) {
       setMinimizedWindows(prev => [...prev, windowId]);
     }
@@ -172,7 +190,7 @@ const Desktop = ({ games }) => {
 
   const toggleCodeEditor = useCallback((file = null) => {
     const windowId = `codeeditor-${file ? file.id : Date.now()}`;
-    const initialTitle = file ? `${file.name} - Code Editor` : 'Untitled.py - Code Editor';
+    const initialTitle = file ? `${file.name} - Code Editor` : 'Untitled - Code Editor';
 
     addWindow(
       windowId,
@@ -194,7 +212,8 @@ const Desktop = ({ games }) => {
   const handleOpenFile = useCallback((file) => {
     if (!file || !file.id) return;
 
-    if (file.name.toLowerCase().endsWith('.py') || file.name.toLowerCase().endsWith('.pyg')) {
+    const codeExts = ['.py', '.pyg', '.js', '.c', '.cpp', '.cc', '.cxx'];
+    if (codeExts.some(ext => file.name.toLowerCase().endsWith(ext))) {
       toggleCodeEditor(file);
       return;
     }
@@ -230,7 +249,13 @@ const Desktop = ({ games }) => {
   }, [addWindow, closeWindow]);
 
   const toggleInternetExplorer = useCallback(() => {
-    addWindow('internet', 'Internet Explorer', ICON_KEYS.app.internet, <InternetExplorer />);
+    addWindow(
+      'internet',
+      'Internet Explorer',
+      ICON_KEYS.app.internet,
+      <InternetExplorer />,
+      { size: { width: 1024, height: 832 } }
+    );
     setStartMenuOpen(false);
   }, [addWindow]);
 
@@ -299,7 +324,8 @@ const Desktop = ({ games }) => {
       'ipod-player',
       'Music Player',
       ICON_KEYS.app.music,
-      <IPodPlayer onClose={() => closeWindow('ipod-player')} />
+      <IPodPlayer onClose={() => closeWindow('ipod-player')} />,
+      { size: { width: 260, height: 530 } }
     );
     setStartMenuOpen(false);
   }, [addWindow, closeWindow]);
@@ -336,6 +362,26 @@ const Desktop = ({ games }) => {
     setStartMenuOpen(false);
   }, [addWindow, toggleFileExplorer, handleNewNotepad, toggleInternetExplorer, toggleIPodPlayer, toggleCodeEditor]);
 
+  const togglePaint = useCallback(() => {
+    addWindow('paint', 'Paint', ICON_KEYS.app.paint, <Paint />, { size: { width: 920, height: 640 } });
+    setStartMenuOpen(false);
+  }, [addWindow]);
+
+  const toggleCalculator = useCallback(() => {
+    addWindow('calculator', 'Calculator', ICON_KEYS.app.calculator, <Calculator />, { size: { width: 240, height: 340 } });
+    setStartMenuOpen(false);
+  }, [addWindow]);
+
+  const toggleMinecraft = useCallback(() => {
+    addWindow('minecraft', 'Minecraft Classic', ICON_KEYS.app.minecraft, <Minecraft />, { isMaximized: true });
+    setStartMenuOpen(false);
+  }, [addWindow]);
+
+  const handleToggleSound = useCallback(() => {
+    const nowEnabled = soundService.toggle();
+    setSoundMuted(!nowEnabled);
+  }, []);
+
   const desktopIcons = useMemo(() => (
     <div className="desktop-icons">
       <div className="desktop-icon" {...asButtonProps(toggleFileExplorer, 'Open Documents')}>
@@ -358,6 +404,21 @@ const Desktop = ({ games }) => {
         <div className="icon-text">Code Editor</div>
       </div>
 
+      <div className="desktop-icon" {...asButtonProps(togglePaint, 'Open Paint')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.paint} size={44} /></div>
+        <div className="icon-text">Paint</div>
+      </div>
+
+      <div className="desktop-icon" {...asButtonProps(toggleCalculator, 'Open Calculator')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.calculator} size={44} /></div>
+        <div className="icon-text">Calculator</div>
+      </div>
+
+      <div className="desktop-icon" {...asButtonProps(toggleMinecraft, 'Open Minecraft Classic')}>
+        <div className="icon"><AppIcon name={ICON_KEYS.app.minecraft} size={44} /></div>
+        <div className="icon-text">Minecraft</div>
+      </div>
+
       {games.map(game => (
         <div
           key={game.id}
@@ -365,7 +426,7 @@ const Desktop = ({ games }) => {
           {...asButtonProps(() => {
             const GameComponent = GAME_COMPONENTS[game.id];
             if (GameComponent) {
-              addWindow(game.id, game.title, game.iconKey, <GameComponent />, (game.id === 'refiner' || game.id === 'doom') ? { isMaximized: true } : {});
+              addWindow(game.id, game.title, game.iconKey, <GameComponent />, { isMaximized: true });
             }
           }, `Launch ${game.title}`)}
         >
@@ -401,7 +462,10 @@ const Desktop = ({ games }) => {
     toggleIPodPlayer,
     toggleUserProfile,
     toggleTerminal,
-    toggleCodeEditor
+    toggleCodeEditor,
+    togglePaint,
+    toggleCalculator,
+    toggleMinecraft,
   ]);
 
   const renderWindows = useMemo(() => (
@@ -501,6 +565,21 @@ const Desktop = ({ games }) => {
               <div className="start-menu-text">Code Editor</div>
             </div>
 
+            <div className="start-menu-item" {...asButtonProps(togglePaint, 'Open Paint')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.paint} size={18} /></div>
+              <div className="start-menu-text">Paint</div>
+            </div>
+
+            <div className="start-menu-item" {...asButtonProps(toggleCalculator, 'Open Calculator')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.calculator} size={18} /></div>
+              <div className="start-menu-text">Calculator</div>
+            </div>
+
+            <div className="start-menu-item" {...asButtonProps(toggleMinecraft, 'Open Minecraft Classic')}>
+              <div className="start-menu-icon"><AppIcon name={ICON_KEYS.app.minecraft} size={18} /></div>
+              <div className="start-menu-text">Minecraft</div>
+            </div>
+
             <div className="start-menu-separator" />
 
             <div className="start-menu-item" {...asButtonProps(toggleLeaderboard, 'Toggle Leaderboards')}>
@@ -523,7 +602,7 @@ const Desktop = ({ games }) => {
                 {...asButtonProps(() => {
                   const GameComponent = GAME_COMPONENTS[game.id];
                   if (GameComponent) {
-                    addWindow(game.id, game.title, game.iconKey, <GameComponent />, game.id === 'refiner' ? { isMaximized: true } : {});
+                    addWindow(game.id, game.title, game.iconKey, <GameComponent />, { isMaximized: true });
                   }
                 }, `Launch ${game.title}`)}
               >
@@ -574,7 +653,11 @@ const Desktop = ({ games }) => {
     toggleUserProfile,
     addWindow,
     toggleTerminal,
-    toggleCodeEditor
+    toggleCodeEditor,
+    togglePaint,
+    toggleCalculator,
+    soundMuted,
+    handleToggleSound,
   ]);
 
   return (
@@ -636,6 +719,13 @@ const Desktop = ({ games }) => {
               />
             </div>
           )}
+          <div
+            className="tray-icon"
+            {...asButtonProps(handleToggleSound, soundMuted ? 'Unmute sounds' : 'Mute sounds')}
+            title={soundMuted ? 'Sound off' : 'Sound on'}
+          >
+            <AppIcon name={soundMuted ? ICON_KEYS.app.soundOff : ICON_KEYS.app.soundOn} size={14} />
+          </div>
           <div
             className="tray-icon"
             {...asButtonProps(toggleLeaderboard, 'Toggle leaderboards')}

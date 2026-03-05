@@ -3,79 +3,17 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    background: #FFFFFF;
+    background: #ECE9D8;
     font-family: var(--ui-font-family);
-    border: 3px solid #0054E3;
     overflow: hidden;
     box-sizing: border-box;
     color: #000;
 }
 
-.quantum-chess .window-header {
-    background: linear-gradient(180deg, #0054E3 0%, #2E89FF 10%, #0054E3 100%);
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 3px;
-    color: white;
-    font-weight: bold;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-    user-select: none;
-}
-
-.quantum-chess .window-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    padding-left: 4px;
-}
-
-.quantum-chess .window-controls {
-    display: flex;
-    gap: 2px;
-}
-
-.quantum-chess .window-button {
-    width: 22px;
-    height: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: linear-gradient(180deg, #4B97FD 0%, #3281E8 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    border-radius: 0;
-}
-
-.quantum-chess .window-button.minimize {
-    font-size: 14px;
-    line-height: 14px;
-}
-
-.quantum-chess .window-button.maximize {
-    font-size: 12px;
-    line-height: 12px;
-}
-
-.quantum-chess .window-button.close::after {
-    content: "×";
-    font-size: 16px;
-}
-
-.quantum-chess .window-button:hover {
-    background: linear-gradient(180deg, #5ca4ff 0%, #3d8fff 100%);
-}
-
-.quantum-chess .window-button.close:hover {
-    background: #E81123;
-}
 
 .quantum-chess-menu-bar {
     display: flex;
-    background: #FFFFFF;
+    background: #ECE9D8;
     border-bottom: 1px solid #a2a9b1;
     height: 24px;
     padding: 0 5px;
@@ -133,13 +71,13 @@
     gap: 20px;
     background: linear-gradient(135deg, #ECE9D8 0%, #FFFFFF 100%);
     border: 1px solid #919B9C;
-    max-height: calc(100vh - 30px);
     overflow: auto;
+    position: relative;
     color: #000;
 }
 
 .quantum-chess .controls {
-    width: min(65vh, 65vw);
+    width: min(420px, 100%);
     margin: 0 auto;
     display: flex;
     gap: 10px;
@@ -225,25 +163,92 @@
 
 .captured-pieces {
     display: flex;
-    justify-content: space-between;
-    width: min(65vh, 65vw);
-    margin: 10px auto;
-    padding: 10px;
+    flex-direction: column;
+    width: min(420px, 100%);
+    padding: 5px 10px;
     background: #ECE9D8;
-    border: 2px solid #919B9C;
+    border: 2px solid;
+    border-color: #848484 #fff #fff #848484;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.8);
+    gap: 3px;
 }
 
-.captured-pieces .white, .captured-pieces .black {
+.captures-row {
     display: flex;
-    gap: 5px;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 22px;
+}
+
+.captures-side-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.captures-side-dot.white-dot {
+    background: radial-gradient(circle at 35% 35%, #fff 20%, #ccc 100%);
+    border: 1.5px solid #666;
+}
+
+.captures-side-dot.black-dot {
+    background: radial-gradient(circle at 35% 35%, #555 0%, #111 100%);
+    border: 1.5px solid #999;
+}
+
+.captures-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    flex: 1;
+    align-items: center;
+}
+
+.captures-empty {
+    font-family: var(--ui-font-family);
+    font-size: 11px;
+    color: #888;
+    line-height: 22px;
 }
 
 .captured-piece {
-    font-size: 1em;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.captured-unknown {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--ui-font-family);
+    font-size: 9px;
+    font-weight: bold;
+    border: 1px dashed;
+}
+
+.captured-unknown.white {
+    background: #ddd;
+    color: #333;
+    border-color: #666;
+}
+
+.captured-unknown.black {
+    background: #444;
+    color: #eee;
+    border-color: #aaa;
 }
 
 .rules-modal {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -331,7 +336,7 @@
 .board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    width: min(65vh, 65vw);
+    width: min(420px, 100%);
     aspect-ratio: 1;
     margin: auto;
     border: 3px solid;
@@ -463,27 +468,6 @@
     }
 }
 
-.captured-piece {
-    position: relative;
-    font-size: 1.2em;
-    width: 25px;
-    height: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 2px;
-    opacity: 0.8;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.white .captured-piece {
-    color: #cccccc;
-}
-
-.black .captured-piece {
-    color: #333333;
-}
 
 .piece.fully-collapsed {
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
@@ -564,4 +548,168 @@
         box-shadow: 0 0 12px rgba(128, 0, 255, 0.5);
         transform: scale(0.95);
     }
-} 
+}
+
+/* Piece images */
+.piece-img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    pointer-events: none;
+    display: block;
+}
+
+.captured-piece .piece-img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Turn indicator bar (between menu bar and game container) */
+.qc-turn-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 10px;
+    background: #ECE9D8;
+    border-bottom: 1px solid #919B9C;
+    font-family: var(--ui-font-family);
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+    user-select: none;
+}
+
+.qc-turn-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1.5px solid #555;
+}
+
+.qc-dot-white {
+    background: radial-gradient(circle at 35% 35%, #fff 20%, #ccc 100%);
+    border-color: #666;
+}
+
+.qc-dot-black {
+    background: radial-gradient(circle at 35% 35%, #555 0%, #111 100%);
+    border-color: #888;
+}
+
+.qc-turn-text {
+    font-family: var(--ui-font-family);
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.qc-turn-over {
+    background: #d9e8ff;
+    border-bottom-color: #7aadff;
+}
+
+.qc-turn-over .qc-turn-text {
+    color: #003399;
+}
+
+/* Intro screen — Windows XP/98 style */
+.qc-intro-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 20px 24px;
+    width: 100%;
+    flex: 1;
+    text-align: center;
+    background: #ECE9D8;
+}
+
+.qc-intro-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.qc-logo-schrodinger {
+    font-family: var(--ui-font-family);
+    font-size: clamp(13px, 2.2vw, 18px);
+    font-weight: bold;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.qc-logo-chess {
+    font-family: var(--ui-font-family);
+    font-size: clamp(28px, 5.5vw, 44px);
+    font-weight: bold;
+    color: #003399;
+    text-shadow: 1px 1px 0 #fff, 2px 2px 0 rgba(0, 0, 80, 0.25);
+    letter-spacing: 4px;
+}
+
+.qc-intro-tagline {
+    font-family: var(--ui-font-family);
+    font-size: 12px;
+    color: #555;
+    margin: 0;
+    font-style: italic;
+}
+
+.qc-intro-rules {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: #fff;
+    border: 2px solid;
+    border-color: #848484 #fff #fff #848484;
+    padding: 8px 16px;
+    width: min(380px, 90%);
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.12);
+    text-align: left;
+}
+
+.qc-intro-rule {
+    font-family: var(--ui-font-family);
+    font-size: 12px;
+    color: #222;
+    padding: 3px 0;
+    border-bottom: 1px solid #e8e6df;
+}
+
+.qc-intro-rule:last-child {
+    border-bottom: none;
+}
+
+.qc-intro-rule span::before {
+    content: '• ';
+    color: #0054E3;
+    font-weight: bold;
+}
+
+.qc-intro-btn {
+    margin-top: 4px;
+    padding: 6px 28px;
+    background: linear-gradient(180deg, #245EDB 0%, #0D3A9E 100%);
+    color: #fff;
+    border: 2px solid;
+    border-color: #6b9fff #001a6e #001a6e #6b9fff;
+    font-family: var(--ui-font-family);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+}
+
+.qc-intro-btn:hover {
+    background: linear-gradient(180deg, #3070E8 0%, #1a4ab0 100%);
+}
+
+.qc-intro-btn:active {
+    border-color: #001a6e #6b9fff #6b9fff #001a6e;
+}

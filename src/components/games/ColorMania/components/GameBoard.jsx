@@ -2,6 +2,7 @@ import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { PENALTY_TIME, GRID_WIDTH, GRID_HEIGHT } from '../constants';
 import useMatchFinder from '../hooks/useMatchFinder';
 import useAnimations from '../hooks/useAnimations';
+import soundService from '../../../../services/soundService';
 
 const Cell = memo(({ cell, onClick }) => {
   return (
@@ -45,6 +46,7 @@ const GameBoard = ({
     const matchingDirections = findMatchingDirections(grid, rowIndex, colIndex);
     
     if (matchingDirections.matchingTiles.length < 2) {
+      soundService.play('error');
       setTimeLeft(prev => Math.max(0, prev - PENALTY_TIME));
       return;
     }
@@ -56,6 +58,7 @@ const GameBoard = ({
     });
     
     const pointsGained = matchingDirections.matchingTiles.length;
+    soundService.play('notify');
     setScore(prev => prev + pointsGained);
     setGrid(newGrid);
     

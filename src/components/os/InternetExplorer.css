@@ -4,6 +4,8 @@
   height: 100%;
   background-color: #f0f0f0;
   font-family: var(--ui-font-family);
+  color-scheme: light;
+  overflow: hidden;
 }
 
 .ie-toolbar {
@@ -58,14 +60,18 @@
   margin-right: 5px;
   font-size: 11px;
   color: #333;
+  white-space: nowrap;
 }
 
 .ie-url-input {
   flex: 1;
+  min-width: 0;
   height: 22px;
   padding: 0 5px;
   border: 1px solid #7b9ebd;
   font-size: 12px;
+  background-color: #fff;
+  color: #000;
 }
 
 .ie-go-button {
@@ -76,18 +82,21 @@
   border-radius: 3px;
   font-size: 11px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .ie-content {
   flex: 1;
   position: relative;
   background-color: white;
+  overflow: hidden;
 }
 
 .ie-iframe {
   width: 100%;
   height: 100%;
   border: none;
+  display: block;
 }
 
 .ie-loading {
@@ -181,4 +190,4 @@
   color: #666;
   font-style: italic;
   margin-top: 15px;
-} 
+}
